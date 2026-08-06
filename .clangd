@@ -1,0 +1,6 @@
+CompileFlags:
+  CompilationDatabase: "build-debug"
+
+SemanticTokens:
+  DisabledKinds:
+    - Operator
