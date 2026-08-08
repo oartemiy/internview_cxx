@@ -57,7 +57,7 @@ components_manager:
             throttling_enabled: false
             url_trailing_slash: strict-match
 
-        postgres-db-1:
+        postgres-db:
             dbconnection: $pg-connection
             dbconnection#env: DB_CONNECTION
             blocking_task_processor: fs-task-processor
@@ -65,7 +65,14 @@ components_manager:
             sync-start: true
             connlimit_mode: manual
 
+        internview-component: {}
+
         handler-status-get:
             path: /status
             method: GET
+            task_processor: main-task-processor
+
+        handler-user-post:
+            path: /user
+            method: POST
             task_processor: main-task-processor

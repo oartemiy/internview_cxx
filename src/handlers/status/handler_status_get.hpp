@@ -6,7 +6,7 @@
 #include "userver/components/component_context.hpp"
 
 namespace internview::handlers::status {
-class HandlerStatusGet : public userver::server::handlers::HttpHandlerJsonBase {
+class HandlerStatusGet final : public userver::server::handlers::HttpHandlerJsonBase {
 public:
     static constexpr std::string_view kName = "handler-status-get";
     HandlerStatusGet(const userver::components::ComponentConfig& config,

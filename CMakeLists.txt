@@ -20,15 +20,44 @@ userver_setup_environment()
 # Common sources
 include_directories(src)
 
+# UserStorage queries
+userver_add_sql_library(
+    ${PROJECT_NAME}_user_storage_sql
+    NAMESPACE
+    user_storage_queries
+    SOURCE_DIR
+    src/storages/user_storage/sql
+    OUTPUT_DIR
+    ${CMAKE_SOURCE_DIR}/src/storages/user_storage/sql
+    SQL_FILES
+    *.sql
+)
+
+target_include_directories(${PROJECT_NAME}_user_storage_sql PUBLIC ${CMAKE_SOURCE_DIR}/src/storages/user_storage/sql/include)
+
 add_library(
     ${PROJECT_NAME}_objs OBJECT
+    # components
+    src/components/internview_component.cpp
+
+    # stotages
+    src/storages/user_storage/user_storage.cpp
+
+
+    # handlers
     src/handlers/status/handler_status_get.cpp
+    src/handlers/user/handler_user_post.cpp
+
 )
+
 target_link_libraries(
     ${PROJECT_NAME}_objs
     PUBLIC userver::core #
            userver::postgresql
+           ${PROJECT_NAME}_user_storage_sql
 )
+
+
 
 # The Service
 add_executable(${PROJECT_NAME} src/main.cpp)
