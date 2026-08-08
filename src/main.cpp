@@ -13,7 +13,7 @@
 #include "components/internview_component.hpp"
 #include "handlers/status/handler_status_get.hpp"
 #include "handlers/user/handler_user_post.hpp"
-#include "userver/storages/secdist/component.hpp"
+#include "userver/storages/secdist/provider_component.hpp"
 
 // TODO: Make internview::utils::password functions async
 
@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
             .Append<userver::server::handlers::TestsControl>()
             .Append<userver::congestion_control::Component>()
             .Append<userver::components::Postgres>("postgres-db")
-            // .Append<userver::components::Secdist>()
+            .Append<userver::components::DefaultSecdistProvider>("default-secdist-provider")
             .Append<internview::components::InternviewComponent>("internview-component")
             .Append<internview::handlers::status::HandlerStatusGet>()
             .Append<internview::handlers::HandlerUserPost>();
