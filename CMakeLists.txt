@@ -26,14 +26,14 @@ userver_add_sql_library(
     NAMESPACE
     user_storage_queries
     SOURCE_DIR
-    src/storages/user_storage/sql
+    src/storages/sql/user_storage
     OUTPUT_DIR
-    ${CMAKE_SOURCE_DIR}/src/storages/user_storage/sql
+    ${CMAKE_SOURCE_DIR}/src/storages/sql/user_storage
     SQL_FILES
     *.sql
 )
 
-target_include_directories(${PROJECT_NAME}_user_storage_sql PUBLIC ${CMAKE_SOURCE_DIR}/src/storages/user_storage/sql/include)
+target_include_directories(${PROJECT_NAME}_user_storage_sql PUBLIC ${CMAKE_SOURCE_DIR}/src/storages/sql/user_storage/include)
 
 add_library(
     ${PROJECT_NAME}_objs OBJECT
@@ -41,7 +41,7 @@ add_library(
     src/components/internview_component.cpp
 
     # stotages
-    src/storages/user_storage/user_storage.cpp
+    src/storages/user_storage.cpp
 
 
     # handlers

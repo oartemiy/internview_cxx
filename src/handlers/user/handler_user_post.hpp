@@ -2,7 +2,7 @@
 
 #include <string_view>
 
-#include "storages/user_storage/user_storage.hpp"
+#include "storages/user_storage.hpp"
 #include "userver/components/component_config.hpp"
 #include "userver/components/component_context.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
