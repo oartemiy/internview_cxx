@@ -28,6 +28,21 @@ struct UpdateDTO {
     std::optional<std::string> profile_pic;
 };
 
+struct DeleteDTO {
+    std::string login;
+    std::string password;
+};
+
+struct LoginDTO {
+    std::string login;
+    std::string password;
+};
+
+struct AuthResponseDTO {
+    
+};
+
+
 struct ResponseDTO {
     boost::uuids::uuid id;
     std::string login;

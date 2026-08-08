@@ -65,7 +65,14 @@ components_manager:
             sync-start: true
             connlimit_mode: manual
 
+        # TODO: problem here ...
+        # default-secdist-provider:
+        #     config: /Users/oartemiy/code/internview/configs/secure_data.json
+        #     missing-ok: false
+        #     environment-secrets-key: SECDIST_CONFIG
+
         internview-component: {}
+
 
         handler-status-get:
             path: /status

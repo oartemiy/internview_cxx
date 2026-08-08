@@ -3,6 +3,8 @@ project(internview CXX)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(DownloadUserver)
+include(DownloadSodium)
+include(DownloadJwt-cpp)
 
 find_package(
     userver
@@ -37,6 +39,12 @@ target_include_directories(${PROJECT_NAME}_user_storage_sql PUBLIC ${CMAKE_SOURC
 
 add_library(
     ${PROJECT_NAME}_objs OBJECT
+    # utils
+    src/utils/password.cpp
+
+    # services
+    src/services/jwt_service.cpp
+
     # components
     src/components/internview_component.cpp
 
@@ -55,6 +63,9 @@ target_link_libraries(
     PUBLIC userver::core #
            userver::postgresql
            ${PROJECT_NAME}_user_storage_sql
+    PRIVATE 
+           sodium
+           jwt-cpp
 )
 
 

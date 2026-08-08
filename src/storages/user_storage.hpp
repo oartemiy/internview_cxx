@@ -13,6 +13,7 @@ class UserStorage {
 public:
     explicit UserStorage(const userver::components::ComponentContext& component_context);
 
+    // NOTE: mostly always (100%) without errors
     dto::user::ResponseDTO CreateUser(const internview::dto::user::CreateDTO& dto) const;
 
     // void UpdateUser(const internview::dto::user::UpdateDTO& dto) const;

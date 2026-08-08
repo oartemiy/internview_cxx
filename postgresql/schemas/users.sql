@@ -1,4 +1,4 @@
--- DROP SCHEMA IF EXISTS internview_schema CASCADE;
+DROP SCHEMA IF EXISTS internview_schema CASCADE;
 
 CREATE SCHEMA IF NOT EXISTS internview_schema;
 
