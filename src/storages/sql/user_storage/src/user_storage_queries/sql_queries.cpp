@@ -4,6 +4,27 @@
 
 namespace user_storage_queries::sql {
 
+// Generated from change_user_password.sql
+const USERVER_NAMESPACE::storages::Query kChangeUserPassword = {
+R"-(
+-- Update rows in 'internview_schema.users' where condition is met
+UPDATE
+    internview_schema.users
+SET
+    password_hash = $2
+WHERE
+    id = $1
+RETURNING
+    id
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("change_user_password"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
+
+
 // Generated from create_user.sql
 const USERVER_NAMESPACE::storages::Query kCreateUser = {
 R"-(
@@ -53,6 +74,54 @@ WHERE
 
 )-",
     USERVER_NAMESPACE::storages::Query::NameLiteral("get_user_by_id"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
+
+
+// Generated from login_user.sql
+const USERVER_NAMESPACE::storages::Query kLoginUser = {
+R"-(
+-- Select all rows from 'internview_schema.users'
+SELECT
+    *
+FROM
+    internview_schema.users
+WHERE
+    login = $1
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("login_user"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
+
+
+// Generated from update_user.sql
+const USERVER_NAMESPACE::storages::Query kUpdateUser = {
+R"-(
+-- Update rows in 'internview_schema.users' where condition is met
+UPDATE
+    internview_schema.users
+SET
+    login = $1,
+    name = $2,
+    description = $3,
+    profile_pic = $4
+WHERE
+    id = $5 AND NOT EXISTS (
+        SELECT 1 FROM internview_schema.users
+        WHERE login = $1 AND id != $5
+    )
+
+RETURNING
+    id
+
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("update_user"),
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 

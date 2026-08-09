@@ -76,6 +76,19 @@ inline auto Parse(const userver::formats::json::Value& json, userver::formats::p
     return dto;
 }
 
+struct ChangePasswordDTO {
+    std::string old_password;
+    std::string new_password;
+};
+
+inline auto Parse(const userver::formats::json::Value& json,
+                  userver::formats::parse::To<ChangePasswordDTO>) {
+    ChangePasswordDTO dto;
+    dto.new_password = json["new_password"].As<std::string>();
+    dto.old_password = json["old_password"].As<std::string>();
+    return dto;
+}
+
 struct ResponseDTO {
     boost::uuids::uuid id;
     std::string login;

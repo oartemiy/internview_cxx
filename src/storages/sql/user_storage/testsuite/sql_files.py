@@ -6,6 +6,9 @@ import pytest
 @pytest.fixture(scope='session')
 def sql_files() -> set:
     return set([
+        # Generated from change_user_password.sql
+        "change_user_password",
+    
         # Generated from create_user.sql
         "create_user",
     
@@ -14,4 +17,10 @@ def sql_files() -> set:
     
         # Generated from get_user_by_id.sql
         "get_user_by_id",
+    
+        # Generated from login_user.sql
+        "login_user",
+    
+        # Generated from update_user.sql
+        "update_user",
     ])

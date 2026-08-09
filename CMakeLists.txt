@@ -53,9 +53,21 @@ add_library(
 
 
     # handlers
+
+        # status
     src/handlers/status/handler_status_get.cpp
-    src/handlers/user/handler_user_post.cpp
+
+
+        # auth
+    src/handlers/auth/handler_auth_register_post.cpp
+    src/handlers/auth/handler_auth_login_post.cpp
+    src/handlers/auth/handler_auth_change_password_post.cpp
+
+
+        # user
     src/handlers/user/handler_user_delete.cpp
+    src/handlers/user/handler_user_get.cpp
+    src/handlers/user/handler_user_update.cpp
 
 )
 

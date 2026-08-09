@@ -7,6 +7,10 @@
 namespace user_storage_queries::sql {
 
 
+// Generated from change_user_password.sql
+extern const USERVER_NAMESPACE::storages::Query kChangeUserPassword;
+
+
 // Generated from create_user.sql
 extern const USERVER_NAMESPACE::storages::Query kCreateUser;
 
@@ -17,5 +21,13 @@ extern const USERVER_NAMESPACE::storages::Query kDeleteUser;
 
 // Generated from get_user_by_id.sql
 extern const USERVER_NAMESPACE::storages::Query kGetUserById;
+
+
+// Generated from login_user.sql
+extern const USERVER_NAMESPACE::storages::Query kLoginUser;
+
+
+// Generated from update_user.sql
+extern const USERVER_NAMESPACE::storages::Query kUpdateUser;
 
 }  // namespace user_storage_queries::sql

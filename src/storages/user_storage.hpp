@@ -21,9 +21,17 @@ public:
         const internview::dto::user::CreateDTO& dto) const;
 
     std::optional<dto::user::ResponseDTO> UpdateUser(
-        const internview::dto::user::UpdateDTO& dto) const;
+        const std::string& token, const internview::dto::user::UpdateDTO& dto) const;
 
     bool DeleteUser(const std::string& token, const internview::dto::user::DeleteDTO& dto) const;
+
+    std::optional<dto::user::ResponseDTO> GetUserByJWT(const std::string& token) const;
+
+    std::optional<dto::user::ResponseDTO> LoginUser(
+        const internview::dto::user::LoginDTO& dto) const;
+
+    bool ChangeUserPassword(const std::string& token,
+                            const dto::user::ChangePasswordDTO& dto) const;
 
 private:
     std::optional<User> GetUserById(const boost::uuids::uuid& id) const;

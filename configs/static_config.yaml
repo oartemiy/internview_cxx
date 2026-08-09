@@ -77,12 +77,32 @@ components_manager:
             method: GET
             task_processor: main-task-processor
 
-        handler-user-post:
-            path: /user
+        handler-auth-register-post:
+            path: /auth/register
+            method: POST
+            task_processor: main-task-processor
+
+        handler-auth-login-post:
+            path: /auth/login
+            method: POST
+            task_processor: main-task-processor
+
+        handler-auth-change-password-post:
+            path: /auth/change-password
             method: POST
             task_processor: main-task-processor
 
         handler-user-delete:
             path: /user/me
             method: DELETE
+            task_processor: main-task-processor
+
+        handler-user-update:
+            path: /user/me
+            method: PATCH
+            task_processor: main-task-processor
+
+        handler-user-get:
+            path: /user/me
+            method: GET
             task_processor: main-task-processor

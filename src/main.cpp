@@ -11,9 +11,13 @@
 #include <userver/utils/daemon_run.hpp>
 
 #include "components/internview_component.hpp"
+#include "handlers/auth/handler_auth_change_password_post.hpp"
+#include "handlers/auth/handler_auth_login_post.hpp"
+#include "handlers/auth/handler_auth_register_post.hpp"
 #include "handlers/status/handler_status_get.hpp"
 #include "handlers/user/handler_user_delete.hpp"
-#include "handlers/user/handler_user_post.hpp"
+#include "handlers/user/handler_user_get.hpp"
+#include "handlers/user/handler_user_update.hpp"
 #include "userver/storages/secdist/provider_component.hpp"
 
 // TODO: Make internview::utils::password functions async
@@ -28,11 +32,20 @@ int main(int argc, char* argv[]) {
             .Append<userver::server::handlers::TestsControl>()
             .Append<userver::congestion_control::Component>()
             .Append<userver::components::Postgres>("postgres-db")
+
             .Append<userver::components::DefaultSecdistProvider>("default-secdist-provider")
+
             .Append<internview::components::InternviewComponent>("internview-component")
+
             .Append<internview::handlers::status::HandlerStatusGet>()
-            .Append<internview::handlers::HandlerUserPost>()
-            .Append<internview::handlers::HandlerUserDelete>();
+
+            .Append<internview::handlers::HandlerAuthRegisterPost>()
+            .Append<internview::handlers::HandlerAuthLoginPost>()
+            .Append<internview::handlers::HandlerAuthChangePasswordPost>()
+
+            .Append<internview::handlers::HandlerUserDelete>()
+            .Append<internview::handlers::HandlerUserUpdate>()
+            .Append<internview::handlers::HandlerUserGet>();
 
     return userver::utils::DaemonMain(argc, argv, component_list);
 }

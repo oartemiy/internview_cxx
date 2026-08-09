@@ -22,10 +22,11 @@ namespace internview::storages {
 std::optional<models::User> UserStorage::GetUserById(const boost::uuids::uuid& id) const {
     auto res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
                                     user_storage_queries::sql::kGetUserById, id);
+    std::optional<models::User> user;
     if (res.IsEmpty()) {
-        return std::nullopt;
+        return user;
     }
-    auto user = res.AsSingleRow<internview::models::User>(userver::storages::postgres::kRowTag);
+    user.emplace(res.AsSingleRow<internview::models::User>(userver::storages::postgres::kRowTag));
     return user;
 }
 
@@ -52,25 +53,20 @@ std::optional<dto::user::ResponseDTO> UserStorage::CreateUser(
         pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
                              user_storage_queries::sql::kCreateUser, id, dto.login, password_hash,
                              dto.name, dto.role, dto.description, dto.profile_pic);
-    dto::user::ResponseDTO ressult;
+    std::optional<dto::user::ResponseDTO> response;
     if (pg_res.IsEmpty()) {
-        return std::nullopt;
+        return response;
     }
-    ressult.id = id;
-    ressult.login = dto.login;
-    ressult.created_at = pg_res[0][0].As<std::chrono::system_clock::time_point>();
-    ressult.name = dto.name;
-    ressult.role = dto.role;
-    ressult.profile_pic = dto.profile_pic;
-    ressult.description = dto.description;
-    ressult.token = jwt_service_.GenerateToken(id, dto.role);
-    return ressult;
+    response.emplace(id, dto.login, dto.name, dto.role, dto.description, dto.profile_pic,
+                     pg_res[0][0].As<std::chrono::system_clock::time_point>(),
+                     jwt_service_.GenerateToken(id, dto.role));
+    return response;
 }
 
 bool UserStorage::DeleteUser(const std::string& token,
                              const internview::dto::user::DeleteDTO& dto) const {
     auto id = jwt_service_.VerifyToken(token);
-    if (id->is_nil()) {
+    if (!id) {
         return false;
     }
     auto user = GetUserById(*id);
@@ -80,6 +76,86 @@ bool UserStorage::DeleteUser(const std::string& token,
     auto res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
                                     user_storage_queries::sql::kDeleteUser, *id);
     if (res.IsEmpty()) {
+        return false;
+    }
+    return true;
+}
+
+std::optional<dto::user::ResponseDTO> UserStorage::UpdateUser(
+    const std::string& token, const internview::dto::user::UpdateDTO& dto) const {
+    auto id = jwt_service_.VerifyToken(token);
+    std::optional<dto::user::ResponseDTO> response;
+    if (!id) {
+        return response;
+    }
+    auto user = GetUserById(*id);
+    if (!user) {
+        return response;
+    }
+    auto login = dto.login ? *dto.login : user->login;
+    auto name = dto.name ? *dto.name : user->name;
+    auto description = dto.description ? *dto.description : user->description;
+    auto profile_pic = dto.profile_pic ? *dto.profile_pic : user->profile_pic;
+    auto res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+                                    user_storage_queries::sql::kUpdateUser, login, name,
+                                    description, profile_pic, *id);
+    if (res.IsEmpty()) {
+        return response;
+    }
+    response.emplace(*id, login, name, user->role, description, profile_pic, user->created_at,
+                     token);
+    return response;
+}
+
+std::optional<dto::user::ResponseDTO> UserStorage::GetUserByJWT(const std::string& token) const {
+    auto id = jwt_service_.VerifyToken(token);
+    std::optional<dto::user::ResponseDTO> response;
+    if (!id) {
+        return response;
+    }
+    auto user = GetUserById(*id);
+    if (!user) {
+        return response;
+    }
+    response.emplace(user->id, user->login, user->name, user->role, user->description,
+                     user->profile_pic, user->created_at, token);
+    return response;
+}
+
+std::optional<dto::user::ResponseDTO> UserStorage::LoginUser(
+    const internview::dto::user::LoginDTO& dto) const {
+    std::optional<dto::user::ResponseDTO> ressult;
+    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+                                       user_storage_queries::sql::kLoginUser, dto.login);
+    if (pg_res.IsEmpty()) {
+        return ressult;
+    }
+    auto user = pg_res.AsSingleRow<internview::models::User>(userver::storages::postgres::kRowTag);
+    if (!utils::password::VerifyPassword(dto.password, user.password_hash)) {
+        return ressult;
+    }
+    auto token = jwt_service_.GenerateToken(user.id, user.role);
+    ressult.emplace(user.id, user.login, user.name, user.role, user.description, user.profile_pic,
+                    user.created_at, token);
+    return ressult;
+}
+
+bool UserStorage::ChangeUserPassword(const std::string& token,
+                                     const dto::user::ChangePasswordDTO& dto) const {
+    auto id = jwt_service_.VerifyToken(token);
+    if (!id) {
+        return false;
+    }
+    auto user = GetUserById(*id);
+    if (!utils::password::VerifyPassword(dto.old_password, user->password_hash)) {
+        return false;
+    }
+
+    auto new_password_hash = internview::utils::password::HashPassword(dto.new_password);
+    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+                                       user_storage_queries::sql::kChangeUserPassword, *id,
+                                       new_password_hash);
+    if (pg_res.IsEmpty()) {
         return false;
     }
     return true;

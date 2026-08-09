@@ -15,10 +15,10 @@ struct User {
     boost::uuids::uuid id;
     std::string login;
     std::string password_hash;
-    std::string role;
     std::string name;
-    std::optional<std::string> profile_pic;
+    std::string role;
     std::optional<std::string> description;
+    std::optional<std::string> profile_pic;
     std::chrono::system_clock::time_point created_at;
 };
 

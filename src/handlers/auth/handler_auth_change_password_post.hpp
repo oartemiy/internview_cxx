@@ -9,12 +9,12 @@
 
 namespace internview::handlers {
 
-class HandlerUserDelete final : public userver::server::handlers::HttpHandlerJsonBase {
+class HandlerAuthChangePasswordPost final : public userver::server::handlers::HttpHandlerJsonBase {
 public:
-    static constexpr std::string_view kName = "handler-user-delete";
+    static constexpr std::string_view kName = "handler-auth-change-password-post";
 
-    HandlerUserDelete(const userver::components::ComponentConfig& config,
-                      const userver::components::ComponentContext& component_context);
+    HandlerAuthChangePasswordPost(const userver::components::ComponentConfig& config,
+                                  const userver::components::ComponentContext& component_context);
 
     Value HandleRequestJsonThrow(const HttpRequest& request, const Value& request_json,
                                  RequestContext& context) const override;
