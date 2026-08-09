@@ -38,11 +38,6 @@ struct LoginDTO {
     std::string password;
 };
 
-struct AuthResponseDTO {
-    
-};
-
-
 struct ResponseDTO {
     boost::uuids::uuid id;
     std::string login;
@@ -51,6 +46,7 @@ struct ResponseDTO {
     std::optional<std::string> description;
     std::optional<std::string> profile_pic;
     std::chrono::system_clock::time_point created_at;
+    std::string token;
 
     userver::formats::json::Value ToJSON() const {
         userver::formats::json::ValueBuilder json_builder;
@@ -61,6 +57,7 @@ struct ResponseDTO {
         json_builder["description"] = description;
         json_builder["profile_pic"] = profile_pic;
         json_builder["created_at"] = created_at;
+        json_builder["token"] = token;
         auto json = json_builder.ExtractValue();
         return json;
     }

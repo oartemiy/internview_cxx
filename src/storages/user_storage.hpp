@@ -2,6 +2,7 @@
 
 #include <userver/storages/postgres/cluster.hpp>
 #include "models/user.hpp"
+#include "services/jwt_service.hpp"
 #include "userver/components/component_context.hpp"
 #include "dto/user_dto.hpp"
 
@@ -22,6 +23,7 @@ public:
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;
+    internview::services::JwtService jwt_service_;
 };
 
 }  // namespace internview::storages

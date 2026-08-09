@@ -15,7 +15,7 @@ JwtService::JwtService(const std::string& secret_code)
     : secret_key_(secret_code), token_expiration_(std::chrono::hours(24)) {
 }
 
-std::string JwtService::GenerateToken(const boost::uuids::uuid& user_id, const std::string& role) {
+std::string JwtService::GenerateToken(const boost::uuids::uuid& user_id, const std::string& role) const {
     const std::string user_id_str = boost::uuids::to_string(user_id);
 
     auto token = jwt::create()
@@ -29,7 +29,7 @@ std::string JwtService::GenerateToken(const boost::uuids::uuid& user_id, const s
     return token;
 }
 
-std::optional<boost::uuids::uuid> JwtService::VerifyToken(const std::string& token) {
+std::optional<boost::uuids::uuid> JwtService::VerifyToken(const std::string& token) const {
     try {
         auto decoded = jwt::decode(token);
         auto verifier = jwt::verify()

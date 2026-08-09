@@ -10,9 +10,9 @@ class JwtService {
 public:
     JwtService(const std::string& secret_key);
 
-    std::string GenerateToken(const boost::uuids::uuid& user_id, const std::string& role);
+    std::string GenerateToken(const boost::uuids::uuid& user_id, const std::string& role) const;
 
-    std::optional<boost::uuids::uuid> VerifyToken(const std::string& token);
+    std::optional<boost::uuids::uuid> VerifyToken(const std::string& token) const;
 
 private:
     std::string secret_key_;

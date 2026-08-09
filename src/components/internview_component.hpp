@@ -2,7 +2,6 @@
 
 #include <string_view>
 
-#include "services/jwt_service.hpp"
 #include "storages/user_storage.hpp"
 #include "userver/components/component_base.hpp"
 #include "userver/components/component_config.hpp"
@@ -25,7 +24,6 @@ public:
 
 private:
     internview::storages::UserStorage user_storage_;
-    internview::services::JwtService jwt_service_;
 };
 
 }  // namespace internview::components
