@@ -10,11 +10,49 @@ R"-(
 -- Insert data into 'internview_schema.users'
 INSERT INTO internview_schema.users(id, login, password_hash, name, role, description, profile_pic)
     VALUES ($1, $2, $3, $4, $5, $6, $7)
+ON CONFLICT (login)
+    DO NOTHING
 RETURNING
     created_at
 
 )-",
     USERVER_NAMESPACE::storages::Query::NameLiteral("create_user"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
+
+
+// Generated from delete_user.sql
+const USERVER_NAMESPACE::storages::Query kDeleteUser = {
+R"-(
+-- Delete rows from 'internview_schema.users' where condition is met
+DELETE FROM internview_schema.users
+WHERE id = $1
+RETURNING
+    id
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("delete_user"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
+
+
+// Generated from get_user_by_id.sql
+const USERVER_NAMESPACE::storages::Query kGetUserById = {
+R"-(
+-- Select all rows from 'internview_schema.users'
+SELECT
+    *
+FROM
+    internview_schema.users
+WHERE
+    id = $1
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("get_user_by_id"),
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 

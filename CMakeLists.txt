@@ -55,6 +55,7 @@ add_library(
     # handlers
     src/handlers/status/handler_status_get.cpp
     src/handlers/user/handler_user_post.cpp
+    src/handlers/user/handler_user_delete.cpp
 
 )
 

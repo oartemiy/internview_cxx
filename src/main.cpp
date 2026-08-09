@@ -12,6 +12,7 @@
 
 #include "components/internview_component.hpp"
 #include "handlers/status/handler_status_get.hpp"
+#include "handlers/user/handler_user_delete.hpp"
 #include "handlers/user/handler_user_post.hpp"
 #include "userver/storages/secdist/provider_component.hpp"
 
@@ -30,7 +31,8 @@ int main(int argc, char* argv[]) {
             .Append<userver::components::DefaultSecdistProvider>("default-secdist-provider")
             .Append<internview::components::InternviewComponent>("internview-component")
             .Append<internview::handlers::status::HandlerStatusGet>()
-            .Append<internview::handlers::HandlerUserPost>();
+            .Append<internview::handlers::HandlerUserPost>()
+            .Append<internview::handlers::HandlerUserDelete>();
 
     return userver::utils::DaemonMain(argc, argv, component_list);
 }

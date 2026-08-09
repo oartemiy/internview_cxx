@@ -8,4 +8,10 @@ def sql_files() -> set:
     return set([
         # Generated from create_user.sql
         "create_user",
+    
+        # Generated from delete_user.sql
+        "delete_user",
+    
+        # Generated from get_user_by_id.sql
+        "get_user_by_id",
     ])

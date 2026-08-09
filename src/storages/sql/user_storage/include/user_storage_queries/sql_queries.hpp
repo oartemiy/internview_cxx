@@ -10,4 +10,12 @@ namespace user_storage_queries::sql {
 // Generated from create_user.sql
 extern const USERVER_NAMESPACE::storages::Query kCreateUser;
 
+
+// Generated from delete_user.sql
+extern const USERVER_NAMESPACE::storages::Query kDeleteUser;
+
+
+// Generated from get_user_by_id.sql
+extern const USERVER_NAMESPACE::storages::Query kGetUserById;
+
 }  // namespace user_storage_queries::sql
