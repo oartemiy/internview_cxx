@@ -2,6 +2,7 @@
 
 #include <string_view>
 
+#include "services/file_service.hpp"
 #include "storages/user_storage.hpp"
 #include "userver/components/component_base.hpp"
 #include "userver/components/component_config.hpp"
@@ -18,7 +19,7 @@ public:
 
     InternviewComponent(const ComponentConfig& config, const ComponentContext& component_context);
 
-    const internview::storages::UserStorage& GetUserStorageRef() const {
+    internview::storages::UserStorage& GetUserStorageRef() {
         return user_storage_;
     }
 

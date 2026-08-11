@@ -14,6 +14,7 @@
 #include "handlers/auth/handler_auth_change_password_post.hpp"
 #include "handlers/auth/handler_auth_login_post.hpp"
 #include "handlers/auth/handler_auth_register_post.hpp"
+#include "handlers/files/handler_upload_profile_pic_post.hpp"
 #include "handlers/status/handler_status_get.hpp"
 #include "handlers/user/handler_user_delete.hpp"
 #include "handlers/user/handler_user_get.hpp"
@@ -45,7 +46,8 @@ int main(int argc, char* argv[]) {
 
             .Append<internview::handlers::HandlerUserDelete>()
             .Append<internview::handlers::HandlerUserUpdate>()
-            .Append<internview::handlers::HandlerUserGet>();
+            .Append<internview::handlers::HandlerUserGet>()
+            .Append<internview::handlers::HandlerUploadProfilePicPost>();
 
     return userver::utils::DaemonMain(argc, argv, component_list);
 }

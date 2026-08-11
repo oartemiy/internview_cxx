@@ -5,8 +5,11 @@
 
 #include "dto/user_dto.hpp"
 #include "models/user.hpp"
+#include "services/file_service.hpp"
 #include "services/jwt_service.hpp"
+#include "userver/components/component_config.hpp"
 #include "userver/components/component_context.hpp"
+#include "userver/server/http/form_data_arg.hpp"
 
 namespace internview::storages {
 
@@ -14,7 +17,10 @@ using internview::models::User;
 
 class UserStorage {
 public:
-    explicit UserStorage(const userver::components::ComponentContext& component_context);
+    enum class FileStatus { Uploaded, InvalidFileType, InvalidFileSize, UnknownError, BadJWT };
+
+    explicit UserStorage(const userver::components::ComponentConfig& config,
+                         const userver::components::ComponentContext& component_context);
 
     // NOTE: mostly always (100%) without errors (UUIDv7 repeat probability -> 0.0)
     std::optional<dto::user::ResponseDTO> CreateUser(
@@ -33,11 +39,16 @@ public:
     bool ChangeUserPassword(const std::string& token,
                             const dto::user::ChangePasswordDTO& dto) const;
 
+    // TODO: make better
+    std::string UploadProfilePic(const std::string& token,
+                          const userver::server::http::FormDataArg& file_arg);
+
 private:
     std::optional<User> GetUserById(const boost::uuids::uuid& id) const;
 
     userver::storages::postgres::ClusterPtr pg_cluster_;
     internview::services::JwtService jwt_service_;
+    internview::services::FileService file_service_;
 };
 
 }  // namespace internview::storages

@@ -106,3 +106,10 @@ components_manager:
             path: /user/me
             method: GET
             task_processor: main-task-processor
+
+        handler-upload-profile-pic-post:
+            path: /users/me/profile-pic
+            method: POST
+            task_processor: main-task-processor
+            max_request_size: 5242880 
+        

@@ -44,6 +44,7 @@ add_library(
 
     # services
     src/services/jwt_service.cpp
+    src/services/file_service.cpp
 
     # components
     src/components/internview_component.cpp
@@ -68,6 +69,7 @@ add_library(
     src/handlers/user/handler_user_delete.cpp
     src/handlers/user/handler_user_get.cpp
     src/handlers/user/handler_user_update.cpp
+    src/handlers/files/handler_upload_profile_pic_post.cpp
 
 )
 

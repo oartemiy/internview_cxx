@@ -3,11 +3,13 @@
 #include <sodium.h>
 
 #include <chrono>
+#include <filesystem>
 #include <optional>
 #include <string>
 
 #include "dto/user_dto.hpp"
 #include "models/user.hpp"
+#include "services/file_service.hpp"
 #include "user_storage_queries/sql_queries.hpp"
 #include "userver/formats/json/value.hpp"
 #include "userver/storages/postgres/cluster_types.hpp"
@@ -15,6 +17,7 @@
 #include "userver/storages/postgres/io/row_types.hpp"
 #include "userver/storages/secdist/provider_component.hpp"
 #include "userver/utils/boost_uuid7.hpp"
+#include "userver/utils/uuid4.hpp"
 #include "utils/password.hpp"
 
 namespace internview::storages {
@@ -30,7 +33,8 @@ std::optional<models::User> UserStorage::GetUserById(const boost::uuids::uuid& i
     return user;
 }
 
-UserStorage::UserStorage(const userver::components::ComponentContext& component_context)
+UserStorage::UserStorage(const userver::components::ComponentConfig& config,
+                         const userver::components::ComponentContext& component_context)
     : pg_cluster_(component_context.FindComponent<userver::components::Postgres>("postgres-db")
                       .GetCluster()),
       jwt_service_(component_context
@@ -38,7 +42,8 @@ UserStorage::UserStorage(const userver::components::ComponentContext& component_
                            "default-secdist-provider")
                        .Get()
                        .As<userver::formats::json::Value>()["jwt_secret"]
-                       .As<std::string>()) {
+                       .As<std::string>()),
+      file_service_(config, component_context) {
     // !NOTE: For password verifing and hashing
     if (sodium_init() != 0) {
         throw std::runtime_error{"Sodium init error"};
@@ -159,6 +164,28 @@ bool UserStorage::ChangeUserPassword(const std::string& token,
         return false;
     }
     return true;
+}
+
+std::string UserStorage::UploadProfilePic(const std::string& token,
+                                          const userver::server::http::FormDataArg& file_arg) {
+    auto id = jwt_service_.VerifyToken(token);
+    if (!id) {
+        return "";
+    }
+
+    auto ext =
+        std::filesystem::path(file_arg.filename ? *file_arg.filename : "").extension().string();
+    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+    if (ext != ".jpg" && ext != ".png" && ext != ".jpeg") {
+        return "";
+    }
+    auto new_uuid = userver::utils::generators::GenerateUuid();
+    auto full_path = file_service_.img_folder + new_uuid + ext;
+    if (file_service_.WriteFile(full_path, file_arg.value)) {
+        return full_path;
+    } else {
+        return "";
+    }
 }
 
 }  // namespace internview::storages
