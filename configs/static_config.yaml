@@ -107,9 +107,20 @@ components_manager:
             method: GET
             task_processor: main-task-processor
 
-        handler-upload-profile-pic-post:
+        handler-profile-pic-post:
             path: /users/me/profile-pic
             method: POST
             task_processor: main-task-processor
             max_request_size: 5242880 
+
+        handler-profile-pic-get:
+            path: /users/me/profile-pic
+            method: GET
+            task_processor: main-task-processor
+        # TODO: make fs-cache support
+        # fs-cache-uploads:
+        #     dir: /Users/oartemiy/code/internview/uploads/
+        #     update-period: 10s
+        #     fs-task-processor: fs-task-processor
+
         

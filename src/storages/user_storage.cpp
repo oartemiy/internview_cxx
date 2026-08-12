@@ -2,7 +2,9 @@
 
 #include <sodium.h>
 
+#include <cctype>
 #include <chrono>
+#include <expected>
 #include <filesystem>
 #include <optional>
 #include <string>
@@ -12,6 +14,7 @@
 #include "services/file_service.hpp"
 #include "user_storage_queries/sql_queries.hpp"
 #include "userver/formats/json/value.hpp"
+#include "userver/logging/log.hpp"
 #include "userver/storages/postgres/cluster_types.hpp"
 #include "userver/storages/postgres/component.hpp"
 #include "userver/storages/postgres/io/row_types.hpp"
@@ -166,26 +169,57 @@ bool UserStorage::ChangeUserPassword(const std::string& token,
     return true;
 }
 
-std::string UserStorage::UploadProfilePic(const std::string& token,
-                                          const userver::server::http::FormDataArg& file_arg) {
+std::expected<std::string, UserStorage::UploadError> UserStorage::UploadProfilePic(
+    const std::string& token, const userver::server::http::FormDataArg& file_arg) {
     auto id = jwt_service_.VerifyToken(token);
     if (!id) {
-        return "";
+        return std::unexpected<UploadError>(UploadError::BadJWT);
     }
 
     auto ext =
         std::filesystem::path(file_arg.filename ? *file_arg.filename : "").extension().string();
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
     if (ext != ".jpg" && ext != ".png" && ext != ".jpeg") {
-        return "";
+        return std::unexpected<UploadError>(UploadError::InvalidFileType);
     }
     auto new_uuid = userver::utils::generators::GenerateUuid();
     auto full_path = file_service_.img_folder + new_uuid + ext;
     if (file_service_.WriteFile(full_path, file_arg.value)) {
+        // TODO: use server path instead
+        auto server_path = new_uuid + ext;
+        auto update_dto =
+            dto::user::UpdateDTO{std::nullopt, std::nullopt, std::nullopt, server_path};
+        auto res = UpdateUser(token, update_dto);
+        if (!res) {
+            return std::unexpected<UploadError>(UploadError::UnknownError);
+        }
         return full_path;
     } else {
-        return "";
+        return std::unexpected<UploadError>(UploadError::UnknownError);
     }
+}
+
+std::optional<std::pair<std::string, std::string>> UserStorage::GetProfilePic(
+    const std::string& token) {
+    auto id = jwt_service_.VerifyToken(token);
+    if (!id) {
+        return std::nullopt;
+    }
+    auto user = GetUserById(*id);
+    if (!user) {
+        return std::nullopt;
+    }
+    auto pic = user->profile_pic;
+    if (!pic) {
+        return std::nullopt;
+    }
+    LOG_INFO() << *pic;
+    auto file = file_service_.ReadFile(services::FileService::img_folder + *pic);
+    if (!file) {
+        return std::nullopt;
+    }
+    std::pair<std::string, std::string> res{*pic, *file};
+    return res;
 }
 
 }  // namespace internview::storages

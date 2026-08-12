@@ -1,6 +1,8 @@
 #pragma once
 
+#include <expected>
 #include <optional>
+#include <string>
 #include <userver/storages/postgres/cluster.hpp>
 
 #include "dto/user_dto.hpp"
@@ -15,9 +17,10 @@ namespace internview::storages {
 
 using internview::models::User;
 
+// TODO: user std::expected to produce consistent errors
 class UserStorage {
 public:
-    enum class FileStatus { Uploaded, InvalidFileType, InvalidFileSize, UnknownError, BadJWT };
+    enum class UploadError { InvalidFileType, UnknownError, BadJWT };
 
     explicit UserStorage(const userver::components::ComponentConfig& config,
                          const userver::components::ComponentContext& component_context);
@@ -39,9 +42,10 @@ public:
     bool ChangeUserPassword(const std::string& token,
                             const dto::user::ChangePasswordDTO& dto) const;
 
-    // TODO: make better
-    std::string UploadProfilePic(const std::string& token,
-                          const userver::server::http::FormDataArg& file_arg);
+    std::expected<std::string, UploadError> UploadProfilePic(
+        const std::string& token, const userver::server::http::FormDataArg& file_arg);
+
+    std::optional<std::pair<std::string, std::string>> GetProfilePic(const std::string& token);
 
 private:
     std::optional<User> GetUserById(const boost::uuids::uuid& id) const;

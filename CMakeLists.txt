@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.12...3.31)
 project(internview CXX)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(DownloadUserver)
@@ -9,7 +11,7 @@ include(DownloadJwt-cpp)
 find_package(
     userver
     COMPONENTS core #
-               postgresql
+    postgresql
     QUIET
 )
 if(NOT userver_FOUND)
@@ -55,32 +57,33 @@ add_library(
 
     # handlers
 
-        # status
+    # status
     src/handlers/status/handler_status_get.cpp
 
 
-        # auth
+    # auth
     src/handlers/auth/handler_auth_register_post.cpp
     src/handlers/auth/handler_auth_login_post.cpp
     src/handlers/auth/handler_auth_change_password_post.cpp
 
 
-        # user
+    # user
     src/handlers/user/handler_user_delete.cpp
     src/handlers/user/handler_user_get.cpp
     src/handlers/user/handler_user_update.cpp
-    src/handlers/files/handler_upload_profile_pic_post.cpp
+    src/handlers/files/handler_profile_pic_post.cpp
+    src/handlers/files/handler_profile_pic_get.cpp
 
 )
 
 target_link_libraries(
     ${PROJECT_NAME}_objs
     PUBLIC userver::core #
-           userver::postgresql
-           ${PROJECT_NAME}_user_storage_sql
-    PRIVATE 
-           sodium
-           jwt-cpp
+    userver::postgresql
+    ${PROJECT_NAME}_user_storage_sql
+    PRIVATE
+    sodium
+    jwt-cpp
 )
 
 

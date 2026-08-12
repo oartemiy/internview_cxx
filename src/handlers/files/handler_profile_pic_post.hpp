@@ -8,12 +8,12 @@
 #include "userver/server/handlers/http_handler_base.hpp"
 
 namespace internview::handlers {
-// TODO: make db queries to update profile pic
-class HandlerUploadProfilePicPost final : public userver::server::handlers::HttpHandlerBase {
-public:
-    static constexpr std::string_view kName = "handler-upload-profile-pic-post";
 
-    HandlerUploadProfilePicPost(const userver::components::ComponentConfig& config,
+class HandlerProfilePicPost final : public userver::server::handlers::HttpHandlerBase {
+public:
+    static constexpr std::string_view kName = "handler-profile-pic-post";
+
+    HandlerProfilePicPost(const userver::components::ComponentConfig& config,
                                 const userver::components::ComponentContext& component_context);
 
     std::string HandleRequestThrow(const userver::server::http::HttpRequest& request,
