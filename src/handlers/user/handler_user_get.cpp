@@ -1,6 +1,8 @@
 #include "handler_user_get.hpp"
 
 #include "components/internview_component.hpp"
+#include "dto/user_dto.hpp"
+#include "errors/errors.hpp"
 #include "userver/formats/json/value_builder.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
 
@@ -9,31 +11,34 @@ namespace internview::handlers {
 HandlerUserGet::HandlerUserGet(const userver::components::ComponentConfig& config,
                                const userver::components::ComponentContext& component_context)
     : userver::server::handlers::HttpHandlerJsonBase(config, component_context),
-      user_storage_ref_(
+      user_storage_ptr_(
           component_context.FindComponent<internview::components::InternviewComponent>()
-              .GetUserStorageRef()) {
+              .GetUserStoragePtr()),
+      auth_service_ptr_(
+          component_context.FindComponent<internview::components::InternviewComponent>()
+              .GetAuthServicePtr()) {
 }
 
 HandlerUserGet::Value HandlerUserGet::HandleRequestJsonThrow(
     const HttpRequest& request, [[maybe_unused]] const Value& request_json,
     [[maybe_unused]] RequestContext& context) const {
     auto auth_header = request.GetHeader("Authorization");
-    if (auth_header.empty() || auth_header.substr(7).empty()) {
-        request.GetHttpResponse().SetStatus(userver::server::http::HttpStatus::kUnauthorized);
-        userver::formats::json::ValueBuilder builder;
-        builder["error"] = "unauthorized";
-        return builder.ExtractValue();
+    auto auth_res = auth_service_ptr_->IsAuthorized(auth_header);
+    if (!auth_res) {
+        request.SetResponseStatus(userver::http::kUnauthorized);
+
+        return services::GetJSON(auth_res);
     }
-    auto token = auth_header.substr(7);
-    auto res = user_storage_ref_.GetUserByJWT(token);
-    if (res) {
-        auto json = userver::formats::json::ValueBuilder(*res).ExtractValue();
-        return json;
-    } else {
-        userver::formats::json::ValueBuilder builder;
-        builder["error"] = "invalid request data";
-        request.GetHttpResponse().SetStatusNotFound();
-        return builder.ExtractValue();
+    auto user_id = *auth_res;
+    try {
+        auto user = user_storage_ptr_->GetUserById(user_id);
+        auto resp_dto = dto::user::ResponseDTO(user.id, user.login, user.name, user.role,
+                                               user.description, user.profile_pic, user.created_at,
+                                               auth_service_ptr_->GetToken(auth_header));
+        return userver::formats::json::ValueBuilder(resp_dto).ExtractValue();
+    } catch (errors::NotFoundError& e) {
+        request.SetResponseStatus(userver::http::kNotFound);
+        return userver::formats::json::MakeObject("error", e.what());
     }
 }
 

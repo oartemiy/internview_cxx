@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace internview::utils::password {
+namespace internview::utils {
 
 std::string HashPassword(const std::string& password);
 

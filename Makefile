@@ -2,7 +2,7 @@ PROJECT_NAME = internview
 NPROCS ?= $(shell nproc)
 CLANG_FORMAT ?= clang-format
 DOCKER_IMAGE ?= ghcr.io/userver-framework/ubuntu-24.04-userver:latest
-CMAKE_OPTS ?=
+CMAKE_OPTS ?= -DUSERVER_PYTHON_PATH=/opt/homebrew/bin/python3.12
 # If we're under TTY, pass "-it" to "docker run"
 DOCKER_ARGS = $(shell /bin/test -t 0 && /bin/echo -it || echo)
 PRESETS ?= debug release debug-custom release-custom

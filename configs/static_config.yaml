@@ -117,6 +117,7 @@ components_manager:
             path: /users/me/profile-pic
             method: GET
             task_processor: main-task-processor
+            
         # TODO: make fs-cache support
         # fs-cache-uploads:
         #     dir: /Users/oartemiy/code/internview/uploads/

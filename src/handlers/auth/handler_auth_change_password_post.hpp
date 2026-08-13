@@ -20,7 +20,8 @@ public:
                                  RequestContext& context) const override;
 
 private:
-    const internview::storages::UserStorage& user_storage_ref_;
+    std::shared_ptr<internview::storages::UserStorage> user_storage_ptr_;
+    std::shared_ptr<internview::services::AuthService> auth_service_ptr_;
 };
 
 }  // namespace internview::handlers

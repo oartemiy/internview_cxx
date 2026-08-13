@@ -7,7 +7,7 @@
 
 #include "sodium/crypto_pwhash.h"
 
-namespace internview::utils::password {
+namespace internview::utils {
 
 std::string HashPassword(const std::string& password) {
     char hashed_password[crypto_pwhash_STRBYTES];
@@ -24,4 +24,4 @@ bool VerifyPassword(const std::string& password, const std::string& password_has
            0;
 }
 
-}  // namespace internview::utils::password
+}  // namespace internview::utils

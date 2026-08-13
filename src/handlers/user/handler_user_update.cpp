@@ -2,6 +2,10 @@
 
 #include "components/internview_component.hpp"
 #include "dto/user_dto.hpp"
+#include "errors/errors.hpp"
+#include "services/auth_service.hpp"
+#include "userver/formats/json/inline.hpp"
+#include "userver/formats/json/value.hpp"
 #include "userver/formats/json/value_builder.hpp"
 #include "userver/http/status_code.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
@@ -11,9 +15,12 @@ namespace internview::handlers {
 HandlerUserUpdate::HandlerUserUpdate(const userver::components::ComponentConfig& config,
                                      const userver::components::ComponentContext& component_context)
     : userver::server::handlers::HttpHandlerJsonBase(config, component_context),
-      user_storage_ref_(
+      user_storage_ptr_(
           component_context.FindComponent<internview::components::InternviewComponent>()
-              .GetUserStorageRef()) {
+              .GetUserStoragePtr()),
+      auth_service_ptr_(
+          component_context.FindComponent<internview::components::InternviewComponent>()
+              .GetAuthServicePtr()) {
 }
 
 HandlerUserUpdate::Value HandlerUserUpdate::HandleRequestJsonThrow(
@@ -21,24 +28,23 @@ HandlerUserUpdate::Value HandlerUserUpdate::HandleRequestJsonThrow(
     [[maybe_unused]] RequestContext& context) const {
     auto dto = request_json.As<internview::dto::user::UpdateDTO>();
     auto auth_header = request.GetHeader("Authorization");
-    if (auth_header.empty() || auth_header.substr(7).empty()) {
-        userver::formats::json::ValueBuilder builder;
-        builder["error"] = "unauthorized";
-        request.GetHttpResponse().SetStatus(userver::http::kUnauthorized);
-        return builder.ExtractValue();
+    auto auth_res = auth_service_ptr_->IsAuthorized(auth_header);
+    if (!auth_res) {
+        request.SetResponseStatus(userver::http::kUnauthorized);
+
+        return services::GetJSON(auth_res);
     }
-    auto token = auth_header.substr(7);
-    auto res = user_storage_ref_.UpdateUser(token, dto);
-    if (res) {
-        userver::formats::json::ValueBuilder builder;
-        builder["status"] = "updated";
-        builder["updated_user"] = dto.login;
-        return builder.ExtractValue();
-    } else {
-        userver::formats::json::ValueBuilder builder;
-        builder["error"] = "invalid request data";
-        request.GetHttpResponse().SetStatusNotFound();
-        return builder.ExtractValue();
+    dto.user_id = *auth_res;
+    try {
+        auto res = user_storage_ptr_->UpdateUser(dto);
+        return userver::formats::json::ValueBuilder(res).ExtractValue();
+
+    } catch (internview::errors::ConflictError& e) {
+        request.SetResponseStatus(userver::http::kConflict);
+        return userver::formats::json::MakeObject("error", e.what());
+    } catch (internview::errors::NotFoundError& e) {
+        request.SetResponseStatus(userver::http::kNotFound);
+        return userver::formats::json::MakeObject("error", e.what());
     }
 }
 

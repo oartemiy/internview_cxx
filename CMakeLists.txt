@@ -16,7 +16,7 @@ find_package(
 )
 if(NOT userver_FOUND)
     # Tries TRY_DIR first, falls back to downloading userver from GitHub using CPM.
-    download_userver(TRY_DIR third_party/userver)
+    download_userver(GIT_TAG v3.1)
 endif()
 
 userver_setup_environment()
@@ -47,6 +47,7 @@ add_library(
     # services
     src/services/jwt_service.cpp
     src/services/file_service.cpp
+    src/services/auth_service.cpp
 
     # components
     src/components/internview_component.cpp

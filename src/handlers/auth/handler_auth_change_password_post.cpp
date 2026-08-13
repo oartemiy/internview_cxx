@@ -2,10 +2,10 @@
 
 #include "components/internview_component.hpp"
 #include "dto/user_dto.hpp"
+#include "errors/errors.hpp"
 #include "userver/formats/json/value_builder.hpp"
 #include "userver/http/status_code.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
-#include "userver/server/http/http_status.hpp"
 
 namespace internview::handlers {
 
@@ -13,9 +13,12 @@ HandlerAuthChangePasswordPost::HandlerAuthChangePasswordPost(
     const userver::components::ComponentConfig& config,
     const userver::components::ComponentContext& component_context)
     : userver::server::handlers::HttpHandlerJsonBase(config, component_context),
-      user_storage_ref_(
+      user_storage_ptr_(
           component_context.FindComponent<internview::components::InternviewComponent>()
-              .GetUserStorageRef()) {
+              .GetUserStoragePtr()),
+      auth_service_ptr_(
+          component_context.FindComponent<internview::components::InternviewComponent>()
+              .GetAuthServicePtr()) {
 }
 
 HandlerAuthChangePasswordPost::Value HandlerAuthChangePasswordPost::HandleRequestJsonThrow(
@@ -23,23 +26,30 @@ HandlerAuthChangePasswordPost::Value HandlerAuthChangePasswordPost::HandleReques
     [[maybe_unused]] RequestContext& context) const {
     auto dto = request_json.As<dto::user::ChangePasswordDTO>();
     auto auth_header = request.GetHeader("Authorization");
-    if (auth_header.empty() || auth_header.substr(7).empty()) {
+    auto auth_res = auth_service_ptr_->IsAuthorized(auth_header);
+    if (!auth_res.has_value()) {
+        request.SetResponseStatus(userver::http::kUnauthorized);
+        return services::GetJSON(auth_res);
+
+    }
+    auto user_id = *auth_res;
+    dto.user_id = user_id;
+    try {
+        user_storage_ptr_->ChangeUserPassword(dto);
         userver::formats::json::ValueBuilder builder;
-        builder["error"] = "unauthorized";
-        request.GetHttpResponse().SetStatus(userver::http::kUnauthorized);
+        builder["status"] = "password changed";
+        return builder.ExtractValue();
+    } catch (errors::InvalidPasswordError& e) {
+        userver::formats::json::ValueBuilder builder;
+        request.SetResponseStatus(userver::http::kBadRequest);
+        builder["error"] = e.what();
+        return builder.ExtractValue();
+    } catch (errors::NotFoundError& e) {
+        userver::formats::json::ValueBuilder builder;
+        request.SetResponseStatus(userver::http::kNotFound);
+        builder["error"] = e.what();
         return builder.ExtractValue();
     }
-    auto token = auth_header.substr(7);
-    auto is_changed = user_storage_ref_.ChangeUserPassword(token, dto);
-    if (!is_changed) {
-        userver::formats::json::ValueBuilder builder;
-        builder["error"] = "invalid password or expired jwt token";
-        request.GetHttpResponse().SetStatus(userver::server::http::HttpStatus::BadRequest);
-        return builder.ExtractValue();
-    }
-    userver::formats::json::ValueBuilder builder;
-    builder["status"] = "password changed";
-    return builder.ExtractValue();
 }
 
 }  // namespace internview::handlers
