@@ -108,13 +108,13 @@ components_manager:
             task_processor: main-task-processor
 
         handler-profile-pic-post:
-            path: /users/me/profile-pic
+            path: /user/me/profile-pic
             method: POST
             task_processor: main-task-processor
             max_request_size: 5242880 
 
         handler-profile-pic-get:
-            path: /users/me/profile-pic
+            path: /user/me/profile-pic
             method: GET
             task_processor: main-task-processor
             

@@ -34,7 +34,7 @@ public:
      * @param role
      * @return std::string
      */
-    std::string GenerateJwtToken(const boost::uuids::uuid& user_id, const std::string& role) const {
+    std::string GenerateJwtToken(const boost::uuids::uuid& user_id, const std::string& role) const noexcept {
         return jwt_service_.GenerateToken(user_id, role);
     }
 

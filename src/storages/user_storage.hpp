@@ -36,7 +36,8 @@ public:
      *
      * @param dto
      * @return dto::user::ResponseDTO
-     * @throw userver::server::handlers::ConflictError
+     * @throws userver::server::handlers::ConflictError
+               std::runtime_error
      */
     dto::user::ResponseDTO CreateUser(const internview::dto::user::CreateDTO& dto) const;
 

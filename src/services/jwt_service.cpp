@@ -16,7 +16,7 @@ JwtService::JwtService(const std::string& secret_code)
 }
 
 std::string JwtService::GenerateToken(const boost::uuids::uuid& user_id,
-                                      const std::string& role) const {
+                                      const std::string& role) const noexcept {
     const std::string user_id_str = boost::uuids::to_string(user_id);
 
     auto token = jwt::create()

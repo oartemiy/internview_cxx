@@ -51,6 +51,9 @@ models::User UserStorage::GetUserById(const boost::uuids::uuid& user_id) const {
 dto::user::ResponseDTO UserStorage::CreateUser(const internview::dto::user::CreateDTO& dto) const {
     auto id = userver::utils::generators::GenerateBoostUuidV7();
     auto password_hash = internview::utils::HashPassword(dto.password);
+    if (password_hash.empty()) {
+        throw std::runtime_error("Sodium error");
+    }
     auto pg_res =
         pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
                              user_storage_queries::sql::kCreateUser, id, dto.login, password_hash,
