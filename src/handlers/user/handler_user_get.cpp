@@ -2,44 +2,29 @@
 
 #include "components/internview_component.hpp"
 #include "dto/user_dto.hpp"
-#include "errors/errors.hpp"
-#include "userver/formats/json/value_builder.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
 
 namespace internview::handlers {
 
-HandlerUserGet::HandlerUserGet(const userver::components::ComponentConfig& config,
-                               const userver::components::ComponentContext& component_context)
-    : userver::server::handlers::HttpHandlerJsonBase(config, component_context),
-      user_storage_ptr_(
-          component_context.FindComponent<internview::components::InternviewComponent>()
-              .GetUserStoragePtr()),
+HandlerUserGet::HandlerUserGet(const ComponentConfig& config,
+                               const ComponentContext& component_context)
+    : HttpHandlerJsonBase(config, component_context),
+      user_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetUserStoragePtr()),
       auth_service_ptr_(
-          component_context.FindComponent<internview::components::InternviewComponent>()
-              .GetAuthServicePtr()) {
+          component_context.FindComponent<InternviewComponent>().GetAuthServicePtr()) {
 }
 
-HandlerUserGet::Value HandlerUserGet::HandleRequestJsonThrow(
-    const HttpRequest& request, [[maybe_unused]] const Value& request_json,
-    [[maybe_unused]] RequestContext& context) const {
+Value HandlerUserGet::HandleRequestJsonThrow(const HttpRequest& request,
+                                             [[maybe_unused]] const Value& request_json,
+                                             [[maybe_unused]] RequestContext& context) const {
     auto auth_header = request.GetHeader("Authorization");
-    auto auth_res = auth_service_ptr_->IsAuthorized(auth_header);
-    if (!auth_res) {
-        request.SetResponseStatus(userver::http::kUnauthorized);
-
-        return services::GetJSON(auth_res);
-    }
-    auto user_id = *auth_res;
-    try {
-        auto user = user_storage_ptr_->GetUserById(user_id);
-        auto resp_dto = dto::user::ResponseDTO(user.id, user.login, user.name, user.role,
-                                               user.description, user.profile_pic, user.created_at,
-                                               auth_service_ptr_->GetToken(auth_header));
-        return userver::formats::json::ValueBuilder(resp_dto).ExtractValue();
-    } catch (errors::NotFoundError& e) {
-        request.SetResponseStatus(userver::http::kNotFound);
-        return userver::formats::json::MakeObject("error", e.what());
-    }
+    auto auth_res = auth_service_ptr_->CheckAuthorization(auth_header);
+    auto user_id = auth_res.user_id;
+    auto user = user_storage_ptr_->GetUserById(user_id);
+    auto resp_dto =
+        dto::user::ResponseDTO(user.id, user.login, user.name, user.role, user.description,
+                               user.profile_pic, user.created_at, auth_res.token);
+    return ValueBuilder(resp_dto).ExtractValue();
 }
 
 }  // namespace internview::handlers

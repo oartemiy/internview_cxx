@@ -1,12 +1,11 @@
 #pragma once
 
-#include <optional>
 #include <string>
 #include <string_view>
 
 #include "userver/components/component_config.hpp"
 #include "userver/components/component_context.hpp"
-#include "userver/components/fs_cache.hpp"
+// #include "userver/components/fs_cache.hpp"
 
 namespace internview::services {
 
@@ -19,11 +18,30 @@ public:
     FileService(const userver::components::ComponentConfig& config,
                 const userver::components::ComponentContext& component_context);
 
-    bool WriteFile(const std::string& path, std::string_view contents);
+    /**
+     * @brief Write(or rewrite) file on disk
+     *
+     * @param path
+     * @param contents
+     * @throw std::runtime_error
+     */
+    void WriteFile(const std::string& path, std::string_view contents);
 
-    std::optional<std::string> ReadFile(const std::string& path);
+    /**
+     * @brief Read file from disk and returns it's bytes as std::string
+     *
+     * @param path
+     * @return std::string
+     * @throw std::runtime_error
+     */
+    std::string ReadFile(const std::string& path);
 
 private:
+    /**
+     * @brief Initialize files dirictories
+     * @throw std::runtime_error
+     *
+     */
     void EnsureDirectories();
 
     userver::engine::TaskProcessor& fs_tp_;

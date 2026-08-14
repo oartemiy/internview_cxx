@@ -6,15 +6,14 @@
 #include <chrono>
 #include <filesystem>
 #include <optional>
+#include <stdexcept>
 #include <string>
+#include <userver/server/handlers/exceptions.hpp>
 
 #include "dto/user_dto.hpp"
-#include "errors/errors.hpp"
 #include "models/user.hpp"
 #include "services/file_service.hpp"
 #include "user_storage_queries/sql_queries.hpp"
-#include "userver/formats/json/value.hpp"
-#include "userver/logging/log.hpp"
 #include "userver/storages/postgres/cluster_types.hpp"
 #include "userver/storages/postgres/component.hpp"
 #include "userver/storages/postgres/io/row_types.hpp"
@@ -37,12 +36,13 @@ UserStorage::UserStorage(std::shared_ptr<services::AuthService> auth_service_ptr
     }
 }
 
-models::User UserStorage::GetUserById(const boost::uuids::uuid& id) const {
+models::User UserStorage::GetUserById(const boost::uuids::uuid& user_id) const {
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
-                                       user_storage_queries::sql::kGetUserById, id);
+                                       user_storage_queries::sql::kGetUserById, user_id);
 
     if (pg_res.IsEmpty()) {
-        throw errors::NotFoundError("User not found");
+        throw userver::server::handlers::ResourceNotFound(userver::formats::json::MakeObject(
+            "message", "User with user_id: " + boost::uuids::to_string(user_id) + " not found"));
     }
     auto user = pg_res.AsSingleRow<internview::models::User>(userver::storages::postgres::kRowTag);
     return user;
@@ -57,7 +57,8 @@ dto::user::ResponseDTO UserStorage::CreateUser(const internview::dto::user::Crea
                              dto.name, dto.role, dto.description, dto.profile_pic);
 
     if (pg_res.IsEmpty()) {
-        throw internview::errors::ConflictError("Login " + dto.login + " is taken. Try another one");
+        throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
+            "message", "Login: " + dto.login + " is taken. Try another one"));
     }
     auto resp_dto = dto::user::ResponseDTO{id,
                                            dto.login,
@@ -82,7 +83,8 @@ dto::user::ResponseDTO UserStorage::UpdateUser(const internview::dto::user::Upda
                                        user_storage_queries::sql::kUpdateUser, login, name,
                                        description, profile_pic, dto.user_id);
     if (pg_res.IsEmpty()) {
-        throw errors::ConflictError("Login " + login + " has already taken");
+        throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
+            "message", "Login: " + login + " has already taken"));
     }
     auto resp_dto = dto::user::ResponseDTO{
         dto.user_id, login, name, user.role, description, profile_pic, user.created_at, ""};
@@ -92,12 +94,14 @@ dto::user::ResponseDTO UserStorage::UpdateUser(const internview::dto::user::Upda
 void UserStorage::DeleteUser(const internview::dto::user::DeleteDTO& dto) const {
     auto user = GetUserById(dto.user_id);
     if (!internview::utils::VerifyPassword(dto.password, user.password_hash)) {
-        throw errors::InvalidPasswordError("Password is incorrect");
+        throw userver::server::handlers::ClientError(
+            userver::formats::json::MakeObject("message", "Password is incorrect"));
     }
     auto res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
                                     user_storage_queries::sql::kDeleteUser, dto.user_id);
     if (res.IsEmpty()) {
-        throw errors::NotFoundError("User not found");
+        throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
+            "message", "User with login: " + dto.login + " not found"));
     }
 }
 
@@ -106,11 +110,13 @@ dto::user::ResponseDTO UserStorage::LoginUser(const internview::dto::user::Login
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
                                        user_storage_queries::sql::kLoginUser, dto.login);
     if (pg_res.IsEmpty()) {
-        throw errors::NotFoundError("User not found");
+        throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
+            "message", "User with login: " + dto.login + " not found"));
     }
     auto user = pg_res.AsSingleRow<internview::models::User>(userver::storages::postgres::kRowTag);
     if (!utils::VerifyPassword(dto.password, user.password_hash)) {
-        throw errors::InvalidPasswordError("Password is incorrect");
+        throw userver::server::handlers::ClientError(
+            userver::formats::json::MakeObject("message", "Password is incorrect"));
     }
     auto token = auth_service_ptr_->GenerateJwtToken(user.id, user.role);
     auto resp_dto =
@@ -122,16 +128,16 @@ dto::user::ResponseDTO UserStorage::LoginUser(const internview::dto::user::Login
 void UserStorage::ChangeUserPassword(const dto::user::ChangePasswordDTO& dto) const {
     auto user = GetUserById(dto.user_id);
     if (!utils::VerifyPassword(dto.old_password, user.password_hash)) {
-        throw errors::InvalidPasswordError("Password is incorrect");
+        throw userver::server::handlers::ClientError(
+            userver::formats::json::MakeObject("message", "Password is incorrect"));
     }
 
     auto new_password_hash = internview::utils::HashPassword(dto.new_password);
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
                                        user_storage_queries::sql::kChangeUserPassword, dto.user_id,
                                        new_password_hash);
-    if (pg_res.IsEmpty()) {
-        throw errors::NotFoundError("User not found");
-    }
+    throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
+        "message", "User with login: " + user.login + " not found"));
 }
 
 void UserStorage::UploadProfilePic(const boost::uuids::uuid& user_id,
@@ -140,19 +146,16 @@ void UserStorage::UploadProfilePic(const boost::uuids::uuid& user_id,
         std::filesystem::path(file_arg.filename ? *file_arg.filename : "").extension().string();
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
     if (ext != ".jpg" && ext != ".png" && ext != ".jpeg") {
-        throw errors::FileUploadError("Invalid file format");
+        throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
+            "message", "Invalid image format. Supported: jpeg, jpg, png"));
     }
     auto new_uuid = userver::utils::generators::GenerateUuid();
     auto full_path = file_service_.img_folder + new_uuid + ext;
-    if (file_service_.WriteFile(full_path, file_arg.value)) {
-        // TODO: use server path instead
-        auto server_path = new_uuid + ext;
-        auto update_dto =
-            dto::user::UpdateDTO{user_id, std::nullopt, std::nullopt, std::nullopt, server_path};
-        auto res = UpdateUser(update_dto);
-    } else {
-        throw errors::FileUploadError("Something went wrong");
-    }
+    file_service_.WriteFile(full_path, file_arg.value);
+    auto server_path = new_uuid + ext;
+    auto update_dto =
+        dto::user::UpdateDTO{user_id, std::nullopt, std::nullopt, std::nullopt, server_path};
+    auto res = UpdateUser(update_dto);
 }
 
 std::optional<std::pair<std::string, std::string>> UserStorage::GetProfilePic(
@@ -164,13 +167,14 @@ std::optional<std::pair<std::string, std::string>> UserStorage::GetProfilePic(
     if (!pic) {
         return std::nullopt;
     }
-    LOG_INFO() << *pic;
-    auto file = file_service_.ReadFile(services::FileService::img_folder + *pic);
-    if (!file) {
+    // LOG_INFO() << *pic;
+    try {
+        auto file = file_service_.ReadFile(services::FileService::img_folder + *pic);
+        std::pair<std::string, std::string> res{*pic, file};
+        return res;
+    } catch (std::runtime_error& e) {
         return std::nullopt;
     }
-    std::pair<std::string, std::string> res{*pic, *file};
-    return res;
 }
 
 }  // namespace internview::storages

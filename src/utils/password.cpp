@@ -12,8 +12,7 @@ namespace internview::utils {
 std::string HashPassword(const std::string& password) {
     char hashed_password[crypto_pwhash_STRBYTES];
     if (crypto_pwhash_str(hashed_password, password.c_str(), password.length(),
-                          crypto_pwhash_OPSLIMIT_MIN,
-                          crypto_pwhash_MEMLIMIT_MIN) != 0) {
+                          crypto_pwhash_OPSLIMIT_MIN, crypto_pwhash_MEMLIMIT_MIN) != 0) {
         throw std::runtime_error{"Sodium crypto_pwhash_str error"};
     }
     return std::string{hashed_password};

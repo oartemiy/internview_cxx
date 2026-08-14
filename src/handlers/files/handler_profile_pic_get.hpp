@@ -3,22 +3,18 @@
 #include <string_view>
 
 #include "storages/user_storage.hpp"
-#include "userver/components/component_config.hpp"
-#include "userver/components/component_context.hpp"
-#include "userver/server/handlers/http_handler_base.hpp"
+#include "utils/common_handler.hpp"
 
 namespace internview::handlers {
 
-class HandlerProfilePicGet final : public userver::server::handlers::HttpHandlerBase {
+class HandlerProfilePicGet final : public HttpHandlerBase {
 public:
     static constexpr std::string_view kName = "handler-profile-pic-get";
 
-    HandlerProfilePicGet(const userver::components::ComponentConfig& config,
-                         const userver::components::ComponentContext& component_context);
+    HandlerProfilePicGet(const ComponentConfig& config, const ComponentContext& component_context);
 
-    std::string HandleRequestThrow(
-        const userver::server::http::HttpRequest& request,
-        userver::server::request::RequestContext& context) const override;
+    std::string HandleRequestThrow(const HttpRequest& request,
+                                   RequestContext& context) const override;
 
 private:
     std::shared_ptr<internview::storages::UserStorage> user_storage_ptr_;

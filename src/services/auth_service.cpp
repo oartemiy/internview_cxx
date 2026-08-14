@@ -1,10 +1,10 @@
 #include "auth_service.hpp"
 
-#include <expected>
 #include <string_view>
 #include <userver/storages/secdist/provider_component.hpp>
 
 #include "userver/formats/json/value.hpp"
+#include "userver/server/handlers/exceptions.hpp"
 
 namespace internview::services {
 
@@ -17,26 +17,23 @@ AuthService::AuthService(const userver::components::ComponentContext& component_
                        .As<std::string>()) {
 }
 
-std::string AuthService::GetToken(const std::string& http_auth_header) const {
-    return http_auth_header.substr(7);
-}
-
-std::expected<boost::uuids::uuid, AuthService::AuthError> AuthService::IsAuthorized(
-    const std::string& http_auth_header) const {
+AuthService::AuthResult AuthService::CheckAuthorization(const std::string& http_auth_header) const {
     if (http_auth_header.empty()) {
-        return std::unexpected{AuthError::kEmptyHeader};
+        throw userver::server::handlers::Unauthorized(
+            userver::formats::json::MakeObject("message", "No authorization"));
     }
-    if (http_auth_header.size() < 7 || !http_auth_header.starts_with("Bearer ")) {
-        return std::unexpected{AuthError::kInvalidAuthType};
+    if (!http_auth_header.starts_with("Bearer ")) {
+        throw userver::server::handlers::Unauthorized(
+            userver::formats::json::MakeObject("message", "Invalid authorization type"));
     }
     std::string token = http_auth_header.substr(7);
     if (token.empty()) {
-        return std::unexpected{AuthError::kEmptyToken};
+        throw userver::server::handlers::Unauthorized(
+            userver::formats::json::MakeObject("message", "Empty JWT token"));
     }
-    if (auto id = jwt_service_.VerifyToken(token); id) {
-        return *id;
-    }
-    return std::unexpected{AuthError::kUnauthorized};
+    auto [id, role] = jwt_service_.VerifyToken(token);
+
+    return {token, id, role};
 }
 
 }  // namespace internview::services

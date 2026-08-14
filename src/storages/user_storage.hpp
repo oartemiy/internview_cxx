@@ -23,11 +23,20 @@ public:
                          const userver::components::ComponentContext& component_context);
 
     /**
-     * @brief Create the User object
+     * @brief Get the User By Id object
+     *
+     * @param id
+     * @return User
+     * @throw userver::server::handlers::ResourceNotFound
+     */
+    User GetUserById(const boost::uuids::uuid& user_id) const;
+
+    /**
+     * @brief Create a User object
      *
      * @param dto
      * @return dto::user::ResponseDTO
-     * @throw internview::errors::ConflictError when login has already taken
+     * @throw userver::server::handlers::ConflictError
      */
     dto::user::ResponseDTO CreateUser(const internview::dto::user::CreateDTO& dto) const;
 
@@ -36,8 +45,8 @@ public:
      *
      * @param dto
      * @return dto::user::ResponseDTO
-     * @throws internview::errors::ConflictError when login had already taken
-               internview::errors::NotFoundError when user_id not found
+     * @throws userver::server::handlers::ConflictError
+               userver::server::handlers::ResourceNotFound
      */
     dto::user::ResponseDTO UpdateUser(const internview::dto::user::UpdateDTO& dto) const;
 
@@ -45,27 +54,17 @@ public:
      * @brief Delete the User object
      *
      * @param dto
-     * @throws internview::errors::NotFoundError when user_id not found
-               internview::errors::InvalidPasswordError when password is incorrect
+     * @throws userver::server::handlers::ClientError
+               userver::server::handlers::ResourceNotFound
      */
     void DeleteUser(const internview::dto::user::DeleteDTO& dto) const;
-
-    /**
-     * @brief Get the User By Id object
-     *
-     * @param id
-     * @return User
-     * @throw internview::errors::NotFoundError when User with user_id does not exists
-     */
-    User GetUserById(const boost::uuids::uuid& user_id) const;
 
     /**
      * @brief Login User
      *
      * @param dto
      * @return dto::user::ResponseDTO
-     * @throws  internview::errors::NotFoundError when user does not exists
-                internview::errors::InvalidPasswordError when password is incorrect
+     * @throws  userver::server::handlers::ClientError
      */
     dto::user::ResponseDTO LoginUser(const internview::dto::user::LoginDTO& dto) const;
 
@@ -73,8 +72,8 @@ public:
      * @brief Change user's password
      *
      * @param dto
-     * @throws internview::errors::NotFoundError when user does not exists
-               internview::errors::InvalidPasswordError when password is incorrect
+     * @throws userver::server::handlers::ResourceNotFound
+               userver::server::handlers::ClientError
      */
     void ChangeUserPassword(const dto::user::ChangePasswordDTO& dto) const;
 
@@ -82,8 +81,8 @@ public:
      * @brief Uploads and sets new user's profile picture
      *
      * @param file_arg
-     * @throws internview::errors::NotFoundError when user does not exists
-               internview::errors::FileUploadError when 
+     * @throws userver::server::handlers::ClientError
+               std::runtime_error
      */
     void UploadProfilePic(const boost::uuids::uuid& user_id,
                           const userver::server::http::FormDataArg& file_arg);
@@ -92,10 +91,12 @@ public:
      * @brief Get the Profile Pic object
      *
      * @param token
-     * @return std::pair<std::string, std::string> 'filename 'file_data
-     * @throw internview::errors::NotFoundError when user does not exists
+     * @return std::optional<std::pair<std::string, std::string>> 'filename 'file_data
+     * @throws userver::server::handlers::ResourceNotFound
+               std::runtime_error
      */
-    std::optional<std::pair<std::string, std::string>> GetProfilePic(const boost::uuids::uuid& user_id);
+    std::optional<std::pair<std::string, std::string>> GetProfilePic(
+        const boost::uuids::uuid& user_id);
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;

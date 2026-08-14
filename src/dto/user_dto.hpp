@@ -23,7 +23,8 @@ struct CreateDTO {
     std::optional<std::string> profile_pic;
 };
 
-inline auto Parse(const userver::formats::json::Value& json, userver::formats::parse::To<CreateDTO>) {
+inline auto Parse(const userver::formats::json::Value& json,
+                  userver::formats::parse::To<CreateDTO>) {
     CreateDTO dto;
     dto.login = json["login"].As<std::string>();
     dto.password = json["password"].As<std::string>();
@@ -44,7 +45,8 @@ struct UpdateDTO {
     std::optional<std::string> profile_pic;
 };
 
-inline auto Parse(const userver::formats::json::Value& json, userver::formats::parse::To<UpdateDTO>) {
+inline auto Parse(const userver::formats::json::Value& json,
+                  userver::formats::parse::To<UpdateDTO>) {
     UpdateDTO dto;
     dto.login = json["login"].As<std::optional<std::string>>(std::nullopt);
     dto.name = json["name"].As<std::optional<std::string>>(std::nullopt);
@@ -59,7 +61,8 @@ struct DeleteDTO {
     std::string password;
 };
 
-inline auto Parse(const userver::formats::json::Value& json, userver::formats::parse::To<DeleteDTO>) {
+inline auto Parse(const userver::formats::json::Value& json,
+                  userver::formats::parse::To<DeleteDTO>) {
     DeleteDTO dto;
     dto.login = json["login"].As<std::string>();
     dto.password = json["password"].As<std::string>();
@@ -71,7 +74,8 @@ struct LoginDTO {
     std::string password;
 };
 
-inline auto Parse(const userver::formats::json::Value& json, userver::formats::parse::To<LoginDTO>) {
+inline auto Parse(const userver::formats::json::Value& json,
+                  userver::formats::parse::To<LoginDTO>) {
     LoginDTO dto;
     dto.login = json["login"].As<std::string>();
     dto.password = json["password"].As<std::string>();
@@ -104,7 +108,7 @@ struct ResponseDTO {
 };
 
 inline auto Serialize(const ResponseDTO& dto,
-               userver::formats::serialize::To<userver::formats::json::Value>) {
+                      userver::formats::serialize::To<userver::formats::json::Value>) {
     userver::formats::json::ValueBuilder builder;
     builder["id"] = dto.id;
     builder["login"] = dto.login;
