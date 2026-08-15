@@ -8,10 +8,7 @@ namespace internview::services {
 
 FileService::FileService(const userver::components::ComponentConfig& config,
                          const userver::components::ComponentContext& component_context)
-    : fs_tp_(userver::components::GetFsTaskProcessor(
-          config,
-          component_context))
-{
+    : fs_tp_(userver::components::GetFsTaskProcessor(config, component_context)) {
     EnsureDirectories();
 }
 

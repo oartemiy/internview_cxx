@@ -16,7 +16,8 @@ public:
      * @param role
      * @return std::string
      */
-    std::string GenerateToken(const boost::uuids::uuid& user_id, const std::string& role) const noexcept;
+    std::string GenerateToken(const boost::uuids::uuid& user_id,
+                              const std::string& role) const noexcept;
 
     /**
      * @brief Verifies JWT token
