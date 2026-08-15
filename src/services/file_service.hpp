@@ -5,11 +5,9 @@
 
 #include "userver/components/component_config.hpp"
 #include "userver/components/component_context.hpp"
-// #include "userver/components/fs_cache.hpp"
 
 namespace internview::services {
 
-// TODO: add fs-cache support
 class FileService {
 public:
     inline static std::string pdf_folder = "/Users/oartemiy/code/internview/uploads/pdf/";

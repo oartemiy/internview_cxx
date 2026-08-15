@@ -1,6 +1,6 @@
--- Update rows in 'internview_schema.users' where condition is met
+-- Update rows in 'internview_schema.user' where condition is met
 UPDATE
-    internview_schema.users
+    internview_schema.user
 SET
     password_hash = $2
 WHERE

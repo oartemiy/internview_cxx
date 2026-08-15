@@ -1,7 +1,7 @@
--- Select all rows from 'internview_schema.users'
+-- Select all rows from 'internview_schema.user'
 SELECT
     *
 FROM
-    internview_schema.users
+    internview_schema.user
 WHERE
     login = $1

@@ -37,7 +37,20 @@ userver_add_sql_library(
     *.sql
 )
 
+userver_add_sql_library(
+    ${PROJECT_NAME}_cv_storage_sql
+    NAMESPACE
+    cv_storage_queries
+    SOURCE_DIR
+    src/storages/sql/cv_storage
+    OUTPUT_DIR
+    ${CMAKE_SOURCE_DIR}/src/storages/sql/cv_storage
+    SQL_FILES
+    *.sql
+)
+
 target_include_directories(${PROJECT_NAME}_user_storage_sql PUBLIC ${CMAKE_SOURCE_DIR}/src/storages/sql/user_storage/include)
+target_include_directories(${PROJECT_NAME}_cv_storage_sql PUBLIC ${CMAKE_SOURCE_DIR}/src/storages/sql/cv_storage/include)
 
 add_library(
     ${PROJECT_NAME}_objs OBJECT
@@ -54,6 +67,7 @@ add_library(
 
     # stotages
     src/storages/user_storage.cpp
+    src/storages/cv_storage.cpp
 
 
     # handlers
@@ -75,6 +89,8 @@ add_library(
     src/handlers/files/handler_profile_pic_post.cpp
     src/handlers/files/handler_profile_pic_get.cpp
 
+    # cv
+    src/handlers/cv/handler_cv_post.cpp
 )
 
 target_link_libraries(
@@ -82,6 +98,8 @@ target_link_libraries(
     PUBLIC userver::core #
     userver::postgresql
     ${PROJECT_NAME}_user_storage_sql
+    ${PROJECT_NAME}_cv_storage_sql
+
     PRIVATE
     sodium
     jwt-cpp

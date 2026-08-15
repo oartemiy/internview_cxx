@@ -122,4 +122,9 @@ components_manager:
             task_processor: main-task-processor
             
         # NOTE: while fs-cache does not support mac os
+
+        handler-cv-post:
+            path: /cv
+            method: POST
+            task_processor: main-task-processor
         
