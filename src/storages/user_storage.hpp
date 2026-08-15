@@ -86,6 +86,7 @@ public:
      * @param description
      * @throws userver::server::handlers::ClientError
                std::runtime_error
+     * NOTE: To delele optional field use DELETE in a json_request
      */
     void UploadProfilePic(const boost::uuids::uuid& id,
                           const userver::server::http::FormDataArg& file_arg);

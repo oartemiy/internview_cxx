@@ -7,6 +7,7 @@
 #include "dto/cv_dto.hpp"
 #include "models/cv.hpp"
 #include "userver/formats/json/inline.hpp"
+#include "userver/logging/log.hpp"
 #include "userver/server/handlers/exceptions.hpp"
 #include "userver/storages/postgres/cluster_types.hpp"
 #include "userver/storages/postgres/component.hpp"
@@ -72,6 +73,13 @@ internview::dto::cv::ResponseDTO CvStorage::UpdateCv(
     auto new_description = dto.description ? *dto.description : cv_model.description;
     auto new_cv_pdf = dto.cv_pdf ? *dto.cv_pdf : cv_model.cv_pdf;
 
+    if (new_cv_pdf == "DELETE") {
+        new_cv_pdf = std::nullopt;
+    }
+    if (new_description == "DELETE") {
+        new_description = std::nullopt;
+    }
+    LOG_INFO() << new_title << ' ' << new_description << ' ' << new_cv_pdf;
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
                                        cv_storage_queries::sql::kUpdateCv, dto.id, dto.user_id,
                                        new_title, new_description, new_cv_pdf);

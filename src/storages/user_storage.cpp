@@ -82,11 +82,17 @@ dto::user::ResponseDTO UserStorage::CreateUser(const internview::dto::user::Crea
 dto::user::ResponseDTO UserStorage::UpdateUser(const internview::dto::user::UpdateDTO& dto) const {
 
     auto user = GetUserById(dto.id);
-
+    
     auto login = dto.login ? *dto.login : user.login;
     auto name = dto.name ? *dto.name : user.name;
     auto description = dto.description ? *dto.description : user.description;
     auto profile_pic = dto.profile_pic ? *dto.profile_pic : user.profile_pic;
+    if (description == "DELETE") {
+        description = std::nullopt;
+    }
+    if (profile_pic == "DELETE") {
+        description = std::nullopt;
+    }
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
                                        user_storage_queries::sql::kUpdateUser, login, name,
                                        description, profile_pic, dto.id);
@@ -94,9 +100,8 @@ dto::user::ResponseDTO UserStorage::UpdateUser(const internview::dto::user::Upda
         throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
             "message", "Login: " + login + " has already taken"));
     }
-    auto resp_dto =
-        dto::user::ResponseDTO{dto.id, login,           name,        user.role, description,
-                               profile_pic, user.created_at, std::nullopt};
+    auto resp_dto = dto::user::ResponseDTO{
+        dto.id, login, name, user.role, description, profile_pic, user.created_at, std::nullopt};
     return resp_dto;
 }
 

@@ -84,7 +84,8 @@ WHERE
             internview_schema.cvs
         WHERE
             user_id = $2
-            AND title = $3)
+            AND title = $3
+            AND id != $1)
 RETURNING
     updated_at
 

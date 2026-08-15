@@ -44,16 +44,16 @@ public:
      * @param id
      * @param user_id
      * @return internview::models::CV
+     * NOTE: To delele optional field use DELETE in a json_request
      */
     internview::models::CV GetCvById(const boost::uuids::uuid& id,
                                      const boost::uuids::uuid& user_id) const;
 
-
     /**
      * @brief Update CV object
-     * 
-     * @param dto 
-     * @return internview::dto::cv::ResponseDTO 
+     *
+     * @param dto
+     * @return internview::dto::cv::ResponseDTO
      */
     internview::dto::cv::ResponseDTO UpdateCv(const internview::dto::cv::UpdateDTO& dto) const;
 
