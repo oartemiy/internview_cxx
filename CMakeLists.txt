@@ -103,7 +103,7 @@ target_link_libraries(
 
     PRIVATE
     sodium
-    jwt-cpp
+    jwt-cpp::jwt-cpp
 )
 
 
