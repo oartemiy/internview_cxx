@@ -104,7 +104,7 @@ struct ResponseDTO {
     std::optional<std::string> description;
     std::optional<std::string> profile_pic;
     std::chrono::system_clock::time_point created_at;
-    std::string token;
+    std::optional<std::string> token;
 };
 
 inline auto Serialize(const ResponseDTO& dto,
@@ -117,7 +117,9 @@ inline auto Serialize(const ResponseDTO& dto,
     builder["description"] = dto.description;
     builder["profile_pic"] = dto.profile_pic;
     builder["created_at"] = dto.created_at;
-    builder["token"] = dto.token;
+    if (dto.token) {
+        builder["token"] = dto.token;
+    }
     auto json = builder.ExtractValue();
     return json;
 }

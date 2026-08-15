@@ -94,8 +94,9 @@ dto::user::ResponseDTO UserStorage::UpdateUser(const internview::dto::user::Upda
         throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
             "message", "Login: " + login + " has already taken"));
     }
-    auto resp_dto = dto::user::ResponseDTO{
-        dto.user_id, login, name, user.role, description, profile_pic, user.created_at, ""};
+    auto resp_dto =
+        dto::user::ResponseDTO{dto.user_id, login,           name,        user.role, description,
+                               profile_pic, user.created_at, std::nullopt};
     return resp_dto;
 }
 

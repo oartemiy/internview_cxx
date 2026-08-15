@@ -23,7 +23,7 @@ Value HandlerUserGet::HandleRequestJsonThrow(const HttpRequest& request,
     auto user = user_storage_ptr_->GetUserById(user_id);
     auto resp_dto =
         dto::user::ResponseDTO(user.id, user.login, user.name, user.role, user.description,
-                               user.profile_pic, user.created_at, auth_res.token);
+                               user.profile_pic, user.created_at, std::nullopt);
     return ValueBuilder(resp_dto).ExtractValue();
 }
 
