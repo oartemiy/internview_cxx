@@ -23,6 +23,27 @@ RETURNING
 
 
 
+// Generated from get_cv_by_id.sql
+const USERVER_NAMESPACE::storages::Query kGetCvById = {
+R"-(
+-- Select all rows from 'internview_schema.cvs'
+SELECT
+    *
+FROM
+    internview_schema.cvs
+WHERE
+    id = $1
+    AND user_id = $2;
+
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("get_cv_by_id"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
+
+
 // Generated from get_cvs.sql
 const USERVER_NAMESPACE::storages::Query kGetCvs = {
 R"-(

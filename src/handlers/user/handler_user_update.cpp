@@ -22,7 +22,7 @@ Value HandlerUserUpdate::HandleRequestJsonThrow(const HttpRequest& request,
     auto auth_header = request.GetHeader("Authorization");
     auto auth_res = auth_service_ptr_->CheckAuthorization(auth_header);
 
-    dto.user_id = auth_res.user_id;
+    dto.id = auth_res.user_id;
 
     auto res = user_storage_ptr_->UpdateUser(dto);
     return ValueBuilder(res).ExtractValue();

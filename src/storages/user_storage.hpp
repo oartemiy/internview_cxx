@@ -30,7 +30,7 @@ public:
      * @return User
      * @throw userver::server::handlers::ResourceNotFound
      */
-    User GetUserById(const boost::uuids::uuid& user_id) const;
+    User GetUserById(const boost::uuids::uuid& id) const;
 
     /**
      * @brief Create a User object
@@ -82,23 +82,23 @@ public:
     /**
      * @brief Uploads and sets new user's profile picture
      *
-     * @param file_arg
+     * @param id
+     * @param description
      * @throws userver::server::handlers::ClientError
                std::runtime_error
      */
-    void UploadProfilePic(const boost::uuids::uuid& user_id,
+    void UploadProfilePic(const boost::uuids::uuid& id,
                           const userver::server::http::FormDataArg& file_arg);
 
     /**
      * @brief Get the Profile Pic object
      *
-     * @param token
+     * @param id
      * @return std::optional<std::pair<std::string, std::string>> 'filename 'file_data
      * @throws userver::server::handlers::ResourceNotFound
                std::runtime_error
      */
-    std::optional<std::pair<std::string, std::string>> GetProfilePic(
-        const boost::uuids::uuid& user_id);
+    std::optional<std::pair<std::string, std::string>> GetProfilePic(const boost::uuids::uuid& id);
 
 private:
     userver::engine::TaskProcessor& crypto_tp_;

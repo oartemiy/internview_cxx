@@ -22,7 +22,7 @@ Value HandlerUserDelete::HandleRequestJsonThrow(const HttpRequest& request,
     auto auth_res = auth_service_ptr_->CheckAuthorization(auth_header);
 
     auto user_id = auth_res.user_id;
-    dto.user_id = user_id;
+    dto.id = user_id;
     // LOG_INFO() << token;
     user_storage_ptr_->DeleteUser(dto);
 

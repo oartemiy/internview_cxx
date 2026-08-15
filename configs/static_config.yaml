@@ -132,4 +132,8 @@ components_manager:
             path: /cvs/me
             method: GET
             task_processor: main-task-processor
-        
+
+        handler-cv-get-by-id:
+            path: /cvs/{id}
+            method: GET
+            task_processor: main-task-processor        

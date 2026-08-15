@@ -11,6 +11,9 @@
 
 namespace internview::storages {
 
+// NOTE: internview::models::CV and internview::dto::cv::ResponseDTO have the same feilds
+// BUT: dto does not support postgres deserialization (architecture decision)
+// AND: models support json serialization
 class CvStorage {
 public:
     explicit CvStorage(std::shared_ptr<services::AuthService> auth_service_ptr,
@@ -33,6 +36,16 @@ public:
      * @return std::vector<internview::models::CV>
      */
     std::vector<internview::models::CV> GetUserCvs(const boost::uuids::uuid& user_id) const;
+
+    /**
+     * @brief Get the Cv By Id object
+     * 
+     * @param id 
+     * @param user_id 
+     * @return internview::models::CV 
+     */
+    internview::models::CV GetCvById(const boost::uuids::uuid& id,
+                                     const boost::uuids::uuid& user_id) const;
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;

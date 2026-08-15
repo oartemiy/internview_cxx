@@ -92,6 +92,7 @@ add_library(
     # cv
     src/handlers/cv/handler_cv_post.cpp
     src/handlers/cv/handler_cv_get.cpp
+    src/handlers/cv/handler_cv_get_by_id.cpp
 )
 
 target_link_libraries(

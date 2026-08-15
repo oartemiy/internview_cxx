@@ -38,13 +38,13 @@ UserStorage::UserStorage(std::shared_ptr<services::AuthService> auth_service_ptr
     }
 }
 
-models::User UserStorage::GetUserById(const boost::uuids::uuid& user_id) const {
+models::User UserStorage::GetUserById(const boost::uuids::uuid& id) const {
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
-                                       user_storage_queries::sql::kGetUserById, user_id);
+                                       user_storage_queries::sql::kGetUserById, id);
 
     if (pg_res.IsEmpty()) {
         throw userver::server::handlers::ResourceNotFound(userver::formats::json::MakeObject(
-            "message", "User with user_id: " + boost::uuids::to_string(user_id) + " not found"));
+            "message", "User with id: " + boost::uuids::to_string(id) + " not found"));
     }
     auto user = pg_res.AsSingleRow<internview::models::User>(userver::storages::postgres::kRowTag);
     return user;
@@ -81,7 +81,7 @@ dto::user::ResponseDTO UserStorage::CreateUser(const internview::dto::user::Crea
 
 dto::user::ResponseDTO UserStorage::UpdateUser(const internview::dto::user::UpdateDTO& dto) const {
 
-    auto user = GetUserById(dto.user_id);
+    auto user = GetUserById(dto.id);
 
     auto login = dto.login ? *dto.login : user.login;
     auto name = dto.name ? *dto.name : user.name;
@@ -89,19 +89,19 @@ dto::user::ResponseDTO UserStorage::UpdateUser(const internview::dto::user::Upda
     auto profile_pic = dto.profile_pic ? *dto.profile_pic : user.profile_pic;
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
                                        user_storage_queries::sql::kUpdateUser, login, name,
-                                       description, profile_pic, dto.user_id);
+                                       description, profile_pic, dto.id);
     if (pg_res.IsEmpty()) {
         throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
             "message", "Login: " + login + " has already taken"));
     }
     auto resp_dto =
-        dto::user::ResponseDTO{dto.user_id, login,           name,        user.role, description,
+        dto::user::ResponseDTO{dto.id, login,           name,        user.role, description,
                                profile_pic, user.created_at, std::nullopt};
     return resp_dto;
 }
 
 void UserStorage::DeleteUser(const internview::dto::user::DeleteDTO& dto) const {
-    auto user = GetUserById(dto.user_id);
+    auto user = GetUserById(dto.id);
 
     auto verify_res_fut = userver::engine::AsyncNoTracing(crypto_tp_, [&dto, &user] {
         return internview::utils::VerifyPassword(dto.password, user.password_hash);
@@ -113,7 +113,7 @@ void UserStorage::DeleteUser(const internview::dto::user::DeleteDTO& dto) const 
             userver::formats::json::MakeObject("message", "Password is incorrect"));
     }
     auto res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
-                                    user_storage_queries::sql::kDeleteUser, dto.user_id);
+                                    user_storage_queries::sql::kDeleteUser, dto.id);
     if (res.IsEmpty()) {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
             "message", "User with login: " + dto.login + " not found"));
@@ -148,7 +148,7 @@ dto::user::ResponseDTO UserStorage::LoginUser(const internview::dto::user::Login
 }
 
 void UserStorage::ChangeUserPassword(const dto::user::ChangePasswordDTO& dto) const {
-    auto user = GetUserById(dto.user_id);
+    auto user = GetUserById(dto.id);
 
     auto verify_res_fut = userver::engine::AsyncNoTracing(crypto_tp_, [&dto, &user] {
         return internview::utils::VerifyPassword(dto.old_password, user.password_hash);
@@ -167,7 +167,7 @@ void UserStorage::ChangeUserPassword(const dto::user::ChangePasswordDTO& dto) co
     auto new_password_hash = new_password_hash_fut.Get();
 
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
-                                       user_storage_queries::sql::kChangeUserPassword, dto.user_id,
+                                       user_storage_queries::sql::kChangeUserPassword, dto.id,
                                        new_password_hash);
     if (pg_res.IsEmpty()) {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
@@ -175,7 +175,7 @@ void UserStorage::ChangeUserPassword(const dto::user::ChangePasswordDTO& dto) co
     }
 }
 
-void UserStorage::UploadProfilePic(const boost::uuids::uuid& user_id,
+void UserStorage::UploadProfilePic(const boost::uuids::uuid& id,
                                    const userver::server::http::FormDataArg& file_arg) {
     auto ext =
         std::filesystem::path(file_arg.filename ? *file_arg.filename : "").extension().string();
@@ -189,14 +189,14 @@ void UserStorage::UploadProfilePic(const boost::uuids::uuid& user_id,
     file_service_.WriteFile(full_path, file_arg.value);
     auto server_path = new_uuid + ext;
     auto update_dto =
-        dto::user::UpdateDTO{user_id, std::nullopt, std::nullopt, std::nullopt, server_path};
+        dto::user::UpdateDTO{id, std::nullopt, std::nullopt, std::nullopt, server_path};
     auto res = UpdateUser(update_dto);
 }
 
 std::optional<std::pair<std::string, std::string>> UserStorage::GetProfilePic(
-    const boost::uuids::uuid& user_id) {
+    const boost::uuids::uuid& id) {
 
-    auto user = GetUserById(user_id);
+    auto user = GetUserById(id);
 
     auto pic = user.profile_pic;
     if (!pic) {

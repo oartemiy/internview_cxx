@@ -5,6 +5,7 @@
 
 #include "cv_storage_queries/sql_queries.hpp"
 #include "dto/cv_dto.hpp"
+#include "models/cv.hpp"
 #include "userver/server/handlers/exceptions.hpp"
 #include "userver/storages/postgres/cluster_types.hpp"
 #include "userver/storages/postgres/component.hpp"
@@ -47,6 +48,19 @@ std::vector<internview::models::CV> CvStorage::GetUserCvs(const boost::uuids::uu
         res_vec.push_back(row.As<internview::models::CV>(userver::storages::postgres::kRowTag));
     }
     return res_vec;
+}
+
+internview::models::CV CvStorage::GetCvById(const boost::uuids::uuid& id,
+                                            const boost::uuids::uuid& user_id) const {
+    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+                                       cv_storage_queries::sql::kGetCvById, id, user_id);
+    if (pg_res.IsEmpty()) {
+        throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
+            "message",
+            "Cv id: " + boost::uuids::to_string(id) + " is unavailable for current user"));
+    }
+    auto models = pg_res.AsSingleRow<models::CV>(userver::storages::postgres::kRowTag);
+    return models;
 }
 
 }  // namespace internview::storages

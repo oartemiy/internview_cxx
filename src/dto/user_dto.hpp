@@ -38,7 +38,7 @@ inline auto Parse(const userver::formats::json::Value& json,
 struct UpdateDTO {
     // ! role can not be changed
     // ! changes only public info
-    boost::uuids::uuid user_id;
+    boost::uuids::uuid id;
     std::optional<std::string> login;
     std::optional<std::string> name;
     std::optional<std::string> description;
@@ -56,7 +56,7 @@ inline auto Parse(const userver::formats::json::Value& json,
 }
 
 struct DeleteDTO {
-    boost::uuids::uuid user_id;
+    boost::uuids::uuid id;
     std::string login;
     std::string password;
 };
@@ -83,7 +83,7 @@ inline auto Parse(const userver::formats::json::Value& json,
 }
 
 struct ChangePasswordDTO {
-    boost::uuids::uuid user_id;
+    boost::uuids::uuid id;
     std::string old_password;
     std::string new_password;
 };
