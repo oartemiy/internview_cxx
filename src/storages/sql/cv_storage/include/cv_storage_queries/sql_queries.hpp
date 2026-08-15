@@ -10,4 +10,8 @@ namespace cv_storage_queries::sql {
 // Generated from create_cv.sql
 extern const USERVER_NAMESPACE::storages::Query kCreateCv;
 
+
+// Generated from get_cvs.sql
+extern const USERVER_NAMESPACE::storages::Query kGetCvs;
+
 }  // namespace cv_storage_queries::sql

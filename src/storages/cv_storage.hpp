@@ -2,8 +2,10 @@
 
 #include <userver/engine/task/task_processor_fwd.hpp>
 #include <userver/storages/postgres/cluster.hpp>
+#include <vector>
 
 #include "dto/cv_dto.hpp"
+#include "models/cv.hpp"
 #include "services/auth_service.hpp"
 #include "services/file_service.hpp"
 
@@ -20,9 +22,17 @@ public:
      *
      * @param dto
      * @return dto::cv::ResponseDTO
-     * @throw std::runtime_error
+     * @throw userver::server::handlers::ConflictError
      */
     dto::cv::ResponseDTO CreateCv(const dto::cv::CreateDTO& dto) const;
+
+    /**
+     * @brief Get the User Cvs objects
+     *
+     * @param user_id
+     * @return std::vector<internview::models::CV>
+     */
+    std::vector<internview::models::CV> GetUserCvs(const boost::uuids::uuid& user_id) const;
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;

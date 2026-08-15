@@ -8,4 +8,7 @@ def sql_files() -> set:
     return set([
         # Generated from create_cv.sql
         "create_cv",
+    
+        # Generated from get_cvs.sql
+        "get_cvs",
     ])

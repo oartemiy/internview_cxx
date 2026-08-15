@@ -7,14 +7,36 @@ namespace cv_storage_queries::sql {
 // Generated from create_cv.sql
 const USERVER_NAMESPACE::storages::Query kCreateCv = {
 R"-(
--- Insert data into 'internview_schema.cv'
-INSERT INTO internview_schema.cv(id, user_id, title, description, cv_pdf)
+-- Insert data into 'internview_schema.cvs'
+INSERT INTO internview_schema.cvs(id, user_id, title, description, cv_pdf)
     VALUES ($1, $2, $3, $4, $5)
+ON CONFLICT
+    DO NOTHING
 RETURNING
     created_at
 
 )-",
     USERVER_NAMESPACE::storages::Query::NameLiteral("create_cv"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
+
+
+// Generated from get_cvs.sql
+const USERVER_NAMESPACE::storages::Query kGetCvs = {
+R"-(
+-- Select all rows from 'internview_schema.cvs'
+SELECT
+    *
+FROM
+    internview_schema.cvs
+WHERE
+    user_id = $1;
+
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("get_cvs"),
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 

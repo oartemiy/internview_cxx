@@ -8,9 +8,11 @@
 #include "userver/formats/json/value.hpp"
 #include "userver/formats/json/value_builder.hpp"
 #include "userver/formats/parse/common_containers.hpp"
-#include "userver/formats/serialize/to.hpp"
-#include "userver/formats/serialize/common_containers.hpp"
 #include "userver/formats/serialize/boost_uuid.hpp"
+#include "userver/formats/serialize/common_containers.hpp"
+#include "userver/formats/serialize/to.hpp"
+// #include "userver/storages/postgres/io/io_fwd.hpp"
+// #include "userver/storages/postgres/io/type_mapping.hpp"
 
 namespace internview::dto::cv {
 
@@ -54,3 +56,13 @@ inline auto Serialize(const ResponseDTO& dto,
 }
 
 }  // namespace internview::dto::cv
+
+// NOTE: ResponseDTO == Cv (model)
+// namespace userver::storages::postgres::io {
+
+// template <>
+// struct CppToUserPg<internview::dto::cv::ResponseDTO> {
+//     static constexpr DBTypeName postgres_name = "internview_schema.cvs";  // NOLINT
+// };
+
+// }  // namespace userver::storages::postgres::io

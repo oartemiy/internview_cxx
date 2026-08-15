@@ -28,7 +28,7 @@ namespace userver::storages::postgres::io {
 
 template <>
 struct CppToUserPg<internview::models::User> {
-    static constexpr DBTypeName postgres_name = "internview_schema.user";  // NOLINT
+    static constexpr DBTypeName postgres_name = "internview_schema.users";  // NOLINT
 };
 
 }  // namespace userver::storages::postgres::io

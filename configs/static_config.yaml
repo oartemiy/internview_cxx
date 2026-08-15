@@ -96,35 +96,40 @@ components_manager:
             task_processor: main-task-processor
 
         handler-user-delete:
-            path: /user/me
+            path: /users/me
             method: DELETE
             task_processor: main-task-processor
 
         handler-user-update:
-            path: /user/me
+            path: /users/me
             method: PATCH
             task_processor: main-task-processor
 
         handler-user-get:
-            path: /user/me
+            path: /users/me
             method: GET
             task_processor: main-task-processor
 
         handler-profile-pic-post:
-            path: /user/me/profile-pic
+            path: /users/me/profile-pic
             method: POST
             task_processor: main-task-processor
             max_request_size: 5242880 
 
         handler-profile-pic-get:
-            path: /user/me/profile-pic
+            path: /users/me/profile-pic
             method: GET
             task_processor: main-task-processor
             
         # NOTE: while fs-cache does not support mac os
 
         handler-cv-post:
-            path: /cv
+            path: /cvs
             method: POST
+            task_processor: main-task-processor
+
+        handler-cv-get:
+            path: /cvs/me
+            method: GET
             task_processor: main-task-processor
         
