@@ -8,6 +8,7 @@
 #include "userver/formats/json/value.hpp"
 #include "userver/formats/json/value_builder.hpp"
 #include "userver/formats/parse/common_containers.hpp"
+#include "userver/formats/parse/to.hpp"
 #include "userver/formats/serialize/boost_uuid.hpp"
 #include "userver/formats/serialize/common_containers.hpp"
 #include "userver/formats/serialize/to.hpp"
@@ -27,6 +28,23 @@ inline auto Parse(const userver::formats::json::Value& json,
                   userver::formats::parse::To<CreateDTO>) {
     CreateDTO dto;
     dto.title = json["title"].As<std::string>();
+    dto.description = json["description"].As<std::optional<std::string>>(std::nullopt);
+    dto.cv_pdf = json["cv_pdf"].As<std::optional<std::string>>(std::nullopt);
+    return dto;
+}
+
+struct UpdateDTO {
+    boost::uuids::uuid id;
+    boost::uuids::uuid user_id;
+    std::optional<std::string> title;
+    std::optional<std::string> description;
+    std::optional<std::string> cv_pdf;
+};
+
+inline auto Parse(const userver::formats::json::Value& json,
+                  userver::formats::parse::To<UpdateDTO>) {
+    UpdateDTO dto;
+    dto.title = json["title"].As<std::optional<std::string>>(std::nullopt);
     dto.description = json["description"].As<std::optional<std::string>>(std::nullopt);
     dto.cv_pdf = json["cv_pdf"].As<std::optional<std::string>>(std::nullopt);
     return dto;

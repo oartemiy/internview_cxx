@@ -111,14 +111,17 @@ SET
     description = $3,
     profile_pic = $4
 WHERE
-    id = $5 AND NOT EXISTS (
-        SELECT 1 FROM internview_schema.users
-        WHERE login = $1 AND id != $5
-    )
-
+    id = $5
+    AND NOT EXISTS (
+        SELECT
+            1
+        FROM
+            internview_schema.users
+        WHERE
+            login = $1
+            AND id != $5)
 RETURNING
     id
-
 
 )-",
     USERVER_NAMESPACE::storages::Query::NameLiteral("update_user"),

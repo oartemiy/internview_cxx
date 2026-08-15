@@ -9,6 +9,7 @@
 #include "services/auth_service.hpp"
 #include "services/file_service.hpp"
 
+// TODO: add @throw section
 namespace internview::storages {
 
 // NOTE: internview::models::CV and internview::dto::cv::ResponseDTO have the same feilds
@@ -39,13 +40,22 @@ public:
 
     /**
      * @brief Get the Cv By Id object
-     * 
-     * @param id 
-     * @param user_id 
-     * @return internview::models::CV 
+     *
+     * @param id
+     * @param user_id
+     * @return internview::models::CV
      */
     internview::models::CV GetCvById(const boost::uuids::uuid& id,
                                      const boost::uuids::uuid& user_id) const;
+
+
+    /**
+     * @brief Update CV object
+     * 
+     * @param dto 
+     * @return internview::dto::cv::ResponseDTO 
+     */
+    internview::dto::cv::ResponseDTO UpdateCv(const internview::dto::cv::UpdateDTO& dto) const;
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;

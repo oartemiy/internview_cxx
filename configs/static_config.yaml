@@ -136,4 +136,9 @@ components_manager:
         handler-cv-get-by-id:
             path: /cvs/{id}
             method: GET
-            task_processor: main-task-processor        
+            task_processor: main-task-processor
+
+        handler-cv-update-by-id:
+            path: /cvs/{id}
+            method: PATCH
+            task_processor: main-task-processor

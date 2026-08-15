@@ -18,4 +18,8 @@ extern const USERVER_NAMESPACE::storages::Query kGetCvById;
 // Generated from get_cvs.sql
 extern const USERVER_NAMESPACE::storages::Query kGetCvs;
 
+
+// Generated from update_cv.sql
+extern const USERVER_NAMESPACE::storages::Query kUpdateCv;
+
 }  // namespace cv_storage_queries::sql

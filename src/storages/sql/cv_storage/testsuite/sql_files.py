@@ -14,4 +14,7 @@ def sql_files() -> set:
     
         # Generated from get_cvs.sql
         "get_cvs",
+    
+        # Generated from update_cv.sql
+        "update_cv",
     ])
