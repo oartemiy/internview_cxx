@@ -6,6 +6,9 @@ components_manager:
         fs-task-processor: # Make a separate task processor for filesystem bound tasks.
             worker_threads: $worker-fs-threads
 
+        crypt-task-processor:
+            worker_threads: $worker-crypt-threads
+
     default_task_processor: main-task-processor
 
     components: # Configuring components that were registered via component_list
@@ -118,10 +121,5 @@ components_manager:
             method: GET
             task_processor: main-task-processor
             
-        # TODO: make fs-cache support
-        # fs-cache-uploads:
-        #     dir: /Users/oartemiy/code/internview/uploads/
-        #     update-period: 10s
-        #     fs-task-processor: fs-task-processor
-
+        # NOTE: while fs-cache does not support mac os
         

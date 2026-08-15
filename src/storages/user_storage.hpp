@@ -10,6 +10,9 @@
 #include "services/file_service.hpp"
 #include "userver/components/component_config.hpp"
 #include "userver/components/component_context.hpp"
+
+#include <userver/engine/task/task_processor_fwd.hpp>
+
 #include "userver/server/http/form_data_arg.hpp"
 
 namespace internview::storages {
@@ -100,6 +103,7 @@ public:
         const boost::uuids::uuid& user_id);
 
 private:
+    userver::engine::TaskProcessor& crypto_tp_;
     userver::storages::postgres::ClusterPtr pg_cluster_;
     std::shared_ptr<services::AuthService> auth_service_ptr_;
     internview::services::FileService file_service_;

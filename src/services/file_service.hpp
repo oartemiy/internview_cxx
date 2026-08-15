@@ -45,7 +45,6 @@ private:
     void EnsureDirectories();
 
     userver::engine::TaskProcessor& fs_tp_;
-    // userver::components::FsCache& fs_cache_;
 };
 
 }  // namespace internview::services
