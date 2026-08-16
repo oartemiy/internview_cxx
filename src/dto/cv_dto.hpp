@@ -34,9 +34,12 @@ inline auto Parse(const userver::formats::json::Value& json,
 }
 
 struct UpdateDTO {
+    bool has_title_in_request = false;
+    bool has_description_in_request = false;
+    bool has_cv_pdf_in_request = false;
     boost::uuids::uuid id;
     boost::uuids::uuid user_id;
-    std::optional<std::string> title;
+    std::string title;
     std::optional<std::string> description;
     std::optional<std::string> cv_pdf;
 };
@@ -44,9 +47,18 @@ struct UpdateDTO {
 inline auto Parse(const userver::formats::json::Value& json,
                   userver::formats::parse::To<UpdateDTO>) {
     UpdateDTO dto;
-    dto.title = json["title"].As<std::optional<std::string>>(std::nullopt);
-    dto.description = json["description"].As<std::optional<std::string>>(std::nullopt);
-    dto.cv_pdf = json["cv_pdf"].As<std::optional<std::string>>(std::nullopt);
+    if (json.HasMember("title")) {
+        dto.has_title_in_request = true;
+        dto.title = json["title"].As<std::string>();
+    }
+    if (json.HasMember("description")) {
+        dto.has_description_in_request = true;
+        dto.description = json["description"].As<std::optional<std::string>>(std::nullopt);
+    }
+    if (json.HasMember("cv_pdf")) {
+        dto.has_cv_pdf_in_request = true;
+        dto.cv_pdf = json["cv_pdf"].As<std::optional<std::string>>(std::nullopt);
+    }
     return dto;
 }
 

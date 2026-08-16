@@ -2,6 +2,7 @@
 
 #include "components/internview_component.hpp"
 #include "dto/cv_dto.hpp"
+#include "userver/server/handlers/exceptions.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
 #include "utils/common_handler.hpp"
 
@@ -17,6 +18,10 @@ HandlerCvUpdateById::HandlerCvUpdateById(const ComponentConfig& config,
 Value HandlerCvUpdateById::HandleRequestJsonThrow(const HttpRequest& request,
                                                   const Value& request_json,
                                                   [[maybe_unused]] RequestContext& context) const {
+    if (request_json.IsEmpty()) {
+        throw userver::server::handlers::ClientError(
+            MakeObject("message", "Empty request data body. Nothing to update"));
+    }
     auto auth_path = request.GetHeader("Authorization");
     auto auth_res = auth_service_ptr_->CheckAuthorization(auth_path);
     auto dto = request_json.As<dto::cv::UpdateDTO>();

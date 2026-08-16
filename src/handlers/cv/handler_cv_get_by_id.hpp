@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+
 #include "services/auth_service.hpp"
 #include "storages/cv_storage.hpp"
 #include "utils/common_handler.hpp"

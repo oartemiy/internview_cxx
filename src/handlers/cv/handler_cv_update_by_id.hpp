@@ -21,7 +21,6 @@ public:
 private:
     std::shared_ptr<internview::services::AuthService> auth_service_ptr_;
     std::shared_ptr<internview::storages::CvStorage> cv_storage_ptr_;
-
 };
 
 }  // namespace internview::handlers

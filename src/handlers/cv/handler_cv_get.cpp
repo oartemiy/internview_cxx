@@ -21,7 +21,6 @@ Value HandlerCvGet::HandleRequestJsonThrow(const HttpRequest& request,
     auto resp_vec = cv_storage_ptr_->GetUserCvs(auth_res.user_id);
     // TODO: optimize with capacity reserving
     return ValueBuilder(resp_vec).ExtractValue();
-    
 }
 
 }  // namespace internview::handlers

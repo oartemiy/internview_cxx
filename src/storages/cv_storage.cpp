@@ -1,13 +1,15 @@
 #include "cv_storage.hpp"
 
 #include <chrono>
+#include <optional>
+#include <string>
 #include <vector>
 
 #include "cv_storage_queries/sql_queries.hpp"
 #include "dto/cv_dto.hpp"
 #include "models/cv.hpp"
 #include "userver/formats/json/inline.hpp"
-#include "userver/logging/log.hpp"
+// #include "userver/logging/log.hpp"
 #include "userver/server/handlers/exceptions.hpp"
 #include "userver/storages/postgres/cluster_types.hpp"
 #include "userver/storages/postgres/component.hpp"
@@ -67,29 +69,39 @@ internview::models::CV CvStorage::GetCvById(const boost::uuids::uuid& id,
 
 internview::dto::cv::ResponseDTO CvStorage::UpdateCv(
     const internview::dto::cv::UpdateDTO& dto) const {
+    if (!dto.has_cv_pdf_in_request && !dto.has_description_in_request &&
+        !dto.has_title_in_request) {
+        throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
+            "message", "Empty request data body. Nothing to update"));
+    }
     auto cv_model = GetCvById(dto.id, dto.user_id);
+    std::string title = cv_model.title;
+    std::optional<std::string> description = cv_model.description;
+    std::optional<std::string> cv_pdf = cv_model.cv_pdf;
 
-    auto new_title = dto.title ? *dto.title : cv_model.title;
-    auto new_description = dto.description ? *dto.description : cv_model.description;
-    auto new_cv_pdf = dto.cv_pdf ? *dto.cv_pdf : cv_model.cv_pdf;
+    if (dto.has_title_in_request) {
+        title = dto.title;
+    }
+    if (dto.has_description_in_request) {
+        description = dto.description;
+    }
+    if (dto.has_cv_pdf_in_request) {
+        cv_pdf = dto.cv_pdf;
+    }
+    if (title.length() <= 1) {
+        throw userver::server::handlers::ClientError(
+            userver::formats::json::MakeObject("message", "Title must be at least 2 chars"));
+    }
 
-    if (new_cv_pdf == "DELETE") {
-        new_cv_pdf = std::nullopt;
-    }
-    if (new_description == "DELETE") {
-        new_description = std::nullopt;
-    }
-    LOG_INFO() << new_title << ' ' << new_description << ' ' << new_cv_pdf;
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
                                        cv_storage_queries::sql::kUpdateCv, dto.id, dto.user_id,
-                                       new_title, new_description, new_cv_pdf);
+                                       title, description, cv_pdf);
     if (pg_res.IsEmpty()) {
         throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
             "message", "Cv may not exists or title has already taken in user's cvs"));
     }
     auto updated_at = pg_res[0][0].As<std::chrono::system_clock::time_point>();
-    return {dto.id,     dto.user_id,         new_title, new_description,
-            new_cv_pdf, cv_model.created_at, updated_at};
+    return {dto.id, dto.user_id, title, description, cv_pdf, cv_model.created_at, updated_at};
 }
 
 }  // namespace internview::storages

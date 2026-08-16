@@ -38,9 +38,13 @@ inline auto Parse(const userver::formats::json::Value& json,
 struct UpdateDTO {
     // ! role can not be changed
     // ! changes only public info
+    bool has_login_in_request = false;
+    bool has_name_in_request = false;
+    bool has_description_in_request = false;
+    bool has_profile_pic_in_request = false;
     boost::uuids::uuid id;
-    std::optional<std::string> login;
-    std::optional<std::string> name;
+    std::string login;
+    std::string name;
     std::optional<std::string> description;
     std::optional<std::string> profile_pic;
 };
@@ -48,10 +52,22 @@ struct UpdateDTO {
 inline auto Parse(const userver::formats::json::Value& json,
                   userver::formats::parse::To<UpdateDTO>) {
     UpdateDTO dto;
-    dto.login = json["login"].As<std::optional<std::string>>(std::nullopt);
-    dto.name = json["name"].As<std::optional<std::string>>(std::nullopt);
-    dto.description = json["description"].As<std::optional<std::string>>(std::nullopt);
-    dto.profile_pic = json["profile_pic"].As<std::optional<std::string>>(std::nullopt);
+    if (json.HasMember("login")) {
+        dto.has_login_in_request = true;
+        dto.login = json["login"].As<std::string>();
+    }
+    if (json.HasMember("name")) {
+        dto.has_name_in_request = true;
+        dto.name = json["name"].As<std::string>();
+    }
+    if (json.HasMember("description")) {
+        dto.has_description_in_request = true;
+        dto.description = json["description"].As<std::optional<std::string>>(std::nullopt);
+    }
+    if (json.HasMember("profile_pic")) {
+        dto.has_profile_pic_in_request = true;
+        dto.profile_pic = json["profile_pic"].As<std::optional<std::string>>(std::nullopt);
+    }
     return dto;
 }
 

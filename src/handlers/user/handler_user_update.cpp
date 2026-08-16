@@ -18,12 +18,20 @@ HandlerUserUpdate::HandlerUserUpdate(const ComponentConfig& config,
 Value HandlerUserUpdate::HandleRequestJsonThrow(const HttpRequest& request,
                                                 const Value& request_json,
                                                 [[maybe_unused]] RequestContext& context) const {
+    if (request_json.IsEmpty()) {
+        throw userver::server::handlers::ClientError(
+            MakeObject("message", "Empty request data body. Nothing to update"));
+    }
     auto dto = request_json.As<internview::dto::user::UpdateDTO>();
     auto auth_header = request.GetHeader("Authorization");
     auto auth_res = auth_service_ptr_->CheckAuthorization(auth_header);
 
     dto.id = auth_res.user_id;
 
+    if (dto.login == "me") {
+        throw userver::server::handlers::ClientError(
+            MakeObject("error", "login: me can not be taken"));
+    }
     auto res = user_storage_ptr_->UpdateUser(dto);
     return ValueBuilder(res).ExtractValue();
 }

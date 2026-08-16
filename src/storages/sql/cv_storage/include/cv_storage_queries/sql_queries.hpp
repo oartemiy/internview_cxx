@@ -6,18 +6,14 @@
 
 namespace cv_storage_queries::sql {
 
-
 // Generated from create_cv.sql
 extern const USERVER_NAMESPACE::storages::Query kCreateCv;
-
 
 // Generated from get_cv_by_id.sql
 extern const USERVER_NAMESPACE::storages::Query kGetCvById;
 
-
 // Generated from get_cvs.sql
 extern const USERVER_NAMESPACE::storages::Query kGetCvs;
-
 
 // Generated from update_cv.sql
 extern const USERVER_NAMESPACE::storages::Query kUpdateCv;

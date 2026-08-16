@@ -80,18 +80,30 @@ dto::user::ResponseDTO UserStorage::CreateUser(const internview::dto::user::Crea
 }
 
 dto::user::ResponseDTO UserStorage::UpdateUser(const internview::dto::user::UpdateDTO& dto) const {
-
-    auto user = GetUserById(dto.id);
-    
-    auto login = dto.login ? *dto.login : user.login;
-    auto name = dto.name ? *dto.name : user.name;
-    auto description = dto.description ? *dto.description : user.description;
-    auto profile_pic = dto.profile_pic ? *dto.profile_pic : user.profile_pic;
-    if (description == "DELETE") {
-        description = std::nullopt;
+    if (!dto.has_description_in_request && !dto.has_login_in_request && !dto.has_name_in_request &&
+        !dto.has_profile_pic_in_request) {
+        throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
+            "message", "Empty request data body. Nothing to update"));
     }
-    if (profile_pic == "DELETE") {
-        description = std::nullopt;
+    auto user = GetUserById(dto.id);
+    std::string login = user.login, name = user.name;
+    std::optional<std::string> description = user.description, profile_pic = user.profile_pic;
+
+    if (dto.has_login_in_request) {
+        login = dto.login;
+    }
+    if (dto.has_name_in_request) {
+        name = dto.name;
+    }
+    if (dto.has_description_in_request) {
+        description = dto.description;
+    }
+    if (dto.has_profile_pic_in_request) {
+        profile_pic = dto.profile_pic;
+    }
+    if (login.length() <= 1) {
+        throw userver::server::handlers::ClientError(
+            userver::formats::json::MakeObject("message", "Login must be at least 2 chars"));
     }
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
                                        user_storage_queries::sql::kUpdateUser, login, name,
@@ -194,7 +206,7 @@ void UserStorage::UploadProfilePic(const boost::uuids::uuid& id,
     file_service_.WriteFile(full_path, file_arg.value);
     auto server_path = new_uuid + ext;
     auto update_dto =
-        dto::user::UpdateDTO{id, std::nullopt, std::nullopt, std::nullopt, server_path};
+        dto::user::UpdateDTO{false, false, false, true, id, "", "", std::nullopt, server_path};
     auto res = UpdateUser(update_dto);
 }
 
