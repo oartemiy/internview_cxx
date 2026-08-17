@@ -93,7 +93,8 @@ add_library(
     src/handlers/cv/handler_cv_post.cpp
     src/handlers/cv/handler_cv_get.cpp
     src/handlers/cv/handler_cv_get_by_id.cpp
-    src/handlers/cv/handler_cv_update_by_id.cpp
+    src/handlers/cv/handler_cv_update.cpp
+    src/handlers/cv/handler_cv_delete.cpp
 )
 
 target_link_libraries(

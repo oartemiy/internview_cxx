@@ -1,4 +1,4 @@
-#include "handler_cv_update_by_id.hpp"
+#include "handler_cv_update.hpp"
 
 #include "components/internview_component.hpp"
 #include "dto/cv_dto.hpp"
@@ -8,14 +8,14 @@
 
 namespace internview::handlers {
 
-HandlerCvUpdateById::HandlerCvUpdateById(const ComponentConfig& config,
+HandlerCvUpdate::HandlerCvUpdate(const ComponentConfig& config,
                                          const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
       auth_service_ptr_(component_context.FindComponent<InternviewComponent>().GetAuthServicePtr()),
       cv_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetCvStoragePtr()) {
 }
 
-Value HandlerCvUpdateById::HandleRequestJsonThrow(const HttpRequest& request,
+Value HandlerCvUpdate::HandleRequestJsonThrow(const HttpRequest& request,
                                                   const Value& request_json,
                                                   [[maybe_unused]] RequestContext& context) const {
     if (request_json.IsEmpty()) {

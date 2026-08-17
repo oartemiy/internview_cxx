@@ -9,6 +9,9 @@ def sql_files() -> set:
         # Generated from create_cv.sql
         "create_cv",
     
+        # Generated from delete_cv.sql
+        "delete_cv",
+    
         # Generated from get_cv_by_id.sql
         "get_cv_by_id",
     

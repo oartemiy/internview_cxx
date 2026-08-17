@@ -138,7 +138,12 @@ components_manager:
             method: GET
             task_processor: main-task-processor
 
-        handler-cv-update-by-id:
+        handler-cv-update-by:
             path: /cvs/{id}
             method: PATCH
+            task_processor: main-task-processor
+
+        handler-cv-delete:
+            path: /cvs/{id}
+            method: DELETE
             task_processor: main-task-processor

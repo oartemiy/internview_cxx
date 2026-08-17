@@ -57,6 +57,14 @@ public:
      */
     internview::dto::cv::ResponseDTO UpdateCv(const internview::dto::cv::UpdateDTO& dto) const;
 
+    /**
+     * @brief Delete CV object
+     * 
+     * @param id 
+     * @param user_id 
+     */
+    void DeleteCv(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id) const;
+
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;
     std::shared_ptr<services::AuthService> auth_service_ptr_;

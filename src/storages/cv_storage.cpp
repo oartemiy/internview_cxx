@@ -104,4 +104,13 @@ internview::dto::cv::ResponseDTO CvStorage::UpdateCv(
     return {dto.id, dto.user_id, title, description, cv_pdf, cv_model.created_at, updated_at};
 }
 
+void CvStorage::DeleteCv(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id) const {
+    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+                                       cv_storage_queries::sql::kDeleteCv, id, user_id);
+    if (pg_res.IsEmpty()) {
+        throw userver::server::handlers::ClientError(
+            userver::formats::json::MakeObject("message", "invalid id or user_id"));
+    }
+}
+
 }  // namespace internview::storages
