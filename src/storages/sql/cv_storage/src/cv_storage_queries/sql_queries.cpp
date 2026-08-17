@@ -6,7 +6,7 @@ namespace cv_storage_queries::sql {
 
 // Generated from create_cv.sql
 const USERVER_NAMESPACE::storages::Query kCreateCv = {
-R"-(
+    R"-(
 -- Insert data into 'internview_schema.cvs'
 INSERT INTO internview_schema.cvs(id, user_id, title, description, cv_pdf)
     VALUES ($1, $2, $3, $4, $5)
@@ -20,12 +20,9 @@ RETURNING
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
-
-
-
 // Generated from delete_cv.sql
 const USERVER_NAMESPACE::storages::Query kDeleteCv = {
-R"-(
+    R"-(
 -- Delete rows from 'internview_schema.cvs' where condition is met
 DELETE FROM internview_schema.cvs
 WHERE id = $1
@@ -38,12 +35,9 @@ RETURNING
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
-
-
-
 // Generated from get_cv_by_id.sql
 const USERVER_NAMESPACE::storages::Query kGetCvById = {
-R"-(
+    R"-(
 -- Select all rows from 'internview_schema.cvs'
 SELECT
     *
@@ -59,12 +53,9 @@ WHERE
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
-
-
-
 // Generated from get_cvs.sql
 const USERVER_NAMESPACE::storages::Query kGetCvs = {
-R"-(
+    R"-(
 -- Select all rows from 'internview_schema.cvs'
 SELECT
     *
@@ -79,12 +70,9 @@ WHERE
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
-
-
-
 // Generated from update_cv.sql
 const USERVER_NAMESPACE::storages::Query kUpdateCv = {
-R"-(
+    R"-(
 -- Update rows in 'internview_schema.cvs' where condition is met
 UPDATE
     internview_schema.cvs
@@ -111,6 +99,5 @@ RETURNING
     USERVER_NAMESPACE::storages::Query::NameLiteral("update_cv"),
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
-
 
 }  // namespace cv_storage_queries::sql

@@ -68,22 +68,23 @@ public:
 
     /**
      * @brief Upload cv_pdf
-     * 
-     * @param id 
-     * @param user_id 
-     * @param file_arg 
+     *
+     * @param id
+     * @param user_id
+     * @param file_arg
      */
     void UploadCvPdf(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id,
                      const userver::server::http::FormDataArg& file_arg);
 
     /**
      * @brief Get the Cv Pdf object
-     * 
-     * @param id 
-     * @param user_id 
-     * @return std::optional<std::pair<std::string, std::string>> 
+     *
+     * @param id
+     * @param user_id
+     * @return std::optional<std::pair<std::string, std::string>>
      */
-    std::optional<std::pair<std::string, std::string>> GetCvPdf(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id);
+    std::optional<std::pair<std::string, std::string>> GetCvPdf(const boost::uuids::uuid& id,
+                                                                const boost::uuids::uuid& user_id);
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;

@@ -9,15 +9,14 @@
 namespace internview::handlers {
 
 HandlerCvUpdate::HandlerCvUpdate(const ComponentConfig& config,
-                                         const ComponentContext& component_context)
+                                 const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
       auth_service_ptr_(component_context.FindComponent<InternviewComponent>().GetAuthServicePtr()),
       cv_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetCvStoragePtr()) {
 }
 
-Value HandlerCvUpdate::HandleRequestJsonThrow(const HttpRequest& request,
-                                                  const Value& request_json,
-                                                  [[maybe_unused]] RequestContext& context) const {
+Value HandlerCvUpdate::HandleRequestJsonThrow(const HttpRequest& request, const Value& request_json,
+                                              [[maybe_unused]] RequestContext& context) const {
     if (request_json.IsEmpty()) {
         throw userver::server::handlers::ClientError(
             MakeObject("message", "Empty request data body. Nothing to update"));

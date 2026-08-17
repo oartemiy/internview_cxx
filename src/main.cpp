@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
             .Append<internview::handlers::HandlerCvGetById>()
             .Append<internview::handlers::HandlerCvUpdate>()
             .Append<internview::handlers::HandlerCvDelete>()
-        
+
             .Append<internview::handlers::HandlerCvPdfGet>()
             .Append<internview::handlers::HandlerCvPdfPost>();
 
