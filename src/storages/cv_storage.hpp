@@ -1,6 +1,7 @@
 #pragma once
 
 #include <userver/engine/task/task_processor_fwd.hpp>
+#include <userver/server/http/form_data_arg.hpp>
 #include <userver/storages/postgres/cluster.hpp>
 #include <vector>
 
@@ -59,11 +60,30 @@ public:
 
     /**
      * @brief Delete CV object
+     *
+     * @param id
+     * @param user_id
+     */
+    void DeleteCv(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id) const;
+
+    /**
+     * @brief Upload cv_pdf
      * 
      * @param id 
      * @param user_id 
+     * @param file_arg 
      */
-    void DeleteCv(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id) const;
+    void UploadCvPdf(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id,
+                     const userver::server::http::FormDataArg& file_arg);
+
+    /**
+     * @brief Get the Cv Pdf object
+     * 
+     * @param id 
+     * @param user_id 
+     * @return std::optional<std::pair<std::string, std::string>> 
+     */
+    std::optional<std::pair<std::string, std::string>> GetCvPdf(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id);
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;

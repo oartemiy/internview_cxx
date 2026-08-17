@@ -1,6 +1,9 @@
 #include "cv_storage.hpp"
 
+#include <algorithm>
+#include <cctype>
 #include <chrono>
+#include <filesystem>
 #include <optional>
 #include <string>
 #include <vector>
@@ -8,6 +11,7 @@
 #include "cv_storage_queries/sql_queries.hpp"
 #include "dto/cv_dto.hpp"
 #include "models/cv.hpp"
+#include "services/file_service.hpp"
 #include "userver/formats/json/inline.hpp"
 // #include "userver/logging/log.hpp"
 #include "userver/server/handlers/exceptions.hpp"
@@ -15,6 +19,7 @@
 #include "userver/storages/postgres/component.hpp"
 #include "userver/storages/postgres/io/row_types.hpp"
 #include "userver/utils/boost_uuid7.hpp"
+#include "userver/utils/uuid4.hpp"
 
 namespace internview::storages {
 
@@ -110,6 +115,39 @@ void CvStorage::DeleteCv(const boost::uuids::uuid& id, const boost::uuids::uuid&
     if (pg_res.IsEmpty()) {
         throw userver::server::handlers::ClientError(
             userver::formats::json::MakeObject("message", "invalid id or user_id"));
+    }
+}
+
+void CvStorage::UploadCvPdf(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id,
+                            const userver::server::http::FormDataArg& file_arg) {
+    auto ext =
+        std::filesystem::path(file_arg.filename ? *file_arg.filename : "").extension().string();
+    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+    if (ext != ".pdf") {
+        throw userver::server::handlers::ClientError(
+            userver::formats::json::MakeObject("message", "Invalid cv format. Supported: pdf"));
+    }
+    auto pdf_id = userver::utils::generators::GenerateUuid();
+    auto full_path = internview::services::FileService::pdf_folder + pdf_id + ext;
+    file_service_.WriteFile(full_path, file_arg.value);
+
+    auto server_path = pdf_id + ext;
+    UpdateCv({false, false, true, id, user_id, "", std::nullopt, pdf_id + ".pdf"});
+}
+
+std::optional<std::pair<std::string, std::string>> CvStorage::GetCvPdf(
+    const boost::uuids::uuid& id, const boost::uuids::uuid& user_id) {
+    auto cv_model = GetCvById(id, user_id);
+    if (!cv_model.cv_pdf) {
+        return std::nullopt;
+    }
+    auto pic = cv_model.cv_pdf;
+    try {
+        auto file = file_service_.ReadFile(services::FileService::pdf_folder + *pic);
+        std::pair<std::string, std::string> res{*pic, file};
+        return res;
+    } catch (std::runtime_error& e) {
+        return std::nullopt;
     }
 }
 

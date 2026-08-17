@@ -114,13 +114,13 @@ components_manager:
             path: /users/me/profile-pic
             method: POST
             task_processor: main-task-processor
-            max_request_size: 5242880 
+            max_request_size: 5242880
 
         handler-profile-pic-get:
             path: /users/me/profile-pic
             method: GET
             task_processor: main-task-processor
-            
+
         # NOTE: while fs-cache does not support mac os
 
         handler-cv-post:
@@ -146,4 +146,14 @@ components_manager:
         handler-cv-delete:
             path: /cvs/{id}
             method: DELETE
+            task_processor: main-task-processor
+
+        handler-cv-pdf-post:
+            path: /cvs/{id}/pdf
+            method: POST
+            task_processor: main-task-processor
+
+        handler-cv-pdf-get:
+            path: /cvs/{id}/pdf
+            method: GET
             task_processor: main-task-processor

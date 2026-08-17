@@ -19,6 +19,8 @@
 #include "handlers/cv/handler_cv_get_by_id.hpp"
 #include "handlers/cv/handler_cv_post.hpp"
 #include "handlers/cv/handler_cv_update.hpp"
+#include "handlers/files/handler_cv_pdf_get.hpp"
+#include "handlers/files/handler_cv_pdf_post.hpp"
 #include "handlers/files/handler_profile_pic_get.hpp"
 #include "handlers/files/handler_profile_pic_post.hpp"
 #include "handlers/status/handler_status_get.hpp"
@@ -58,7 +60,10 @@ int main(int argc, char* argv[]) {
             .Append<internview::handlers::HandlerCvGet>()
             .Append<internview::handlers::HandlerCvGetById>()
             .Append<internview::handlers::HandlerCvUpdate>()
-            .Append<internview::handlers::HandlerCvDelete>();
+            .Append<internview::handlers::HandlerCvDelete>()
+        
+            .Append<internview::handlers::HandlerCvPdfGet>()
+            .Append<internview::handlers::HandlerCvPdfPost>();
 
     return userver::utils::DaemonMain(argc, argv, component_list);
 }
