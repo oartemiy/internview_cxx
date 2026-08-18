@@ -123,11 +123,11 @@ internview::models::Vacancy VacancyStorage::UpdateVacancy(const dto::vacancy::Up
             userver::formats::json::MakeObject("message", "Nothing to update"));
     }
     try {
-        auto pg_res =
-            pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
-                                 vacancy_storage_queries::sql::kUpdateVacancy, dto.id, model.title,
-                                 model.description, model.requirements, model.salary_range,
-                                 model.location, model.work_mode, model.experience_level);
+        auto pg_res = pg_cluster_->Execute(
+            userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+            vacancy_storage_queries::sql::kUpdateVacancy, dto.id, dto.recruiter_id, model.title,
+            model.description, model.requirements, model.salary_range, model.location,
+            model.work_mode, model.experience_level);
     } catch (userver::storages::postgres::UniqueViolation& e) {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
             "message", "You have already taken this title. Use another one"));
@@ -144,6 +144,18 @@ void VacancyStorage::DeleteVacancy(const boost::uuids::uuid& id,
         throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
             "message", "Vacancy with id " + boost::uuids::to_string(id) + " does not exists"));
     }
+}
+
+internview::models::Vacancy VacancyStorage::ToggleVacancy(const boost::uuids::uuid& id,
+                                                          const boost::uuids::uuid& recruiter_id) {
+    auto pg_res =
+        pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+                             vacancy_storage_queries::sql::kToggleVacancy, id, recruiter_id);
+    if (pg_res.IsEmpty()) {
+        throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
+            "message", "Vacancy with id " + boost::uuids::to_string(id) + " does not exists"));
+    }
+    return pg_res.AsSingleRow<models::Vacancy>(userver::v3_1::storages::postgres::kRowTag);
 }
 
 }  // namespace internview::storages

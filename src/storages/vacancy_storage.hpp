@@ -62,14 +62,23 @@ public:
      */
     internview::models::Vacancy UpdateVacancy(const dto::vacancy::UpdateDTO& dto);
 
-
     /**
      * @brief Delete the Vacancy
-     * 
-     * @param id 
-     * @param recruiter_id 
+     *
+     * @param id
+     * @param recruiter_id
      */
     void DeleteVacancy(const boost::uuids::uuid& id, const boost::uuids::uuid& recruiter_id);
+
+    /**
+     * @brief Sets is_active flag to opposite position
+     *
+     * @param id
+     * @param recruiter_id
+     * @return internview::models::Vacancy
+     */
+    internview::models::Vacancy ToggleVacancy(const boost::uuids::uuid& id,
+                                              const boost::uuids::uuid& recruiter_id);
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;

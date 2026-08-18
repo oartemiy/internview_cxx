@@ -31,10 +31,12 @@
 #include "handlers/vacancy/handler_vacancies_get.hpp"
 #include "handlers/vacancy/handler_vacancies_get_by_id.hpp"
 #include "handlers/vacancy/handler_vacancies_get_me.hpp"
+#include "handlers/vacancy/handler_vacancies_toggle.hpp"
 #include "handlers/vacancy/handler_vacancies_update_id.hpp"
 #include "handlers/vacancy/handler_vacancy_post.hpp"
 #include "userver/storages/secdist/provider_component.hpp"
 
+// TODO: Unify all errors messages
 // TODO: Add cv and vacancy deletion when user deletion
 // TODO: add handeler /users/{id}/profile-pic for recruters
 
@@ -78,7 +80,8 @@ int main(int argc, char* argv[]) {
             .Append<internview::handlers::HandlerVacanciesGetMe>()
             .Append<internview::handlers::HandlerVacanciesGetById>()
             .Append<internview::handlers::HandlerVacancyUpdate>()
-            .Append<internview::handlers::HandlerVacanciesDelete>();
+            .Append<internview::handlers::HandlerVacanciesDelete>()
+            .Append<internview::handlers::HandlerVacancyToggle>();
 
     return userver::utils::DaemonMain(argc, argv, component_list);
 }

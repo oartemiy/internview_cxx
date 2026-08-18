@@ -2,16 +2,9 @@
 UPDATE
     internview_schema.vacancies
 SET
-    title = $3,
-    description = $4,
-    requirements = $5,
-    salary_range = $6,
-    location = $7,
-    work_mode = $8,
-    experience_level = $9,
+    is_active = NOT is_active,
     updated_at = NOW()
 WHERE
     id = $1 AND recruiter_id = $2
 RETURNING
-    id;
-
+    *

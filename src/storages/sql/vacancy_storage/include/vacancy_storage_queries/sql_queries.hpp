@@ -6,26 +6,23 @@
 
 namespace vacancy_storage_queries::sql {
 
-
 // Generated from create_vacancy.sql
 extern const USERVER_NAMESPACE::storages::Query kCreateVacancy;
-
 
 // Generated from delete_vacancy.sql
 extern const USERVER_NAMESPACE::storages::Query kDeleteVacancy;
 
-
 // Generated from get_recruiter_vacancies.sql
 extern const USERVER_NAMESPACE::storages::Query kGetRecruiterVacancies;
-
 
 // Generated from get_vacancies.sql
 extern const USERVER_NAMESPACE::storages::Query kGetVacancies;
 
-
 // Generated from get_vacancy_by_id.sql
 extern const USERVER_NAMESPACE::storages::Query kGetVacancyById;
 
+// Generated from toggle_vacancy.sql
+extern const USERVER_NAMESPACE::storages::Query kToggleVacancy;
 
 // Generated from update_vacancy.sql
 extern const USERVER_NAMESPACE::storages::Query kUpdateVacancy;

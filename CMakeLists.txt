@@ -121,6 +121,7 @@ add_library(
     src/handlers/vacancy/handler_vacancies_get_me.cpp
     src/handlers/vacancy/handler_vacancies_update_id.cpp
     src/handlers/vacancy/handler_vacancies_delete.cpp
+    src/handlers/vacancy/handler_vacancies_toggle.cpp
 )
 
 target_link_libraries(

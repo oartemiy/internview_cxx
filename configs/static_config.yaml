@@ -187,3 +187,9 @@ components_manager:
             path: /vacancies/{id}
             method: DELETE
             task_processor: main-task-processor
+
+        handler-vacancies-toggle:
+            path: /vacancies/{id}/toggle
+            method: PATCH
+            task_processor: main-task-processor
+
