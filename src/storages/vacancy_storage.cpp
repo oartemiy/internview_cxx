@@ -62,4 +62,17 @@ internview::models::Vacancy VacancyStorage::GetVacancyById(const boost::uuids::u
     return vacancy;
 }
 
+std::vector<internview::models::Vacancy> VacancyStorage::GetRecruiterVacancies(
+    const boost::uuids::uuid& recruiter_id) {
+    auto pg_res =
+        pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+                             vacancy_storage_queries::sql::kGetRecruiterVacancies, recruiter_id);
+    std::vector<models::Vacancy> vec;
+    vec.reserve(pg_res.Size());
+    for (const auto& row : pg_res) {
+        vec.push_back(row.As<models::Vacancy>(userver::v3_1::storages::postgres::kRowTag));
+    }
+    return vec;
+}
+
 }  // namespace internview::storages

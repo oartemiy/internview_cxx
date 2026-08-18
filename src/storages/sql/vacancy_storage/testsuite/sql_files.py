@@ -9,6 +9,9 @@ def sql_files() -> set:
         # Generated from create_vacancy.sql
         "create_vacancy",
     
+        # Generated from get_recruiter_vacancies.sql
+        "get_recruiter_vacancies",
+    
         # Generated from get_vacancies.sql
         "get_vacancies",
     

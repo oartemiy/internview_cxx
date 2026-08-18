@@ -168,8 +168,12 @@ components_manager:
             method: GET
             task_processor: main-task-processor
 
+        handler-vacancies-get-me:
+            path: /vacancies/me
+            method: GET
+            task_processor: main-task-processor
+
         handler-vacancies-get-by-id:
             path: /vacancies/{id}
             method: GET
             task_processor: main-task-processor
-            

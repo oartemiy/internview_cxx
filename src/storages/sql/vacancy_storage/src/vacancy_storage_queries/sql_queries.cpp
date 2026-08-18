@@ -23,6 +23,26 @@ RETURNING
 
 
 
+// Generated from get_recruiter_vacancies.sql
+const USERVER_NAMESPACE::storages::Query kGetRecruiterVacancies = {
+R"-(
+-- Select all rows from 'internview_schema.vacancies'
+SELECT
+    *
+FROM
+    internview_schema.vacancies
+WHERE
+    recruiter_id = $1;
+
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("get_recruiter_vacancies"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
+
+
 // Generated from get_vacancies.sql
 const USERVER_NAMESPACE::storages::Query kGetVacancies = {
 R"-(

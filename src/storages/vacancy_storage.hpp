@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <vector>
+
 #include "dto/vacancy_dto.hpp"
 #include "models/vacancy.hpp"
 #include "services/auth_service.hpp"
@@ -21,28 +22,37 @@ public:
 
     /**
      * @brief Create a Vacancy object
-     * 
-     * @param dto 
-     * @return internview::models::Vacancy 
+     *
+     * @param dto
+     * @return internview::models::Vacancy
      */
     internview::models::Vacancy CreateVacancy(const dto::vacancy::CreateDTO& dto);
 
     /**
      * @brief Get the Vacancies object
-     * 
-     * @param limit 
-     * @param offset 
-     * @return std::vector<internview::models::Vacancy> 
+     *
+     * @param limit
+     * @param offset
+     * @return std::vector<internview::models::Vacancy>
      */
     std::vector<internview::models::Vacancy> GetVacancies(int limit, int offset);
 
     /**
      * @brief Get the Vacancy By Id object
-     * 
-     * @param id 
-     * @return internview::models::Vacancy 
+     *
+     * @param id
+     * @return internview::models::Vacancy
      */
     internview::models::Vacancy GetVacancyById(const boost::uuids::uuid& id);
+
+    /**
+     * @brief Get the Recruiter Vacancies objects
+     * 
+     * @param recruiter_id 
+     * @return std::vector<internview::models::Vacancy> 
+     */
+    std::vector<internview::models::Vacancy> GetRecruiterVacancies(
+        const boost::uuids::uuid& recruiter_id);
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;

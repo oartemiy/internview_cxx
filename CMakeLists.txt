@@ -118,6 +118,7 @@ add_library(
     src/handlers/vacancy/handler_vacancy_post.cpp
     src/handlers/vacancy/handler_vacancies_get.cpp
     src/handlers/vacancy/handler_vacancies_get_by_id.cpp
+    src/handlers/vacancy/handler_vacancies_get_me.cpp
 )
 
 target_link_libraries(
