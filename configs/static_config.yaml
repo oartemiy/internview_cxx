@@ -162,3 +162,8 @@ components_manager:
             path: /vacancies
             method: POST
             task_processor: main-task-processor
+
+        handler-vacancies-get:
+            path: /vacancies
+            method: GET
+            task_processor: main-task-processor

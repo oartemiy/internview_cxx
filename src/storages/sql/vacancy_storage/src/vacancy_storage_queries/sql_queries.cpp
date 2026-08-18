@@ -21,4 +21,27 @@ RETURNING
 };
 
 
+
+
+// Generated from get_vacancies.sql
+const USERVER_NAMESPACE::storages::Query kGetVacancies = {
+R"-(
+-- Select all rows from 'internview_schema.vacancies'
+SELECT
+    *
+FROM
+    internview_schema.vacancies
+WHERE
+    is_active = TRUE
+ORDER BY
+    created_at DESC
+LIMIT $1 OFFSET $2;
+
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("get_vacancies"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
 }  // namespace vacancy_storage_queries::sql

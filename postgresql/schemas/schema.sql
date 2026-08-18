@@ -47,3 +47,4 @@ CREATE INDEX IF NOT EXISTS idx_vacancies_recruiter_id ON internview_schema.vacan
 
 CREATE INDEX IF NOT EXISTS idx_vacancies_is_active ON internview_schema.vacancies(is_active);
 
+CREATE INDEX idx_vacancies_created_at ON internview_schema.vacancies(created_at DESC);

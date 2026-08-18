@@ -116,6 +116,7 @@ add_library(
 
     # vacancy
     src/handlers/vacancy/handler_vacancy_post.cpp
+    src/handlers/vacancy/handler_vacancies_get.cpp
 )
 
 target_link_libraries(

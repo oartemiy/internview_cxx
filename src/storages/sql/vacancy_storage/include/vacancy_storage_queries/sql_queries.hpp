@@ -10,4 +10,8 @@ namespace vacancy_storage_queries::sql {
 // Generated from create_vacancy.sql
 extern const USERVER_NAMESPACE::storages::Query kCreateVacancy;
 
+
+// Generated from get_vacancies.sql
+extern const USERVER_NAMESPACE::storages::Query kGetVacancies;
+
 }  // namespace vacancy_storage_queries::sql

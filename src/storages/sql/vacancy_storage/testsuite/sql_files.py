@@ -8,4 +8,7 @@ def sql_files() -> set:
     return set([
         # Generated from create_vacancy.sql
         "create_vacancy",
+    
+        # Generated from get_vacancies.sql
+        "get_vacancies",
     ])

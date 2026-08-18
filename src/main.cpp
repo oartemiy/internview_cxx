@@ -27,6 +27,7 @@
 #include "handlers/user/handler_user_delete.hpp"
 #include "handlers/user/handler_user_get.hpp"
 #include "handlers/user/handler_user_update.hpp"
+#include "handlers/vacancy/handler_vacancies_get.hpp"
 #include "handlers/vacancy/handler_vacancy_post.hpp"
 #include "userver/storages/secdist/provider_component.hpp"
 
@@ -68,7 +69,8 @@ int main(int argc, char* argv[]) {
             .Append<internview::handlers::HandlerCvPdfGet>()
             .Append<internview::handlers::HandlerCvPdfPost>()
 
-            .Append<internview::handlers::HandlerVacancyPost>();
+            .Append<internview::handlers::HandlerVacancyPost>()
+            .Append<internview::handlers::HandlerVacanciesGet>();
 
     return userver::utils::DaemonMain(argc, argv, component_list);
 }

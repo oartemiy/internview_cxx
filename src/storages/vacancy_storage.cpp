@@ -1,5 +1,8 @@
 #include "vacancy_storage.hpp"
 
+#include <cstddef>
+#include <vector>
+
 #include "components/internview_component.hpp"
 #include "models/vacancy.hpp"
 #include "userver/formats/json/inline.hpp"
@@ -32,6 +35,17 @@ internview::models::Vacancy VacancyStorage::CreateVacancy(const dto::vacancy::Cr
             "message", "Title: " + dto.title + " has already taken, rename vacancy"));
     }
     return pg_res.AsSingleRow<models::Vacancy>(userver::storages::postgres::kRowTag);
+}
+
+std::vector<internview::models::Vacancy> VacancyStorage::GetVacancies(int limit, int offset) {
+    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+                                       vacancy_storage_queries::sql::kGetVacancies, limit, offset);
+    std::vector<models::Vacancy> vec;
+    vec.reserve(pg_res.Size());
+    for (const auto& row : pg_res) {
+        vec.push_back(row.As<models::Vacancy>(userver::v3_1::storages::postgres::kRowTag));
+    }
+    return vec;
 }
 
 }  // namespace internview::storages
