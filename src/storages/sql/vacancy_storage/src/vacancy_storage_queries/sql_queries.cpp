@@ -9,8 +9,6 @@ const USERVER_NAMESPACE::storages::Query kCreateVacancy = {
 R"-(
 INSERT INTO internview_schema.vacancies(id, recruiter_id, title, description, requirements, salary_range, location, work_mode, experience_level)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-ON CONFLICT
-    DO NOTHING
 RETURNING
     *;
 
@@ -80,6 +78,35 @@ WHERE
 
 )-",
     USERVER_NAMESPACE::storages::Query::NameLiteral("get_vacancy_by_id"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
+
+
+// Generated from update_vacancy.sql
+const USERVER_NAMESPACE::storages::Query kUpdateVacancy = {
+R"-(
+-- Update rows in 'internview_schema.vacancies' where condition is met
+UPDATE
+    internview_schema.vacancies
+SET
+    title = $2,
+    description = $3,
+    requirements = $4,
+    salary_range = $5,
+    location = $6,
+    work_mode = $7,
+    experience_level = $8,
+    updated_at = NOW()
+WHERE
+    id = $1
+RETURNING
+    id;
+
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("update_vacancy"),
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 

@@ -40,7 +40,7 @@ inline auto Serialize(const Vacancy& vacancy,
     builder["description"] = vacancy.description;
     builder["requirements"] = vacancy.requirements;
     builder["salary_range"] = vacancy.salary_range;
-    builder["location"] = vacancy.salary_range;
+    builder["location"] = vacancy.location;
     builder["work_mode"] = vacancy.work_mode;
     builder["experience_level"] = vacancy.experience_level;
     builder["is_active"] = vacancy.is_active;

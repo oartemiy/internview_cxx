@@ -30,6 +30,7 @@
 #include "handlers/vacancy/handler_vacancies_get.hpp"
 #include "handlers/vacancy/handler_vacancies_get_by_id.hpp"
 #include "handlers/vacancy/handler_vacancies_get_me.hpp"
+#include "handlers/vacancy/handler_vacancies_update_id.hpp"
 #include "handlers/vacancy/handler_vacancy_post.hpp"
 #include "userver/storages/secdist/provider_component.hpp"
 
@@ -74,7 +75,8 @@ int main(int argc, char* argv[]) {
             .Append<internview::handlers::HandlerVacancyPost>()
             .Append<internview::handlers::HandlerVacanciesGet>()
             .Append<internview::handlers::HandlerVacanciesGetMe>()
-            .Append<internview::handlers::HandlerVacanciesGetById>();
+            .Append<internview::handlers::HandlerVacanciesGetById>()
+            .Append<internview::handlers::HandlerVacancyUpdate>();
 
     return userver::utils::DaemonMain(argc, argv, component_list);
 }

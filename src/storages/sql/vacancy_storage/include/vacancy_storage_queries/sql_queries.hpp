@@ -22,4 +22,8 @@ extern const USERVER_NAMESPACE::storages::Query kGetVacancies;
 // Generated from get_vacancy_by_id.sql
 extern const USERVER_NAMESPACE::storages::Query kGetVacancyById;
 
+
+// Generated from update_vacancy.sql
+extern const USERVER_NAMESPACE::storages::Query kUpdateVacancy;
+
 }  // namespace vacancy_storage_queries::sql

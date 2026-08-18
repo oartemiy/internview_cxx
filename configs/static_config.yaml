@@ -177,3 +177,8 @@ components_manager:
             path: /vacancies/{id}
             method: GET
             task_processor: main-task-processor
+        
+        handler-vacancies-update-id:
+            path: /vacancies/{id}
+            method: PATCH
+            task_processor: main-task-processor

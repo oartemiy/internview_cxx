@@ -17,6 +17,7 @@
 #include "userver/engine/async.hpp"
 #include "userver/storages/postgres/cluster_types.hpp"
 #include "userver/storages/postgres/component.hpp"
+#include "userver/storages/postgres/exceptions.hpp"
 #include "userver/storages/postgres/io/row_types.hpp"
 #include "userver/utils/boost_uuid7.hpp"
 #include "userver/utils/uuid4.hpp"
@@ -59,24 +60,26 @@ dto::user::ResponseDTO UserStorage::CreateUser(const internview::dto::user::Crea
     if (password_hash.empty()) {
         throw std::runtime_error("Sodium error");
     }
-    auto pg_res =
-        pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
-                             user_storage_queries::sql::kCreateUser, id, dto.login, password_hash,
-                             dto.name, dto.role, dto.description, dto.profile_pic);
+    try {
+        auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+                                           user_storage_queries::sql::kCreateUser, id, dto.login,
+                                           password_hash, dto.name, dto.role, dto.description,
+                                           dto.profile_pic);
 
-    if (pg_res.IsEmpty()) {
+        auto resp_dto =
+            dto::user::ResponseDTO{id,
+                                   dto.login,
+                                   dto.name,
+                                   dto.role,
+                                   dto.description,
+                                   dto.profile_pic,
+                                   pg_res[0][0].As<std::chrono::system_clock::time_point>(),
+                                   auth_service_ptr_->GenerateJwtToken(id, dto.role)};
+        return resp_dto;
+    } catch (userver::storages::postgres::UniqueViolation& e) {
         throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
             "message", "Login: " + dto.login + " is taken. Try another one"));
     }
-    auto resp_dto = dto::user::ResponseDTO{id,
-                                           dto.login,
-                                           dto.name,
-                                           dto.role,
-                                           dto.description,
-                                           dto.profile_pic,
-                                           pg_res[0][0].As<std::chrono::system_clock::time_point>(),
-                                           auth_service_ptr_->GenerateJwtToken(id, dto.role)};
-    return resp_dto;
 }
 
 dto::user::ResponseDTO UserStorage::UpdateUser(const internview::dto::user::UpdateDTO& dto) {
@@ -105,19 +108,21 @@ dto::user::ResponseDTO UserStorage::UpdateUser(const internview::dto::user::Upda
         throw userver::server::handlers::ClientError(
             userver::formats::json::MakeObject("message", "Login must be at least 2 chars"));
     }
-    if (profile_pic == std::nullopt && user.profile_pic != std::nullopt) {
-        file_service_.DeleteFile(services::FileService::img_folder + *user.profile_pic);
-    }
-    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
-                                       user_storage_queries::sql::kUpdateUser, login, name,
-                                       description, profile_pic, dto.id);
-    if (pg_res.IsEmpty()) {
+    try {
+        auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+                                           user_storage_queries::sql::kUpdateUser, login, name,
+                                           description, profile_pic, dto.id);
+        if (profile_pic == std::nullopt && user.profile_pic != std::nullopt) {
+            file_service_.DeleteFile(services::FileService::img_folder + *user.profile_pic);
+        }
+        auto resp_dto = dto::user::ResponseDTO{dto.id,          login,       name,
+                                               user.role,       description, profile_pic,
+                                               user.created_at, std::nullopt};
+        return resp_dto;
+    } catch (userver::storages::postgres::UniqueViolation& e) {
         throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
             "message", "Login: " + login + " has already taken"));
     }
-    auto resp_dto = dto::user::ResponseDTO{
-        dto.id, login, name, user.role, description, profile_pic, user.created_at, std::nullopt};
-    return resp_dto;
 }
 
 void UserStorage::DeleteUser(const internview::dto::user::DeleteDTO& dto) {
@@ -132,11 +137,12 @@ void UserStorage::DeleteUser(const internview::dto::user::DeleteDTO& dto) {
         throw userver::server::handlers::ClientError(
             userver::formats::json::MakeObject("message", "Password is incorrect"));
     }
+
+    auto res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+                                    user_storage_queries::sql::kDeleteUser, dto.id);
     if (user.profile_pic != std::nullopt) {
         file_service_.DeleteFile(services::FileService::img_folder + *user.profile_pic);
     }
-    auto res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
-                                    user_storage_queries::sql::kDeleteUser, dto.id);
     if (res.IsEmpty()) {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
             "message", "User with login: " + dto.login + " not found"));

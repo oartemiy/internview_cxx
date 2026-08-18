@@ -54,6 +54,15 @@ public:
     std::vector<internview::models::Vacancy> GetRecruiterVacancies(
         const boost::uuids::uuid& recruiter_id);
 
+
+    /**
+     * @brief Update the Vacancy
+     * 
+     * @param dto 
+     * @return internview::models::Vacancy 
+     */
+    internview::models::Vacancy UpdateVacancy(const dto::vacancy::UpdateDTO& dto);
+
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;
     std::shared_ptr<internview::services::AuthService> auth_service_ptr_;

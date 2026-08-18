@@ -17,6 +17,7 @@
 #include "userver/server/handlers/exceptions.hpp"
 #include "userver/storages/postgres/cluster_types.hpp"
 #include "userver/storages/postgres/component.hpp"
+#include "userver/storages/postgres/exceptions.hpp"
 #include "userver/storages/postgres/io/row_types.hpp"
 #include "userver/utils/boost_uuid7.hpp"
 #include "userver/utils/uuid4.hpp"
@@ -34,17 +35,18 @@ CvStorage::CvStorage(std::shared_ptr<services::AuthService> auth_service_ptr,
 
 dto::cv::ResponseDTO CvStorage::CreateCv(const dto::cv::CreateDTO& dto) const {
     auto id = userver::utils::generators::GenerateBoostUuidV7();
-    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
-                                       cv_storage_queries::sql::kCreateCv, id, dto.user_id,
-                                       dto.title, dto.description, dto.cv_pdf);
-    if (pg_res.IsEmpty()) {
+    try {
+        auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+                                           cv_storage_queries::sql::kCreateCv, id, dto.user_id,
+                                           dto.title, dto.description, dto.cv_pdf);
+        auto created_at = pg_res[0][0].As<std::chrono::system_clock::time_point>();
+        dto::cv::ResponseDTO resp_dto = {id,         dto.user_id, dto.title, dto.description,
+                                         dto.cv_pdf, created_at,  created_at};
+        return resp_dto;
+    } catch (userver::storages::postgres::UniqueViolation& e) {
         throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
             "message", "Title: " + dto.title + " has already taken, rename cv"));
     }
-    auto created_at = pg_res[0][0].As<std::chrono::system_clock::time_point>();
-    dto::cv::ResponseDTO resp_dto = {id,         dto.user_id, dto.title, dto.description,
-                                     dto.cv_pdf, created_at,  created_at};
-    return resp_dto;
 }
 
 std::vector<internview::models::CV> CvStorage::GetUserCvs(const boost::uuids::uuid& user_id) const {
@@ -97,28 +99,29 @@ internview::dto::cv::ResponseDTO CvStorage::UpdateCv(const internview::dto::cv::
             userver::formats::json::MakeObject("message", "Title must be at least 2 chars"));
     }
 
-    if (cv_pdf == std::nullopt && cv_model.cv_pdf != std::nullopt) {
-        file_service_.DeleteFile(services::FileService::pdf_folder + *cv_model.cv_pdf);
-    }
-
-    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
-                                       cv_storage_queries::sql::kUpdateCv, dto.id, dto.user_id,
-                                       title, description, cv_pdf);
-    if (pg_res.IsEmpty()) {
+    try {
+        auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+                                           cv_storage_queries::sql::kUpdateCv, dto.id,
+                                           title, description, cv_pdf);
+        if (cv_pdf == std::nullopt && cv_model.cv_pdf != std::nullopt) {
+            file_service_.DeleteFile(services::FileService::pdf_folder + *cv_model.cv_pdf);
+        }
+        auto updated_at = pg_res[0][0].As<std::chrono::system_clock::time_point>();
+        return {dto.id, dto.user_id, title, description, cv_pdf, cv_model.created_at, updated_at};
+    } catch (userver::storages::postgres::UniqueViolation& e) {
         throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
             "message", "Cv may not exists or title has already taken in user's cvs"));
     }
-    auto updated_at = pg_res[0][0].As<std::chrono::system_clock::time_point>();
-    return {dto.id, dto.user_id, title, description, cv_pdf, cv_model.created_at, updated_at};
 }
 
 void CvStorage::DeleteCv(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id) {
     auto cv_model = GetCvById(id, user_id);
+
+    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+                                       cv_storage_queries::sql::kDeleteCv, id, user_id);
     if (cv_model.cv_pdf != std::nullopt) {
         file_service_.DeleteFile(services::FileService::pdf_folder + *cv_model.cv_pdf);
     }
-    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
-                                       cv_storage_queries::sql::kDeleteCv, id, user_id);
     if (pg_res.IsEmpty()) {
         throw userver::server::handlers::ClientError(
             userver::formats::json::MakeObject("message", "invalid id or user_id"));
