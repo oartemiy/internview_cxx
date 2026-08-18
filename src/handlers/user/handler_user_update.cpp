@@ -30,7 +30,7 @@ Value HandlerUserUpdate::HandleRequestJsonThrow(const HttpRequest& request,
 
     if (dto.login == "me") {
         throw userver::server::handlers::ClientError(
-            MakeObject("error", "login: me can not be taken"));
+            MakeObject("message", "login: me can not be taken"));
     }
     auto res = user_storage_ptr_->UpdateUser(dto);
     return ValueBuilder(res).ExtractValue();

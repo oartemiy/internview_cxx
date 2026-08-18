@@ -17,6 +17,12 @@ Value HandlerCvGetById::HandleRequestJsonThrow(const HttpRequest& request,
     auto id = request.GetPathArg("id");
     auto auth_header = request.GetHeader("Authorization");
     auto auth_res = auth_service_ptr_->CheckAuthorization(auth_header);
+
+    // TODO: temporary solution. Later: add check for application
+    if (auth_res.role != "intern") {
+        throw ClientError(MakeObject("message", "invalid role for this action"));
+    }
+
     auto resp_model =
         cv_storage_ptr_->GetCvById(boost::uuids::uuid_from_string(id), auth_res.user_id);
     return ValueBuilder(resp_model).ExtractValue();

@@ -18,6 +18,10 @@ Value HandlerCvGet::HandleRequestJsonThrow(const HttpRequest& request,
     auto auth_header = request.GetHeader("Authorization");
     auto auth_res = auth_service_ptr_->CheckAuthorization(auth_header);
 
+    if (auth_res.role != "intern") {
+        throw ClientError(MakeObject("message", "invalid role for this action"));
+    }
+    
     auto resp_vec = cv_storage_ptr_->GetUserCvs(auth_res.user_id);
     // TODO: optimize with capacity reserving
     return ValueBuilder(resp_vec).ExtractValue();

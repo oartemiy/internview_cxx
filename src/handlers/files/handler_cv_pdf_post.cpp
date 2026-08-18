@@ -18,6 +18,11 @@ std::string HandlerCvPdfPost::HandleRequest(HttpRequest& request,
     auto id = boost::uuids::uuid_from_string(request.GetPathArg("id"));
     auto auth_header = request.GetHeader("Authorization");
     auto auth_res = auth_service_ptr_->CheckAuthorization(auth_header);
+
+    if (auth_res.role != "intern") {
+        throw ClientError(MakeObject("message", "invalid role for this action"));
+    }
+
     const auto& file_data = request.GetFormDataArg("file");
     if (file_data.filename->empty()) {
         request.SetResponseStatus(userver::server::http::HttpStatus::BadRequest);

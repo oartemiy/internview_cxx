@@ -29,6 +29,9 @@
 #include "handlers/user/handler_user_update.hpp"
 #include "userver/storages/secdist/provider_component.hpp"
 
+// TODO: Add cv and vacancy deletion when user deletion
+// TODO: add handeler /users/{id}/profile-pic for recruters
+
 int main(int argc, char* argv[]) {
     auto component_list =
         userver::components::MinimalServerComponentList()

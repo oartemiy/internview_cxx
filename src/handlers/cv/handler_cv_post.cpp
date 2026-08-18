@@ -14,8 +14,12 @@ Value HandlerCvPost::HandleRequestJsonThrow(const HttpRequest& request, const Va
     auto dto = request_json.As<internview::dto::cv::CreateDTO>();
     auto auth_header = request.GetHeader("Authorization");
     auto auth_res = auth_service_ptr_->CheckAuthorization(auth_header);
-    dto.user_id = auth_res.user_id;
 
+    if (auth_res.role != "intern") {
+        throw ClientError(MakeObject("message", "invalid role for this action"));
+    }
+
+    dto.user_id = auth_res.user_id;
     auto res = cv_storage_ptr_->CreateCv(dto);
 
     return ValueBuilder(res).ExtractValue();

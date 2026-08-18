@@ -19,13 +19,16 @@ Value HandlerAuthRegisterPost::HandleRequestJsonThrow(
     [[maybe_unused]] const HttpRequest& request, const Value& request_json,
     [[maybe_unused]] RequestContext& context) const {
     dto::user::CreateDTO dto = request_json.As<dto::user::CreateDTO>();
+    if (dto.role != "intern" && dto.role != "recruiter") {
+        throw userver::server::handlers::ClientError(MakeObject("message", "available roles: intern, recruiter"));
+    }
     if (dto.login == "me") {
         throw userver::server::handlers::ClientError(
-            MakeObject("error", "login: me can not be taken"));
+            MakeObject("message", "login: me can not be taken"));
     }
     if (dto.password.length() <= 1) {
         throw userver::server::handlers::ClientError(
-            MakeObject("error", "password must be at least 2 chars"));
+            MakeObject("message", "password must be at least 2 chars"));
     }
     auto res = user_storage_ptr_->CreateUser(dto);
     return ValueBuilder(res).ExtractValue();

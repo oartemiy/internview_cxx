@@ -23,6 +23,11 @@ Value HandlerCvUpdate::HandleRequestJsonThrow(const HttpRequest& request, const 
     }
     auto auth_path = request.GetHeader("Authorization");
     auto auth_res = auth_service_ptr_->CheckAuthorization(auth_path);
+
+    if (auth_res.role != "intern") {
+        throw ClientError(MakeObject("message", "invalid role for this action"));
+    }
+
     auto dto = request_json.As<dto::cv::UpdateDTO>();
     auto id = request.GetPathArg("id");
     dto.user_id = auth_res.user_id;

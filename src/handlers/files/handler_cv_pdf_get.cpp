@@ -19,6 +19,10 @@ std::string HandlerCvPdfGet::HandleRequestThrow(const HttpRequest& request,
     auto auth_header = request.GetHeader("Authorization");
     auto auth_res = auth_service_ptr_->CheckAuthorization(auth_header);
 
+    // TODO: temporary solution. Later: add check for application
+    if (auth_res.role != "intern") {
+        throw ClientError(MakeObject("message", "invalid role for this action"));
+    }
     auto opt = cv_storage_ptr_->GetCvPdf(id, auth_res.user_id);
 
     if (!opt) {
