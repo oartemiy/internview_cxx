@@ -11,4 +11,7 @@ def sql_files() -> set:
     
         # Generated from get_vacancies.sql
         "get_vacancies",
+    
+        # Generated from get_vacancy_by_id.sql
+        "get_vacancy_by_id",
     ])

@@ -44,4 +44,24 @@ LIMIT $1 OFFSET $2;
 };
 
 
+
+
+// Generated from get_vacancy_by_id.sql
+const USERVER_NAMESPACE::storages::Query kGetVacancyById = {
+R"-(
+-- Select all rows from 'internview_schema.vacancies'
+SELECT
+    *
+FROM
+    internview_schema.vacancies
+WHERE
+    id = $1;
+
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("get_vacancy_by_id"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
 }  // namespace vacancy_storage_queries::sql

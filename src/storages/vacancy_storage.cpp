@@ -11,6 +11,7 @@
 #include "userver/storages/postgres/component.hpp"
 #include "userver/storages/postgres/io/row_types.hpp"
 #include "userver/utils/boost_uuid7.hpp"
+#include "utils/common_handler.hpp"
 #include "vacancy_storage_queries/sql_queries.hpp"
 
 namespace internview::storages {
@@ -46,6 +47,19 @@ std::vector<internview::models::Vacancy> VacancyStorage::GetVacancies(int limit,
         vec.push_back(row.As<models::Vacancy>(userver::v3_1::storages::postgres::kRowTag));
     }
     return vec;
+}
+
+internview::models::Vacancy VacancyStorage::GetVacancyById(const boost::uuids::uuid& id) {
+    auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+                                       vacancy_storage_queries::sql::kGetVacancyById, id);
+
+    if (pg_res.IsEmpty()) {
+        throw userver::server::handlers::ClientError(handlers::MakeObject(
+            "message", "Vacancy with id: " + boost::uuids::to_string(id) + " does not exists"));
+    }
+    auto vacancy = pg_res.AsSingleRow<models::Vacancy>(userver::v3_1::storages::postgres::kRowTag);
+
+    return vacancy;
 }
 
 }  // namespace internview::storages

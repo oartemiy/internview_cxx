@@ -27,7 +27,22 @@ public:
      */
     internview::models::Vacancy CreateVacancy(const dto::vacancy::CreateDTO& dto);
 
+    /**
+     * @brief Get the Vacancies object
+     * 
+     * @param limit 
+     * @param offset 
+     * @return std::vector<internview::models::Vacancy> 
+     */
     std::vector<internview::models::Vacancy> GetVacancies(int limit, int offset);
+
+    /**
+     * @brief Get the Vacancy By Id object
+     * 
+     * @param id 
+     * @return internview::models::Vacancy 
+     */
+    internview::models::Vacancy GetVacancyById(const boost::uuids::uuid& id);
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;
