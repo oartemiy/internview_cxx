@@ -21,7 +21,6 @@ CREATE TABLE IF NOT EXISTS internview_schema.cvs(
     cv_pdf text,
     created_at timestamptz DEFAULT NOW(),
     updated_at timestamptz DEFAULT NOW(),
-    -- CONSTRAINT fk_cv_user FOREIGN KEY (user_id) REFERENCES internview_schema.users(id) ON DELETE CASCADE,
     CONSTRAINT cv_user_title_unique UNIQUE (user_id, title)
 );
 
@@ -35,10 +34,9 @@ CREATE TABLE IF NOT EXISTS internview_schema.vacancies(
     location text,
     work_mode text,
     experience_level text,
-    is_active boolean DEFAULT TRUE,
+    is_active boolean NOT NULL DEFAULT TRUE,
     created_at timestamptz DEFAULT NOW(),
     updated_at timestamptz DEFAULT NOW(),
-    -- CONSTRAINT fk_vacancy_user FOREIGN KEY (recruiter_id) REFERENCES internview_schema.users(id) ON DELETE CASCADE,
     CONSTRAINT vacancy_recruiter_title_unique UNIQUE (recruiter_id, title)
 );
 

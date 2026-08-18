@@ -27,6 +27,7 @@
 #include "handlers/user/handler_user_delete.hpp"
 #include "handlers/user/handler_user_get.hpp"
 #include "handlers/user/handler_user_update.hpp"
+#include "handlers/vacancy/handler_vacancy_post.hpp"
 #include "userver/storages/secdist/provider_component.hpp"
 
 // TODO: Add cv and vacancy deletion when user deletion
@@ -64,9 +65,10 @@ int main(int argc, char* argv[]) {
             .Append<internview::handlers::HandlerCvGetById>()
             .Append<internview::handlers::HandlerCvUpdate>()
             .Append<internview::handlers::HandlerCvDelete>()
-
             .Append<internview::handlers::HandlerCvPdfGet>()
-            .Append<internview::handlers::HandlerCvPdfPost>();
+            .Append<internview::handlers::HandlerCvPdfPost>()
+
+            .Append<internview::handlers::HandlerVacancyPost>();
 
     return userver::utils::DaemonMain(argc, argv, component_list);
 }

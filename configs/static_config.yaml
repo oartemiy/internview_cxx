@@ -157,3 +157,8 @@ components_manager:
             path: /cvs/{id}/pdf
             method: GET
             task_processor: main-task-processor
+
+        handler-vacancy-post:
+            path: /vacancies
+            method: POST
+            task_processor: main-task-processor
