@@ -47,19 +47,18 @@ public:
 
     /**
      * @brief Get the Recruiter Vacancies objects
-     * 
-     * @param recruiter_id 
-     * @return std::vector<internview::models::Vacancy> 
+     *
+     * @param recruiter_id
+     * @return std::vector<internview::models::Vacancy>
      */
     std::vector<internview::models::Vacancy> GetRecruiterVacancies(
         const boost::uuids::uuid& recruiter_id);
 
-
     /**
      * @brief Update the Vacancy
-     * 
-     * @param dto 
-     * @return internview::models::Vacancy 
+     *
+     * @param dto
+     * @return internview::models::Vacancy
      */
     internview::models::Vacancy UpdateVacancy(const dto::vacancy::UpdateDTO& dto);
 

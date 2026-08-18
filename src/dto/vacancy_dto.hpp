@@ -42,7 +42,7 @@ inline auto Parse(const userver::formats::json::Value& json,
 
 struct UpdateDTO {
     boost::uuids::uuid id;
-    
+
     bool has_title_in_request_json = false;
     bool has_description_in_request_json = false;
     bool has_requirements_in_request_json = false;

@@ -88,26 +88,39 @@ internview::models::Vacancy VacancyStorage::UpdateVacancy(const dto::vacancy::Up
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
             "message", "Empty request data body. Nothing to update"));
     }
-    if (dto.has_title_in_request_json) {
+    int count_changes = 0;
+    if (dto.has_title_in_request_json && model.title != dto.title) {
         model.title = dto.title;
+        ++count_changes;
     }
-    if (dto.has_description_in_request_json) {
+    if (dto.has_description_in_request_json && model.description != dto.description) {
         model.description = dto.description;
+        ++count_changes;
     }
-    if (dto.has_experience_level_in_request_json) {
+    if (dto.has_experience_level_in_request_json &&
+        model.experience_level != dto.experience_level) {
         model.experience_level = dto.experience_level;
+        ++count_changes;
     }
-    if (dto.has_location_in_request_json) {
+    if (dto.has_location_in_request_json && model.location != dto.location) {
         model.location = dto.location;
+        ++count_changes;
     }
-    if (dto.has_requirements_in_request_json) {
+    if (dto.has_requirements_in_request_json && model.requirements != dto.requirements) {
         model.requirements = dto.requirements;
+        ++count_changes;
     }
-    if (dto.has_work_mode_in_request_json) {
+    if (dto.has_work_mode_in_request_json && model.work_mode != dto.work_mode) {
         model.work_mode = dto.work_mode;
+        ++count_changes;
     }
-    if (dto.has_salary_range_in_request_json) {
+    if (dto.has_salary_range_in_request_json && model.salary_range != dto.salary_range) {
         model.salary_range = dto.salary_range;
+        ++count_changes;
+    }
+    if (count_changes == 0) {
+        throw userver::server::handlers::ClientError(
+            userver::formats::json::MakeObject("message", "Nothing to update"));
     }
     try {
         auto pg_res =

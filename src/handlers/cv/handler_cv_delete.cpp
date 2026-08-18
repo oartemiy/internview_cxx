@@ -23,7 +23,7 @@ Value HandlerCvDelete::HandleRequestJsonThrow(const HttpRequest& request,
     if (auth_res.role != "intern") {
         throw ClientError(MakeObject("message", "invalid role for this action"));
     }
-    
+
     auto id = boost::uuids::uuid_from_string(request.GetPathArg("id"));
     cv_storage_ptr_->DeleteCv(id, auth_res.user_id);
     return MakeObject("status", "success", "deleted cv", request.GetPathArg("id"));

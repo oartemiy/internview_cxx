@@ -80,34 +80,41 @@ internview::dto::cv::ResponseDTO CvStorage::UpdateCv(const internview::dto::cv::
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
             "message", "Empty request data body. Nothing to update"));
     }
-    auto cv_model = GetCvById(dto.id, dto.user_id);
-    std::string title = cv_model.title;
-    std::optional<std::string> description = cv_model.description;
-    std::optional<std::string> cv_pdf = cv_model.cv_pdf;
+    auto model = GetCvById(dto.id, dto.user_id);
+    auto old_cv_pdf = model.cv_pdf;
+    int count_changes = 0;
 
-    if (dto.has_title_in_request) {
-        title = dto.title;
+    if (dto.has_title_in_request && model.title != dto.title) {
+        model.title = dto.title;
+        ++count_changes;
     }
-    if (dto.has_description_in_request) {
-        description = dto.description;
+    if (dto.has_description_in_request && model.description != dto.description) {
+        model.description = dto.description;
+        ++count_changes;
     }
-    if (dto.has_cv_pdf_in_request) {
-        cv_pdf = dto.cv_pdf;
+    if (dto.has_cv_pdf_in_request && model.cv_pdf != dto.cv_pdf) {
+        model.cv_pdf = dto.cv_pdf;
+        ++count_changes;
     }
-    if (title.length() <= 1) {
+    if (count_changes == 0) {
+        throw userver::server::handlers::ClientError(
+            userver::formats::json::MakeObject("message", "Nothing to update"));
+    }
+    if (model.title.length() <= 1) {
         throw userver::server::handlers::ClientError(
             userver::formats::json::MakeObject("message", "Title must be at least 2 chars"));
     }
 
     try {
         auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
-                                           cv_storage_queries::sql::kUpdateCv, dto.id,
-                                           title, description, cv_pdf);
-        if (cv_pdf == std::nullopt && cv_model.cv_pdf != std::nullopt) {
-            file_service_.DeleteFile(services::FileService::pdf_folder + *cv_model.cv_pdf);
+                                           cv_storage_queries::sql::kUpdateCv, dto.id, model.title,
+                                           model.description, model.cv_pdf);
+        if (old_cv_pdf != std::nullopt && model.cv_pdf == std::nullopt) {
+            file_service_.DeleteFile(services::FileService::pdf_folder + *old_cv_pdf);
         }
         auto updated_at = pg_res[0][0].As<std::chrono::system_clock::time_point>();
-        return {dto.id, dto.user_id, title, description, cv_pdf, cv_model.created_at, updated_at};
+        return {dto.id,       dto.user_id,      model.title, model.description,
+                model.cv_pdf, model.created_at, updated_at};
     } catch (userver::storages::postgres::UniqueViolation& e) {
         throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
             "message", "Cv may not exists or title has already taken in user's cvs"));

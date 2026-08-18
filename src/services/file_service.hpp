@@ -36,8 +36,8 @@ public:
 
     /**
      * @brief Deleting file from disk
-     * 
-     * @param path 
+     *
+     * @param path
      */
     void DeleteFile(const std::string& path);
 

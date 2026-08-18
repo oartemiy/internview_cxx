@@ -88,40 +88,49 @@ dto::user::ResponseDTO UserStorage::UpdateUser(const internview::dto::user::Upda
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
             "message", "Empty request data body. Nothing to update"));
     }
-    auto user = GetUserById(dto.id);
-    std::string login = user.login, name = user.name;
-    std::optional<std::string> description = user.description, profile_pic = user.profile_pic;
-
-    if (dto.has_login_in_request) {
-        login = dto.login;
+    auto model = GetUserById(dto.id);
+    auto old_profile_pic = model.profile_pic;
+    int count_changes = 0;
+    if (dto.has_login_in_request && model.login != dto.login) {
+        model.login = dto.login;
+        ++count_changes;
     }
-    if (dto.has_name_in_request) {
-        name = dto.name;
+    if (dto.has_name_in_request && model.name != dto.name) {
+        model.name = dto.name;
+        ++count_changes;
     }
-    if (dto.has_description_in_request) {
-        description = dto.description;
+    if (dto.has_description_in_request && model.description != dto.description) {
+        model.description = dto.description;
+        ++count_changes;
     }
-    if (dto.has_profile_pic_in_request) {
-        profile_pic = dto.profile_pic;
+    if (dto.has_profile_pic_in_request && model.profile_pic != dto.profile_pic) {
+        model.profile_pic = dto.profile_pic;
+        ++count_changes;
     }
-    if (login.length() <= 1) {
+    if (count_changes == 0) {
+        throw userver::server::handlers::ClientError(
+            userver::formats::json::MakeObject("message", "Nothing to update"));
+    }
+    if (model.login.length() <= 1) {
         throw userver::server::handlers::ClientError(
             userver::formats::json::MakeObject("message", "Login must be at least 2 chars"));
     }
     try {
-        auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
-                                           user_storage_queries::sql::kUpdateUser, login, name,
-                                           description, profile_pic, dto.id);
-        if (profile_pic == std::nullopt && user.profile_pic != std::nullopt) {
-            file_service_.DeleteFile(services::FileService::img_folder + *user.profile_pic);
+        auto pg_res =
+            pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+                                 user_storage_queries::sql::kUpdateUser, model.login, model.name,
+                                 model.description, model.profile_pic, dto.id);
+        if (old_profile_pic != std::nullopt && model.profile_pic == std::nullopt) {
+            file_service_.DeleteFile(services::FileService::img_folder + *old_profile_pic);
         }
-        auto resp_dto = dto::user::ResponseDTO{dto.id,          login,       name,
-                                               user.role,       description, profile_pic,
-                                               user.created_at, std::nullopt};
+        auto resp_dto =
+            dto::user::ResponseDTO{dto.id,           model.login,       model.name,
+                                   model.role,       model.description, model.profile_pic,
+                                   model.created_at, std::nullopt};
         return resp_dto;
     } catch (userver::storages::postgres::UniqueViolation& e) {
         throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
-            "message", "Login: " + login + " has already taken"));
+            "message", "Login: " + model.login + " has already taken"));
     }
 }
 

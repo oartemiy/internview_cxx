@@ -20,7 +20,8 @@ Value HandlerAuthRegisterPost::HandleRequestJsonThrow(
     [[maybe_unused]] RequestContext& context) const {
     dto::user::CreateDTO dto = request_json.As<dto::user::CreateDTO>();
     if (dto.role != "intern" && dto.role != "recruiter") {
-        throw userver::server::handlers::ClientError(MakeObject("message", "available roles: intern, recruiter"));
+        throw userver::server::handlers::ClientError(
+            MakeObject("message", "available roles: intern, recruiter"));
     }
     if (dto.login == "me") {
         throw userver::server::handlers::ClientError(

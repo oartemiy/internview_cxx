@@ -11,7 +11,8 @@ namespace internview::handlers {
 
 class HandlerVacanciesGetById final : public HttpHandlerJsonBase {
 public:
-    HandlerVacanciesGetById(const ComponentConfig& config, const ComponentContext& component_context);
+    HandlerVacanciesGetById(const ComponentConfig& config,
+                            const ComponentContext& component_context);
 
     static constexpr std::string_view kName = "handler-vacancies-get-by-id";
 

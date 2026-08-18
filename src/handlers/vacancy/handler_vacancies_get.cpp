@@ -1,4 +1,5 @@
 #include "handler_vacancies_get.hpp"
+
 #include <cstddef>
 #include <string>
 
