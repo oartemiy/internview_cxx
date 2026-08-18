@@ -6,7 +6,7 @@ namespace vacancy_storage_queries::sql {
 
 // Generated from create_vacancy.sql
 const USERVER_NAMESPACE::storages::Query kCreateVacancy = {
-    R"-(
+R"-(
 INSERT INTO internview_schema.vacancies(id, recruiter_id, title, description, requirements, salary_range, location, work_mode, experience_level)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 RETURNING
@@ -18,9 +18,29 @@ RETURNING
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
+
+
+
+// Generated from delete_vacancy.sql
+const USERVER_NAMESPACE::storages::Query kDeleteVacancy = {
+R"-(
+DELETE FROM internview_schema.vacancies
+WHERE id = $1
+    AND recruiter_id = $2
+RETURNING
+    id
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("delete_vacancy"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
+
+
 // Generated from get_recruiter_vacancies.sql
 const USERVER_NAMESPACE::storages::Query kGetRecruiterVacancies = {
-    R"-(
+R"-(
 -- Select all rows from 'internview_schema.vacancies'
 SELECT
     *
@@ -35,9 +55,12 @@ WHERE
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
+
+
+
 // Generated from get_vacancies.sql
 const USERVER_NAMESPACE::storages::Query kGetVacancies = {
-    R"-(
+R"-(
 -- Select all rows from 'internview_schema.vacancies'
 SELECT
     *
@@ -55,9 +78,12 @@ LIMIT $1 OFFSET $2;
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
+
+
+
 // Generated from get_vacancy_by_id.sql
 const USERVER_NAMESPACE::storages::Query kGetVacancyById = {
-    R"-(
+R"-(
 -- Select all rows from 'internview_schema.vacancies'
 SELECT
     *
@@ -72,9 +98,12 @@ WHERE
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
+
+
+
 // Generated from update_vacancy.sql
 const USERVER_NAMESPACE::storages::Query kUpdateVacancy = {
-    R"-(
+R"-(
 -- Update rows in 'internview_schema.vacancies' where condition is met
 UPDATE
     internview_schema.vacancies
@@ -97,5 +126,6 @@ RETURNING
     USERVER_NAMESPACE::storages::Query::NameLiteral("update_vacancy"),
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
+
 
 }  // namespace vacancy_storage_queries::sql

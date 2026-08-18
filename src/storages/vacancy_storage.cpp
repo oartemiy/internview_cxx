@@ -135,4 +135,15 @@ internview::models::Vacancy VacancyStorage::UpdateVacancy(const dto::vacancy::Up
     return model;
 }
 
+void VacancyStorage::DeleteVacancy(const boost::uuids::uuid& id,
+                                   const boost::uuids::uuid& recruiter_id) {
+    auto pg_res =
+        pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+                             vacancy_storage_queries::sql::kDeleteVacancy, id, recruiter_id);
+    if (pg_res.IsEmpty()) {
+        throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
+            "message", "Vacancy with id " + boost::uuids::to_string(id) + " does not exists"));
+    }
+}
+
 }  // namespace internview::storages

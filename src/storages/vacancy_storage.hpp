@@ -62,6 +62,15 @@ public:
      */
     internview::models::Vacancy UpdateVacancy(const dto::vacancy::UpdateDTO& dto);
 
+
+    /**
+     * @brief Delete the Vacancy
+     * 
+     * @param id 
+     * @param recruiter_id 
+     */
+    void DeleteVacancy(const boost::uuids::uuid& id, const boost::uuids::uuid& recruiter_id);
+
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;
     std::shared_ptr<internview::services::AuthService> auth_service_ptr_;

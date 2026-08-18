@@ -27,6 +27,7 @@
 #include "handlers/user/handler_user_delete.hpp"
 #include "handlers/user/handler_user_get.hpp"
 #include "handlers/user/handler_user_update.hpp"
+#include "handlers/vacancy/handler_vacancies_delete.hpp"
 #include "handlers/vacancy/handler_vacancies_get.hpp"
 #include "handlers/vacancy/handler_vacancies_get_by_id.hpp"
 #include "handlers/vacancy/handler_vacancies_get_me.hpp"
@@ -76,7 +77,8 @@ int main(int argc, char* argv[]) {
             .Append<internview::handlers::HandlerVacanciesGet>()
             .Append<internview::handlers::HandlerVacanciesGetMe>()
             .Append<internview::handlers::HandlerVacanciesGetById>()
-            .Append<internview::handlers::HandlerVacancyUpdate>();
+            .Append<internview::handlers::HandlerVacancyUpdate>()
+            .Append<internview::handlers::HandlerVacanciesDelete>();
 
     return userver::utils::DaemonMain(argc, argv, component_list);
 }
