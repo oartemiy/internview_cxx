@@ -72,8 +72,7 @@ internview::models::CV CvStorage::GetCvById(const boost::uuids::uuid& id,
     return models;
 }
 
-internview::dto::cv::ResponseDTO CvStorage::UpdateCv(
-    const internview::dto::cv::UpdateDTO& dto) const {
+internview::dto::cv::ResponseDTO CvStorage::UpdateCv(const internview::dto::cv::UpdateDTO& dto) {
     if (!dto.has_cv_pdf_in_request && !dto.has_description_in_request &&
         !dto.has_title_in_request) {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
@@ -98,6 +97,10 @@ internview::dto::cv::ResponseDTO CvStorage::UpdateCv(
             userver::formats::json::MakeObject("message", "Title must be at least 2 chars"));
     }
 
+    if (cv_pdf == std::nullopt && cv_model.cv_pdf != std::nullopt) {
+        file_service_.DeleteFile(services::FileService::pdf_folder + *cv_model.cv_pdf);
+    }
+
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
                                        cv_storage_queries::sql::kUpdateCv, dto.id, dto.user_id,
                                        title, description, cv_pdf);
@@ -109,7 +112,11 @@ internview::dto::cv::ResponseDTO CvStorage::UpdateCv(
     return {dto.id, dto.user_id, title, description, cv_pdf, cv_model.created_at, updated_at};
 }
 
-void CvStorage::DeleteCv(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id) const {
+void CvStorage::DeleteCv(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id) {
+    auto cv_model = GetCvById(id, user_id);
+    if (cv_model.cv_pdf != std::nullopt) {
+        file_service_.DeleteFile(services::FileService::pdf_folder + *cv_model.cv_pdf);
+    }
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
                                        cv_storage_queries::sql::kDeleteCv, id, user_id);
     if (pg_res.IsEmpty()) {
@@ -126,6 +133,10 @@ void CvStorage::UploadCvPdf(const boost::uuids::uuid& id, const boost::uuids::uu
     if (ext != ".pdf") {
         throw userver::server::handlers::ClientError(
             userver::formats::json::MakeObject("message", "Invalid cv format. Supported: pdf"));
+    }
+    auto cv_model = GetCvById(id, user_id);
+    if (cv_model.cv_pdf != std::nullopt) {
+        file_service_.DeleteFile(services::FileService::pdf_folder + *cv_model.cv_pdf);
     }
     auto pdf_id = userver::utils::generators::GenerateUuid();
     auto full_path = internview::services::FileService::pdf_folder + pdf_id + ext;

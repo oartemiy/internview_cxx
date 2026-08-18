@@ -56,7 +56,7 @@ public:
      * @param dto
      * @return internview::dto::cv::ResponseDTO
      */
-    internview::dto::cv::ResponseDTO UpdateCv(const internview::dto::cv::UpdateDTO& dto) const;
+    internview::dto::cv::ResponseDTO UpdateCv(const internview::dto::cv::UpdateDTO& dto);
 
     /**
      * @brief Delete CV object
@@ -64,7 +64,7 @@ public:
      * @param id
      * @param user_id
      */
-    void DeleteCv(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id) const;
+    void DeleteCv(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id);
 
     /**
      * @brief Upload cv_pdf

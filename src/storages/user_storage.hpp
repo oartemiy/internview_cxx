@@ -50,7 +50,7 @@ public:
      * @throws userver::server::handlers::ConflictError
                userver::server::handlers::ResourceNotFound
      */
-    dto::user::ResponseDTO UpdateUser(const internview::dto::user::UpdateDTO& dto) const;
+    dto::user::ResponseDTO UpdateUser(const internview::dto::user::UpdateDTO& dto);
 
     /**
      * @brief Delete the User object
@@ -59,7 +59,7 @@ public:
      * @throws userver::server::handlers::ClientError
                userver::server::handlers::ResourceNotFound
      */
-    void DeleteUser(const internview::dto::user::DeleteDTO& dto) const;
+    void DeleteUser(const internview::dto::user::DeleteDTO& dto);
 
     /**
      * @brief Login User

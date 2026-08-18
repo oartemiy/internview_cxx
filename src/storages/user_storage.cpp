@@ -79,7 +79,7 @@ dto::user::ResponseDTO UserStorage::CreateUser(const internview::dto::user::Crea
     return resp_dto;
 }
 
-dto::user::ResponseDTO UserStorage::UpdateUser(const internview::dto::user::UpdateDTO& dto) const {
+dto::user::ResponseDTO UserStorage::UpdateUser(const internview::dto::user::UpdateDTO& dto) {
     if (!dto.has_description_in_request && !dto.has_login_in_request && !dto.has_name_in_request &&
         !dto.has_profile_pic_in_request) {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
@@ -105,6 +105,9 @@ dto::user::ResponseDTO UserStorage::UpdateUser(const internview::dto::user::Upda
         throw userver::server::handlers::ClientError(
             userver::formats::json::MakeObject("message", "Login must be at least 2 chars"));
     }
+    if (profile_pic == std::nullopt && user.profile_pic != std::nullopt) {
+        file_service_.DeleteFile(services::FileService::img_folder + *user.profile_pic);
+    }
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
                                        user_storage_queries::sql::kUpdateUser, login, name,
                                        description, profile_pic, dto.id);
@@ -117,7 +120,7 @@ dto::user::ResponseDTO UserStorage::UpdateUser(const internview::dto::user::Upda
     return resp_dto;
 }
 
-void UserStorage::DeleteUser(const internview::dto::user::DeleteDTO& dto) const {
+void UserStorage::DeleteUser(const internview::dto::user::DeleteDTO& dto) {
     auto user = GetUserById(dto.id);
 
     auto verify_res_fut = userver::engine::AsyncNoTracing(crypto_tp_, [&dto, &user] {
@@ -128,6 +131,9 @@ void UserStorage::DeleteUser(const internview::dto::user::DeleteDTO& dto) const 
     if (!verify_res) {
         throw userver::server::handlers::ClientError(
             userver::formats::json::MakeObject("message", "Password is incorrect"));
+    }
+    if (user.profile_pic != std::nullopt) {
+        file_service_.DeleteFile(services::FileService::img_folder + *user.profile_pic);
     }
     auto res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
                                     user_storage_queries::sql::kDeleteUser, dto.id);
@@ -200,6 +206,10 @@ void UserStorage::UploadProfilePic(const boost::uuids::uuid& id,
     if (ext != ".jpg" && ext != ".png" && ext != ".jpeg") {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
             "message", "Invalid image format. Supported: jpeg, jpg, png"));
+    }
+    auto user = GetUserById(id);
+    if (user.profile_pic != std::nullopt) {
+        file_service_.DeleteFile(services::FileService::img_folder + *user.profile_pic);
     }
     auto new_uuid = userver::utils::generators::GenerateUuid();
     auto full_path = file_service_.img_folder + new_uuid + ext;

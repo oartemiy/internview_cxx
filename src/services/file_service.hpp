@@ -34,6 +34,13 @@ public:
      */
     std::string ReadFile(const std::string& path);
 
+    /**
+     * @brief Deleting file from disk
+     * 
+     * @param path 
+     */
+    void DeleteFile(const std::string& path);
+
 private:
     /**
      * @brief Initialize files dirictories

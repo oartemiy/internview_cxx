@@ -27,4 +27,8 @@ std::string FileService::ReadFile(const std::string& path) {
     return userver::fs::ReadFileContents(fs_tp_, path);
 }
 
+void FileService::DeleteFile(const std::string& path) {
+    userver::fs::RemoveSingleFile(fs_tp_, path);
+}
+
 }  // namespace internview::services
