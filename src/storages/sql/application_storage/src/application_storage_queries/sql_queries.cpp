@@ -20,4 +20,44 @@ RETURNING
 };
 
 
+
+
+// Generated from get_interns_applications.sql
+const USERVER_NAMESPACE::storages::Query kGetInternsApplications = {
+R"-(
+-- Select all rows from 'internview_schema.applications'
+SELECT * FROM internview_schema.applications
+WHERE intern_id = $1;
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("get_interns_applications"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
+
+
+// Generated from get_recruiter_applications.sql
+const USERVER_NAMESPACE::storages::Query kGetRecruiterApplications = {
+R"-(
+-- Select all rows from 'internview_schema.applications'
+SELECT
+    *
+FROM
+    internview_schema.applications
+WHERE
+    vacancy_id IN (
+        SELECT
+            id
+        FROM
+            internview_schema.vacancies
+        WHERE
+            recruiter_id = $1);
+
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("get_recruiter_applications"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
 }  // namespace application_storage_queries::sql

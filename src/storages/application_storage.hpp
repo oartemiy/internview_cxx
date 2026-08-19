@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <userver/storages/postgres/cluster.hpp>
 #include <vector>
 
@@ -24,7 +25,21 @@ public:
      */
     models::Application CreateApplication(const dto::application::CreateDTO& dto);
 
+    /**
+     * @brief Get the Interns Applications object
+     * 
+     * @param intern_id 
+     * @return std::vector<models::Application> 
+     */
     std::vector<models::Application> GetInternsApplications(const boost::uuids::uuid& intern_id);
+
+    /**
+     * @brief Get the Recruiter Applications object
+     * 
+     * @param recruiter_id 
+     * @return std::vector<models::Application> 
+     */
+    std::vector<models::Application> GetRecruiterApplications(const boost::uuids::uuid& recruiter_id);
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;

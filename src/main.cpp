@@ -12,6 +12,7 @@
 
 #include "components/internview_component.hpp"
 #include "handlers/application/handler_application_post.hpp"
+#include "handlers/application/handler_applications_get.hpp"
 #include "handlers/auth/handler_auth_change_password_post.hpp"
 #include "handlers/auth/handler_auth_login_post.hpp"
 #include "handlers/auth/handler_auth_register_post.hpp"
@@ -84,7 +85,8 @@ int main(int argc, char* argv[]) {
             .Append<internview::handlers::HandlerVacanciesDelete>()
             .Append<internview::handlers::HandlerVacancyToggle>()
 
-            .Append<internview::handlers::HandlerApplicationPost>();
+            .Append<internview::handlers::HandlerApplicationPost>()
+            .Append<internview::handlers::HandlerApplicationsGet>();
 
     return userver::utils::DaemonMain(argc, argv, component_list);
 }

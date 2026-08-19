@@ -10,4 +10,12 @@ namespace application_storage_queries::sql {
 // Generated from create_application.sql
 extern const USERVER_NAMESPACE::storages::Query kCreateApplication;
 
+
+// Generated from get_interns_applications.sql
+extern const USERVER_NAMESPACE::storages::Query kGetInternsApplications;
+
+
+// Generated from get_recruiter_applications.sql
+extern const USERVER_NAMESPACE::storages::Query kGetRecruiterApplications;
+
 }  // namespace application_storage_queries::sql

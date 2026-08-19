@@ -1,6 +1,7 @@
 #include "application_storage.hpp"
 
 #include <userver/storages/postgres/exceptions.hpp>
+#include <vector>
 
 #include "application_storage_queries/sql_queries.hpp"
 #include "models/application.hpp"
@@ -35,9 +36,35 @@ models::Application ApplicationStorage::CreateApplication(const dto::application
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
             "message", "You have already applied for this vacancy"));
     } catch (userver::storages::postgres::ForeignKeyViolation& e) {
-        throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
-            "message", "This vacancy or cv does not exists"));
+        throw userver::server::handlers::ClientError(
+            userver::formats::json::MakeObject("message", "This vacancy or cv does not exists"));
     }
+}
+
+std::vector<models::Application> ApplicationStorage::GetInternsApplications(
+    const boost::uuids::uuid& intern_id) {
+    auto pg_res =
+        pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+                             application_storage_queries::sql::kGetInternsApplications, intern_id);
+    std::vector<models::Application> vec;
+    vec.reserve(pg_res.Size());
+    for (const auto& row : pg_res) {
+        vec.push_back(row.As<models::Application>(userver::v3_1::storages::postgres::kRowTag));
+    }
+    return vec;
+}
+
+std::vector<models::Application> ApplicationStorage::GetRecruiterApplications(
+    const boost::uuids::uuid& recruiter_id) {
+    auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+                                       application_storage_queries::sql::kGetRecruiterApplications,
+                                       recruiter_id);
+    std::vector<models::Application> vec;
+    vec.reserve(pg_res.Size());
+    for (const auto& row : pg_res) {
+        vec.push_back(row.As<models::Application>(userver::v3_1::storages::postgres::kRowTag));
+    }
+    return vec;
 }
 
 }  // namespace internview::storages

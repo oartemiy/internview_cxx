@@ -197,3 +197,9 @@ components_manager:
             path: /applications
             method: POST
             task_processor: main-task-processor
+
+        handler-applications-get:
+            path: /applications/me
+            method: GET
+            task_processor: main-task-processor
+
