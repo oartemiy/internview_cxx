@@ -11,6 +11,7 @@
 #include <userver/utils/daemon_run.hpp>
 
 #include "components/internview_component.hpp"
+#include "handlers/application/handler_application_post.hpp"
 #include "handlers/auth/handler_auth_change_password_post.hpp"
 #include "handlers/auth/handler_auth_login_post.hpp"
 #include "handlers/auth/handler_auth_register_post.hpp"
@@ -81,7 +82,9 @@ int main(int argc, char* argv[]) {
             .Append<internview::handlers::HandlerVacanciesGetById>()
             .Append<internview::handlers::HandlerVacancyUpdate>()
             .Append<internview::handlers::HandlerVacanciesDelete>()
-            .Append<internview::handlers::HandlerVacancyToggle>();
+            .Append<internview::handlers::HandlerVacancyToggle>()
+
+            .Append<internview::handlers::HandlerApplicationPost>();
 
     return userver::utils::DaemonMain(argc, argv, component_list);
 }

@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "services/auth_service.hpp"
+#include "storages/application_storage.hpp"
 #include "storages/cv_storage.hpp"
 #include "storages/user_storage.hpp"
 #include "storages/vacancy_storage.hpp"
@@ -18,8 +19,10 @@ InternviewComponent::InternviewComponent(const ComponentConfig& config,
           std::make_shared<storages::UserStorage>(auth_service_ptr_, config, component_context)),
       cv_storage_ptr_(
           std::make_shared<storages::CvStorage>(auth_service_ptr_, config, component_context)),
-      vacancy_storage_ptr_(std::make_shared<storages::VacancyStorage>(auth_service_ptr_, config,
-                                                                      component_context)) {
+      vacancy_storage_ptr_(
+          std::make_shared<storages::VacancyStorage>(auth_service_ptr_, config, component_context)),
+      application_storage_ptr_(
+          std::make_shared<storages::ApplicationStorage>(config, component_context)) {
 }
 
 }  // namespace internview::components
