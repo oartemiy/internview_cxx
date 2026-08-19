@@ -11,6 +11,8 @@ HandlerUserDelete::HandlerUserDelete(const ComponentConfig& config,
     : HttpHandlerJsonBase(config, component_context),
       user_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetUserStoragePtr()),
       cv_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetCvStoragePtr()),
+      vacancy_storage_ptr_(
+          component_context.FindComponent<InternviewComponent>().GetVacancyStoragePtr()),
       auth_service_ptr_(
           component_context.FindComponent<InternviewComponent>().GetAuthServicePtr()) {
 }
@@ -30,15 +32,16 @@ Value HandlerUserDelete::HandleRequestJsonThrow(const HttpRequest& request,
         for (const auto& cv : user_cvs) {
             cv_storage_ptr_->DeleteCv(cv.id, cv.user_id);
         }
+        // TODO: delete applications
+        /*
+         */
     }
 
     if (auth_res.role == "recruiter") {
-        /*
-        auto user_vacancies = vacancy_storage_ptr_->GetUserVacancies(user_id);
+        auto user_vacancies = vacancy_storage_ptr_->GetRecruiterVacancies(user_id);
         for (const auto& vacancy : user_vacancies) {
             vacancy_storage_ptr_->DeleteVacancy(vacancy.id, vacancy.recruiter_id);
         }
-        */
     }
 
     // LOG_INFO() << token;
