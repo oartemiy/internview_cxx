@@ -1,6 +1,7 @@
 #pragma once
 
 #include <userver/storages/postgres/cluster.hpp>
+#include <vector>
 
 #include "dto/application_dto.hpp"
 #include "models/application.hpp"
@@ -15,7 +16,15 @@ public:
     ApplicationStorage(const userver::components::ComponentConfig& config,
                        const userver::components::ComponentContext& component_context);
 
+    /**
+     * @brief Create a Application object
+     * 
+     * @param dto 
+     * @return models::Application 
+     */
     models::Application CreateApplication(const dto::application::CreateDTO& dto);
+
+    std::vector<models::Application> GetInternsApplications(const boost::uuids::uuid& intern_id);
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;

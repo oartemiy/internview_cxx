@@ -34,6 +34,9 @@ models::Application ApplicationStorage::CreateApplication(const dto::application
     } catch (userver::storages::postgres::UniqueViolation& e) {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
             "message", "You have already applied for this vacancy"));
+    } catch (userver::storages::postgres::ForeignKeyViolation& e) {
+        throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
+            "message", "This vacancy or cv does not exists"));
     }
 }
 

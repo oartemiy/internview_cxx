@@ -46,6 +46,9 @@ dto::cv::ResponseDTO CvStorage::CreateCv(const dto::cv::CreateDTO& dto) const {
     } catch (userver::storages::postgres::UniqueViolation& e) {
         throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
             "message", "Title: " + dto.title + " has already taken, rename cv"));
+    } catch (userver::storages::postgres::ForeignKeyViolation& e) {
+        throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
+            "message", "This intern does not exists. Check authrization"));
     }
 }
 
@@ -118,6 +121,9 @@ internview::dto::cv::ResponseDTO CvStorage::UpdateCv(const internview::dto::cv::
     } catch (userver::storages::postgres::UniqueViolation& e) {
         throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
             "message", "Cv may not exists or title has already taken in user's cvs"));
+    } catch (userver::storages::postgres::ForeignKeyViolation& e) {
+        throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
+            "message", "This intern does not exists. Check authrization"));
     }
 }
 

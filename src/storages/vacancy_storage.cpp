@@ -39,6 +39,9 @@ internview::models::Vacancy VacancyStorage::CreateVacancy(const dto::vacancy::Cr
     } catch (userver::storages::postgres::UniqueViolation& e) {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
             "message", "You have already taken this title. Use another one"));
+    } catch (userver::storages::postgres::ForeignKeyViolation& e) {
+        throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
+            "message", "This recruiter does not exists. Check authorization"));
     }
 }
 
@@ -131,6 +134,9 @@ internview::models::Vacancy VacancyStorage::UpdateVacancy(const dto::vacancy::Up
     } catch (userver::storages::postgres::UniqueViolation& e) {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
             "message", "You have already taken this title. Use another one"));
+    } catch (userver::storages::postgres::ForeignKeyViolation& e) {
+        throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
+            "message", "This recruiter does not exists. Check authorization"));
     }
     return model;
 }
@@ -148,14 +154,19 @@ void VacancyStorage::DeleteVacancy(const boost::uuids::uuid& id,
 
 internview::models::Vacancy VacancyStorage::ToggleVacancy(const boost::uuids::uuid& id,
                                                           const boost::uuids::uuid& recruiter_id) {
-    auto pg_res =
-        pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
-                             vacancy_storage_queries::sql::kToggleVacancy, id, recruiter_id);
-    if (pg_res.IsEmpty()) {
+    try {
+        auto pg_res =
+            pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+                                 vacancy_storage_queries::sql::kToggleVacancy, id, recruiter_id);
+        if (pg_res.IsEmpty()) {
+            throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
+                "message", "Vacancy with id " + boost::uuids::to_string(id) + " does not exists"));
+        }
+        return pg_res.AsSingleRow<models::Vacancy>(userver::v3_1::storages::postgres::kRowTag);
+    } catch (userver::storages::postgres::ForeignKeyViolation& e) {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
-            "message", "Vacancy with id " + boost::uuids::to_string(id) + " does not exists"));
+            "message", "This recruiter does not exists. Check authorization"));
     }
-    return pg_res.AsSingleRow<models::Vacancy>(userver::v3_1::storages::postgres::kRowTag);
 }
 
 }  // namespace internview::storages
