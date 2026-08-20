@@ -14,4 +14,7 @@ def sql_files() -> set:
     
         # Generated from get_recruiter_applications.sql
         "get_recruiter_applications",
+    
+        # Generated from get_vacancy_applications.sql
+        "get_vacancy_applications",
     ])

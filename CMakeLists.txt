@@ -135,6 +135,7 @@ add_library(
     src/handlers/vacancy/handler_vacancies_update_id.cpp
     src/handlers/vacancy/handler_vacancies_delete.cpp
     src/handlers/vacancy/handler_vacancies_toggle.cpp
+    src/handlers/vacancy/handler_vacancy_applications_get.cpp # for application
 
     # application
     src/handlers/application/handler_application_post.cpp

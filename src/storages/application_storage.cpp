@@ -67,4 +67,17 @@ std::vector<models::Application> ApplicationStorage::GetRecruiterApplications(
     return vec;
 }
 
+std::vector<models::Application> ApplicationStorage::GetVacancyApplications(
+    const boost::uuids::uuid& vacancy_id) {
+    auto pg_res =
+        pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+                             application_storage_queries::sql::kGetVacancyApplications, vacancy_id);
+    std::vector<models::Application> res_vec;
+    res_vec.reserve(pg_res.Size());
+    for (const auto& row : pg_res) {
+        res_vec.push_back(row.As<models::Application>(userver::v3_1::storages::postgres::kRowTag));
+    }
+    return res_vec;
+}
+
 }  // namespace internview::storages

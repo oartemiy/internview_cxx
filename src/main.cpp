@@ -35,6 +35,7 @@
 #include "handlers/vacancy/handler_vacancies_get_me.hpp"
 #include "handlers/vacancy/handler_vacancies_toggle.hpp"
 #include "handlers/vacancy/handler_vacancies_update_id.hpp"
+#include "handlers/vacancy/handler_vacancy_applications_get.hpp"
 #include "handlers/vacancy/handler_vacancy_post.hpp"
 #include "userver/storages/secdist/provider_component.hpp"
 
@@ -84,6 +85,7 @@ int main(int argc, char* argv[]) {
             .Append<internview::handlers::HandlerVacancyUpdate>()
             .Append<internview::handlers::HandlerVacanciesDelete>()
             .Append<internview::handlers::HandlerVacancyToggle>()
+            .Append<internview::handlers::HandlerVacancyApplicationsGet>()
 
             .Append<internview::handlers::HandlerApplicationPost>()
             .Append<internview::handlers::HandlerApplicationsGet>();

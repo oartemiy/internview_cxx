@@ -18,4 +18,8 @@ extern const USERVER_NAMESPACE::storages::Query kGetInternsApplications;
 // Generated from get_recruiter_applications.sql
 extern const USERVER_NAMESPACE::storages::Query kGetRecruiterApplications;
 
+
+// Generated from get_vacancy_applications.sql
+extern const USERVER_NAMESPACE::storages::Query kGetVacancyApplications;
+
 }  // namespace application_storage_queries::sql

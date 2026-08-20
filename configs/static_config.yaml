@@ -203,3 +203,7 @@ components_manager:
             method: GET
             task_processor: main-task-processor
 
+        handler-vacancy-applications-get:
+            path: /vacancies/{id}/applications
+            method: GET
+            task_processor: main-task-processor

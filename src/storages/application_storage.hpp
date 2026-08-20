@@ -19,27 +19,37 @@ public:
 
     /**
      * @brief Create a Application object
-     * 
-     * @param dto 
-     * @return models::Application 
+     *
+     * @param dto
+     * @return models::Application
      */
     models::Application CreateApplication(const dto::application::CreateDTO& dto);
 
     /**
      * @brief Get the Interns Applications object
-     * 
-     * @param intern_id 
-     * @return std::vector<models::Application> 
+     *
+     * @param intern_id
+     * @return std::vector<models::Application>
      */
     std::vector<models::Application> GetInternsApplications(const boost::uuids::uuid& intern_id);
 
     /**
      * @brief Get the Recruiter Applications object
+     *
+     * @param recruiter_id
+     * @return std::vector<models::Application>
+     */
+    std::vector<models::Application> GetRecruiterApplications(
+        const boost::uuids::uuid& recruiter_id);
+
+
+    /**
+     * @brief Get the Vacancy Applications object
      * 
-     * @param recruiter_id 
+     * @param vacancy_id 
      * @return std::vector<models::Application> 
      */
-    std::vector<models::Application> GetRecruiterApplications(const boost::uuids::uuid& recruiter_id);
+    std::vector<models::Application> GetVacancyApplications(const boost::uuids::uuid& vacancy_id);
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;

@@ -60,4 +60,24 @@ WHERE
 };
 
 
+
+
+// Generated from get_vacancy_applications.sql
+const USERVER_NAMESPACE::storages::Query kGetVacancyApplications = {
+R"-(
+-- Select all rows from 'internview_schema.applications'
+SELECT
+    *
+FROM
+    internview_schema.applications
+WHERE
+    vacancy_id = $1;
+
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("get_vacancy_applications"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
 }  // namespace application_storage_queries::sql
