@@ -6,6 +6,9 @@ import pytest
 @pytest.fixture(scope='session')
 def sql_files() -> set:
     return set([
+        # Generated from check_intern_applied.sql
+        "check_intern_applied",
+    
         # Generated from create_application.sql
         "create_application",
     
@@ -14,6 +17,9 @@ def sql_files() -> set:
     
         # Generated from get_application_by_id.sql
         "get_application_by_id",
+    
+        # Generated from get_intern_id_by_cv.sql
+        "get_intern_id_by_cv",
     
         # Generated from get_interns_applications.sql
         "get_interns_applications",

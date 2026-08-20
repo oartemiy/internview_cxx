@@ -26,6 +26,7 @@
 #include "handlers/files/handler_cv_pdf_get.hpp"
 #include "handlers/files/handler_cv_pdf_post.hpp"
 #include "handlers/files/handler_profile_pic_get.hpp"
+#include "handlers/files/handler_profile_pic_get_for_recruiter.hpp"
 #include "handlers/files/handler_profile_pic_post.hpp"
 #include "handlers/status/handler_status_get.hpp"
 #include "handlers/user/handler_user_delete.hpp"
@@ -42,7 +43,6 @@
 #include "userver/storages/secdist/provider_component.hpp"
 
 // TODO: Unify all errors messages
-// TODO: Add cv and vacancy deletion when user deletion
 // TODO: add handeler /users/{id}/profile-pic for recruters
 
 int main(int argc, char* argv[]) {
@@ -71,6 +71,7 @@ int main(int argc, char* argv[]) {
             .Append<internview::handlers::HandlerUserGet>()
             .Append<internview::handlers::HandlerProfilePicPost>()
             .Append<internview::handlers::HandlerProfilePicGet>()
+            .Append<internview::handlers::HandlerProfilePicGetForRecruiter>()
 
             .Append<internview::handlers::HandlerCvPost>()
             .Append<internview::handlers::HandlerCvGet>()

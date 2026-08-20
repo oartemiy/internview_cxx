@@ -128,4 +128,27 @@ void ApplicationStorage::DeleteApplication(const boost::uuids::uuid& id,
     }
 }
 
+bool ApplicationStorage::CheckInternApplied(const boost::uuids::uuid& intern_id,
+                                            const boost::uuids::uuid& recruiter_id) {
+    auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+                                       application_storage_queries::sql::kCheckInternApplied,
+                                       intern_id, recruiter_id);
+    if (pg_res.IsEmpty()) {
+        return false;
+    }
+    return true;
+}
+
+boost::uuids::uuid ApplicationStorage::GetInternIdByCv(const boost::uuids::uuid& cv_id,
+                                                       const boost::uuids::uuid& recruiter_id) {
+    auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
+                                       application_storage_queries::sql::kGetInternIdByCv, cv_id,
+                                       recruiter_id);
+    if (pg_res.IsEmpty()) {
+        throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
+            "message", "This cv does not belongs to your vacancies applications"));
+    }
+    return pg_res.AsSingleRow<boost::uuids::uuid>();
+}
+
 }  // namespace internview::storages

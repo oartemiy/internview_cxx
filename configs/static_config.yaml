@@ -121,6 +121,11 @@ components_manager:
             method: GET
             task_processor: main-task-processor
 
+        handler-profile-pic-get-for-recruiter:
+            path: /users/{id}/profile-pic
+            method: GET
+            task_processor: main-task-processor
+
         # NOTE: while fs-cache does not support mac os
 
         handler-cv-post:

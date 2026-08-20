@@ -11,7 +11,6 @@
 #include "userver/storages/postgres/postgres_fwd.hpp"
 
 // NOTE ResponseDTO for Vacancy does not provided
-// TODO: Replace ResponseDTO for most models
 namespace internview::storages {
 
 class VacancyStorage {

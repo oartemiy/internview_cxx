@@ -57,7 +57,6 @@ std::vector<internview::models::CV> CvStorage::GetUserCvs(const boost::uuids::uu
                                        cv_storage_queries::sql::kGetCvs, user_id);
     std::vector<internview::models::CV> res_vec;
     res_vec.reserve(pg_res.Size());
-    // TODO: optimize with emplace_back method
     for (const auto& row : pg_res) {
         res_vec.push_back(row.As<internview::models::CV>(userver::storages::postgres::kRowTag));
     }

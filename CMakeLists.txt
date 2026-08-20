@@ -117,6 +117,7 @@ add_library(
     src/handlers/user/handler_user_update.cpp
     src/handlers/files/handler_profile_pic_post.cpp
     src/handlers/files/handler_profile_pic_get.cpp
+    src/handlers/files/handler_profile_pic_get_for_recruiter.cpp
 
     # cv
     src/handlers/cv/handler_cv_post.cpp

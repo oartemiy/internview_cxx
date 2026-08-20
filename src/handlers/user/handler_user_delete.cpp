@@ -32,9 +32,7 @@ Value HandlerUserDelete::HandleRequestJsonThrow(const HttpRequest& request,
         for (const auto& cv : user_cvs) {
             cv_storage_ptr_->DeleteCv(cv.id, cv.user_id);
         }
-        // TODO: delete applications
-        /*
-         */
+        // NOTE: application deleting is automatic, check schema
     }
 
     if (auth_res.role == "recruiter") {

@@ -4,6 +4,32 @@
 
 namespace application_storage_queries::sql {
 
+// Generated from check_intern_applied.sql
+const USERVER_NAMESPACE::storages::Query kCheckInternApplied = {
+R"-(
+SELECT
+    1
+FROM
+    internview_schema.applications
+WHERE
+    intern_id = $1
+    AND vacancy_id IN (
+        SELECT
+            id
+        FROM
+            internview_schema.vacancies
+        WHERE
+            recruiter_id = $2);
+
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("check_intern_applied"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
+
+
 // Generated from create_application.sql
 const USERVER_NAMESPACE::storages::Query kCreateApplication = {
 R"-(
@@ -55,6 +81,33 @@ WHERE
 
 )-",
     USERVER_NAMESPACE::storages::Query::NameLiteral("get_application_by_id"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
+
+
+// Generated from get_intern_id_by_cv.sql
+const USERVER_NAMESPACE::storages::Query kGetInternIdByCv = {
+R"-(
+SELECT
+    intern_id
+FROM
+    internview_schema.applications
+WHERE
+    cv_id = $1
+    AND vacancy_id IN (
+        SELECT
+            id
+        FROM
+            internview_schema.vacancies
+        WHERE
+            recruiter_id = $2)
+LIMIT 1;
+
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("get_intern_id_by_cv"),
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 

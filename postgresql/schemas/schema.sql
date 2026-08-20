@@ -70,8 +70,6 @@ ALTER TABLE internview_schema.applications
 ALTER TABLE internview_schema.applications
     ADD CONSTRAINT fk_application_cv FOREIGN KEY (cv_id) REFERENCES internview_schema.cvs(id) ON DELETE CASCADE;
 
-
-
 -- Create an index on 'internview_schema.cvs' for better query performance
 CREATE INDEX IF NOT EXISTS idx_cvs_user_id ON internview_schema.cvs(user_id);
 
@@ -85,4 +83,7 @@ CREATE INDEX IF NOT EXISTS idx_applications_vacancy_id ON internview_schema.appl
 
 CREATE INDEX IF NOT EXISTS idx_applications_intern_id ON internview_schema.applications(intern_id);
 
+CREATE INDEX IF NOT EXISTS idx_applications_cv_id ON internview_schema.applications(cv_id);
+
 CREATE INDEX IF NOT EXISTS idx_applications_status ON internview_schema.applications(status);
+
