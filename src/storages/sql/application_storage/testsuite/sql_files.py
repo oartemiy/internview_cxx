@@ -9,6 +9,9 @@ def sql_files() -> set:
         # Generated from create_application.sql
         "create_application",
     
+        # Generated from delete_application.sql
+        "delete_application",
+    
         # Generated from get_application_by_id.sql
         "get_application_by_id",
     

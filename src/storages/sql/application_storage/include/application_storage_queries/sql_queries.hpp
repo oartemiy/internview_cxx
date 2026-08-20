@@ -11,6 +11,10 @@ namespace application_storage_queries::sql {
 extern const USERVER_NAMESPACE::storages::Query kCreateApplication;
 
 
+// Generated from delete_application.sql
+extern const USERVER_NAMESPACE::storages::Query kDeleteApplication;
+
+
 // Generated from get_application_by_id.sql
 extern const USERVER_NAMESPACE::storages::Query kGetApplicationById;
 

@@ -212,3 +212,8 @@ components_manager:
             path: /applications/{id}
             method: PATCH
             task_processor: main-task-processor
+
+        handler-application-delete:
+            path: /applications/{id}
+            method: DELETE
+            task_processor: main-task-processor

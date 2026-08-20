@@ -11,6 +11,7 @@
 #include <userver/utils/daemon_run.hpp>
 
 #include "components/internview_component.hpp"
+#include "handlers/application/handler_application_delete.hpp"
 #include "handlers/application/handler_application_post.hpp"
 #include "handlers/application/handler_application_update.hpp"
 #include "handlers/application/handler_applications_get.hpp"
@@ -90,7 +91,8 @@ int main(int argc, char* argv[]) {
 
             .Append<internview::handlers::HandlerApplicationPost>()
             .Append<internview::handlers::HandlerApplicationsGet>()
-            .Append<internview::handlers::HandlerApplicationUpdate>();
+            .Append<internview::handlers::HandlerApplicationUpdate>()
+            .Append<internview::handlers::HandlerApplicationDelete>();
 
     return userver::utils::DaemonMain(argc, argv, component_list);
 }

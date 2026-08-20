@@ -66,6 +66,13 @@ public:
      */
     models::Application UpdateApplication(const dto::application::UpdateDTO& dto);
 
+    /**
+     * @brief Delete Application object
+     * 
+     * @param intern_id 
+     */
+    void DeleteApplication(const boost::uuids::uuid& id, const boost::uuids::uuid& intern_id);
+
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;
 };

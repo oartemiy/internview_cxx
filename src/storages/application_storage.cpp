@@ -117,4 +117,15 @@ models::Application ApplicationStorage::UpdateApplication(const dto::application
     }
 }
 
+void ApplicationStorage::DeleteApplication(const boost::uuids::uuid& id,
+                                           const boost::uuids::uuid& intern_id) {
+    auto pg_res =
+        pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+                             application_storage_queries::sql::kDeleteApplication, id, intern_id);
+    if (pg_res.IsEmpty()) {
+        throw userver::server::handlers::ClientError(
+            userver::formats::json::MakeObject("message", "This application does not exist"));
+    }
+}
+
 }  // namespace internview::storages

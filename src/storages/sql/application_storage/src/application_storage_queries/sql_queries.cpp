@@ -22,6 +22,25 @@ RETURNING
 
 
 
+// Generated from delete_application.sql
+const USERVER_NAMESPACE::storages::Query kDeleteApplication = {
+R"-(
+-- Delete rows from 'internview_schema.applications' where condition is met
+DELETE FROM internview_schema.applications
+WHERE id = $1
+    AND intern_id = $2
+RETURNING
+    id;
+
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("delete_application"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
+
+
 // Generated from get_application_by_id.sql
 const USERVER_NAMESPACE::storages::Query kGetApplicationById = {
 R"-(

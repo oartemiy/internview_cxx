@@ -141,6 +141,7 @@ add_library(
     src/handlers/application/handler_application_post.cpp
     src/handlers/application/handler_applications_get.cpp
     src/handlers/application/handler_application_update.cpp
+    src/handlers/application/handler_application_delete.cpp
 )
 
 target_link_libraries(
