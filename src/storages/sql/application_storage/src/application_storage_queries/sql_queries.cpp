@@ -22,6 +22,26 @@ RETURNING
 
 
 
+// Generated from get_application_by_id.sql
+const USERVER_NAMESPACE::storages::Query kGetApplicationById = {
+R"-(
+-- Select all rows from 'internview_schema.applications'
+SELECT
+    *
+FROM
+    internview_schema.applications
+WHERE
+    id = $1;
+
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("get_application_by_id"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
+
+
 // Generated from get_interns_applications.sql
 const USERVER_NAMESPACE::storages::Query kGetInternsApplications = {
 R"-(
@@ -76,6 +96,30 @@ WHERE
 
 )-",
     USERVER_NAMESPACE::storages::Query::NameLiteral("get_vacancy_applications"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
+
+
+// Generated from update_application.sql
+const USERVER_NAMESPACE::storages::Query kUpdateApplication = {
+R"-(
+-- Update rows in 'internview_schema.applications' where condition is met
+UPDATE
+    internview_schema.applications
+SET
+    cv_id = $2,
+    status = $3,
+    cover_letter = $4
+WHERE
+    id = $1
+RETURNING
+    *;
+
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("update_application"),
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 

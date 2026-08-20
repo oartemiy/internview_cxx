@@ -42,14 +42,29 @@ public:
     std::vector<models::Application> GetRecruiterApplications(
         const boost::uuids::uuid& recruiter_id);
 
-
     /**
      * @brief Get the Vacancy Applications object
-     * 
-     * @param vacancy_id 
-     * @return std::vector<models::Application> 
+     *
+     * @param vacancy_id
+     * @return std::vector<models::Application>
      */
     std::vector<models::Application> GetVacancyApplications(const boost::uuids::uuid& vacancy_id);
+
+    /**
+     * @brief Get the Application By Id object
+     *
+     * @param id
+     * @return models::Application
+     */
+    models::Application GetApplicationById(const boost::uuids::uuid& id);
+
+    /**
+     * @brief Update the application object
+     *
+     * @param dto
+     * @return models::Application
+     */
+    models::Application UpdateApplication(const dto::application::UpdateDTO& dto);
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;

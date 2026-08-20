@@ -9,6 +9,7 @@
 #include "userver/server/handlers/exceptions.hpp"
 #include "userver/storages/postgres/cluster_types.hpp"
 #include "userver/storages/postgres/component.hpp"
+#include "userver/storages/postgres/exceptions.hpp"
 #include "userver/storages/postgres/io/row_types.hpp"
 #include "userver/utils/boost_uuid7.hpp"
 
@@ -19,6 +20,16 @@ ApplicationStorage::ApplicationStorage(
     const userver::components::ComponentContext& component_context)
     : pg_cluster_(component_context.FindComponent<userver::components::Postgres>("postgres-db")
                       .GetCluster()) {
+}
+
+models::Application ApplicationStorage::GetApplicationById(const boost::uuids::uuid& id) {
+    auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+                                       application_storage_queries::sql::kGetApplicationById, id);
+    if (pg_res.IsEmpty()) {
+        throw userver::server::handlers::ClientError(
+            userver::formats::json::MakeObject("message", "This application does not exists"));
+    }
+    return pg_res.AsSingleRow<models::Application>(userver::v3_1::storages::postgres::kRowTag);
 }
 
 models::Application ApplicationStorage::CreateApplication(const dto::application::CreateDTO& dto) {
@@ -78,6 +89,32 @@ std::vector<models::Application> ApplicationStorage::GetVacancyApplications(
         res_vec.push_back(row.As<models::Application>(userver::v3_1::storages::postgres::kRowTag));
     }
     return res_vec;
+}
+
+models::Application ApplicationStorage::UpdateApplication(const dto::application::UpdateDTO& dto) {
+    auto model = GetApplicationById(dto.id);
+    if (dto.has_cover_letter_in_request_json) {
+        model.cover_letter = dto.cover_letter;
+    }
+    if (dto.has_cv_id_in_request_json) {
+        model.cv_id = dto.cv_id;
+    }
+    if (dto.has_status_in_request_json) {
+        model.status = dto.status;
+    }
+    try {
+        auto pg_res =
+            pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+                                 application_storage_queries::sql::kUpdateApplication, model.id,
+                                 model.cv_id, model.status, model.cover_letter);
+        return pg_res.AsSingleRow<models::Application>(userver::v3_1::storages::postgres::kRowTag);
+    } catch (userver::storages::postgres::ForeignKeyViolation& e) {
+        throw userver::server::handlers::ClientError(
+            userver::formats::json::MakeObject("message", "invalid cv_pdf"));
+    } catch (userver::storages::postgres::CheckViolation& e) {
+        throw userver::server::handlers::ClientError(
+            userver::formats::json::MakeObject("message", "unsupported status"));
+    }
 }
 
 }  // namespace internview::storages
