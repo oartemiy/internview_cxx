@@ -31,6 +31,7 @@
 #include "handlers/status/handler_status_get.hpp"
 #include "handlers/user/handler_user_delete.hpp"
 #include "handlers/user/handler_user_get.hpp"
+#include "handlers/user/handler_user_get_by_id.hpp"
 #include "handlers/user/handler_user_update.hpp"
 #include "handlers/vacancy/handler_vacancies_delete.hpp"
 #include "handlers/vacancy/handler_vacancies_get.hpp"
@@ -72,6 +73,7 @@ int main(int argc, char* argv[]) {
             .Append<internview::handlers::HandlerProfilePicPost>()
             .Append<internview::handlers::HandlerProfilePicGet>()
             .Append<internview::handlers::HandlerProfilePicGetForRecruiter>()
+            .Append<internview::handlers::HandlerUserGetById>()
 
             .Append<internview::handlers::HandlerCvPost>()
             .Append<internview::handlers::HandlerCvGet>()

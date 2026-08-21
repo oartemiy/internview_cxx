@@ -110,6 +110,11 @@ components_manager:
             method: GET
             task_processor: main-task-processor
 
+        handler-user-get-by-id:
+            path: /users/{id}
+            method: GET
+            task_processor: main-task-processor
+
         handler-profile-pic-post:
             path: /users/me/profile-pic
             method: POST
