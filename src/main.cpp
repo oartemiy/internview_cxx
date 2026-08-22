@@ -44,7 +44,6 @@
 #include "userver/storages/secdist/provider_component.hpp"
 
 // TODO: Unify all errors messages
-// TODO: add handeler /users/{id}/profile-pic for recruters
 
 int main(int argc, char* argv[]) {
     auto component_list =
