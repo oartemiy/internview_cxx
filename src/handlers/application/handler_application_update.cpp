@@ -32,13 +32,10 @@ Value HandlerApplicationUpdate::HandleRequestJsonThrow(
             auto res = application_storage_ptr_->UpdateApplication(dto);
             return ValueBuilder(res).ExtractValue();
         } else {
-            throw ClientError(MakeObject("message", "invalid intern request_json"));
+            throw ClientError(MakeObject("message", "Invalid intern request_json"));
         }
     } else {
-        // TODO: bottle neck. Delete
-        if (vacancy_storage_ptr_
-                ->GetVacancyById(application_storage_ptr_->GetApplicationById(id).vacancy_id)
-                .recruiter_id != auth_res.user_id) {
+        if (vacancy_storage_ptr_->GetRecruiterIdByApplicationId(id) != auth_res.user_id) {
             throw ClientError(
                 MakeObject("message", "This application does not belongs to your vacancy"));
         }
@@ -47,7 +44,7 @@ Value HandlerApplicationUpdate::HandleRequestJsonThrow(
             auto res = application_storage_ptr_->UpdateApplication(dto);
             return ValueBuilder(res).ExtractValue();
         } else {
-            throw ClientError(MakeObject("message", "invalid recruiter request_json"));
+            throw ClientError(MakeObject("message", "Invalid recruiter request_json"));
         }
     }
 }

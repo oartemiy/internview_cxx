@@ -53,14 +53,19 @@ dto::cv::ResponseDTO CvStorage::CreateCv(const dto::cv::CreateDTO& dto) const {
 }
 
 std::vector<internview::models::CV> CvStorage::GetUserCvs(const boost::uuids::uuid& user_id) const {
-    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
-                                       cv_storage_queries::sql::kGetCvs, user_id);
-    std::vector<internview::models::CV> res_vec;
-    res_vec.reserve(pg_res.Size());
-    for (const auto& row : pg_res) {
-        res_vec.push_back(row.As<internview::models::CV>(userver::storages::postgres::kRowTag));
+    try {
+        auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+                                           cv_storage_queries::sql::kGetCvs, user_id);
+        std::vector<internview::models::CV> res_vec;
+        res_vec.reserve(pg_res.Size());
+        for (const auto& row : pg_res) {
+            res_vec.push_back(row.As<internview::models::CV>(userver::storages::postgres::kRowTag));
+        }
+        return res_vec;
+    } catch (userver::storages::postgres::ForeignKeyViolation& e) {
+        throw userver::server::handlers::ResourceNotFound(
+            userver::formats::json::MakeObject("message", "This user does not exists"));
     }
-    return res_vec;
 }
 
 internview::models::CV CvStorage::GetCvById(const boost::uuids::uuid& id,
@@ -136,7 +141,7 @@ void CvStorage::DeleteCv(const boost::uuids::uuid& id, const boost::uuids::uuid&
     }
     if (pg_res.IsEmpty()) {
         throw userver::server::handlers::ClientError(
-            userver::formats::json::MakeObject("message", "invalid id or user_id"));
+            userver::formats::json::MakeObject("message", "Invalid id or user_id"));
     }
 }
 

@@ -30,7 +30,7 @@ Value HandlerUserGetById::HandleRequestJsonThrow(const HttpRequest& request,
         auto res = user_storage_ptr_->GetUserById(id).ToResponseDTO();
         return ValueBuilder(res).ExtractValue();
     } else {
-        throw ClientError(MakeObject("message", "invalid role or id for this action"));
+        throw ClientError(MakeObject("message", "Invalid role or id for this action"));
     }
 }
 

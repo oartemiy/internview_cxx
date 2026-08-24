@@ -22,7 +22,7 @@ std::string HandlerProfilePicGetForRecruiter::HandleRequestThrow(
     auto auth_res = auth_service_ptr_->CheckAuthorization(auth_header);
 
     if (auth_res.role != "recruiter") {
-        throw ClientError(MakeObject("message", "invalid role for this action"));
+        throw ClientError(MakeObject("message", "Invalid role for this action"));
     }
     auto id = boost::uuids::uuid_from_string(request.GetPathArg("id"));
     if (application_storage_ptr_->CheckInternApplied(id, auth_res.user_id)) {
@@ -39,7 +39,7 @@ std::string HandlerProfilePicGetForRecruiter::HandleRequestThrow(
         request.SetResponseStatus(userver::http::OK);
         return file;
     } else {
-        throw ClientError(MakeObject("message", "this user does not applied for your vacancies"));
+        throw ClientError(MakeObject("message", "This user does not applied for your vacancies"));
     }
 }
 

@@ -10,7 +10,6 @@
 #include "services/auth_service.hpp"
 #include "services/file_service.hpp"
 
-// TODO: add @throw section
 namespace internview::storages {
 
 // NOTE: internview::models::CV and internview::dto::cv::ResponseDTO have the same feilds
@@ -36,6 +35,7 @@ public:
      *
      * @param user_id
      * @return std::vector<internview::models::CV>
+     * @throw userver::server::handlers::ResourceNotFound
      */
     std::vector<internview::models::CV> GetUserCvs(const boost::uuids::uuid& user_id) const;
 
@@ -45,7 +45,6 @@ public:
      * @param id
      * @param user_id
      * @return internview::models::CV
-     * NOTE: To delele optional field use DELETE in a json_request
      */
     internview::models::CV GetCvById(const boost::uuids::uuid& id,
                                      const boost::uuids::uuid& user_id) const;
@@ -55,6 +54,7 @@ public:
      *
      * @param dto
      * @return internview::dto::cv::ResponseDTO
+     * @throw userver::server::handlers::ClientError
      */
     internview::dto::cv::ResponseDTO UpdateCv(const internview::dto::cv::UpdateDTO& dto);
 
@@ -63,6 +63,7 @@ public:
      *
      * @param id
      * @param user_id
+     * @throw userver::server::handlers::ClientError
      */
     void DeleteCv(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id);
 
@@ -72,6 +73,7 @@ public:
      * @param id
      * @param user_id
      * @param file_arg
+     * @throw userver::server::handlers::ClientError
      */
     void UploadCvPdf(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id,
                      const userver::server::http::FormDataArg& file_arg);

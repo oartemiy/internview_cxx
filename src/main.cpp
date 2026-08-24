@@ -43,8 +43,6 @@
 #include "handlers/vacancy/handler_vacancy_post.hpp"
 #include "userver/storages/secdist/provider_component.hpp"
 
-// TODO: Unify all errors messages
-
 int main(int argc, char* argv[]) {
     auto component_list =
         userver::components::MinimalServerComponentList()

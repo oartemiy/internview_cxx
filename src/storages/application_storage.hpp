@@ -22,6 +22,7 @@ public:
      *
      * @param dto
      * @return models::Application
+     * @throw userver::server::handlers::ClientError
      */
     models::Application CreateApplication(const dto::application::CreateDTO& dto);
 
@@ -63,26 +64,38 @@ public:
      *
      * @param dto
      * @return models::Application
+     * @throw userver::server::handlers::ClientError
      */
     models::Application UpdateApplication(const dto::application::UpdateDTO& dto);
 
     /**
      * @brief Delete Application object
-     * 
-     * @param intern_id 
+     *
+     * @param intern_id
+     * @throw userver::server::handlers::ClientError
      */
     void DeleteApplication(const boost::uuids::uuid& id, const boost::uuids::uuid& intern_id);
 
     /**
      * @brief Checks interns is applied
-     * 
-     * @param intern_id 
-     * @return true 
-     * @return false 
+     *
+     * @param intern_id
+     * @return true
+     * @return false
      */
-    bool CheckInternApplied(const boost::uuids::uuid& intern_id, const boost::uuids::uuid& recruiter_id);
+    bool CheckInternApplied(const boost::uuids::uuid& intern_id,
+                            const boost::uuids::uuid& recruiter_id);
 
-    boost::uuids::uuid GetInternIdByCv(const boost::uuids::uuid& cv_id, const boost::uuids::uuid& recruiter_id);
+    /**
+     * @brief Get the Intern Id By Cv object
+     *
+     * @param cv_id
+     * @param recruiter_id
+     * @return boost::uuids::uuid
+     * @throw userver::server::handlers::ClientError
+     */
+    boost::uuids::uuid GetInternIdByCv(const boost::uuids::uuid& cv_id,
+                                       const boost::uuids::uuid& recruiter_id);
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;

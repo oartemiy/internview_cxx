@@ -110,10 +110,10 @@ models::Application ApplicationStorage::UpdateApplication(const dto::application
         return pg_res.AsSingleRow<models::Application>(userver::v3_1::storages::postgres::kRowTag);
     } catch (userver::storages::postgres::ForeignKeyViolation& e) {
         throw userver::server::handlers::ClientError(
-            userver::formats::json::MakeObject("message", "invalid cv_pdf"));
+            userver::formats::json::MakeObject("message", "Invalid cv_pdf"));
     } catch (userver::storages::postgres::CheckViolation& e) {
         throw userver::server::handlers::ClientError(
-            userver::formats::json::MakeObject("message", "unsupported status"));
+            userver::formats::json::MakeObject("message", "Unsupported status"));
     }
 }
 

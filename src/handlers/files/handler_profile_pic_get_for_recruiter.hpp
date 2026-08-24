@@ -11,7 +11,8 @@ class HandlerProfilePicGetForRecruiter final : public HttpHandlerBase {
 public:
     static constexpr std::string_view kName = "handler-profile-pic-get-for-recruiter";
 
-    HandlerProfilePicGetForRecruiter(const ComponentConfig& config, const ComponentContext& component_context);
+    HandlerProfilePicGetForRecruiter(const ComponentConfig& config,
+                                     const ComponentContext& component_context);
 
     std::string HandleRequestThrow(const HttpRequest& request,
                                    RequestContext& context) const override;

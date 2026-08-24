@@ -66,7 +66,7 @@ public:
      *
      * @param dto
      * @return dto::user::ResponseDTO
-     * @throws  userver::server::handlers::ClientError
+     * @throws userver::server::handlers::ClientError
      */
     dto::user::ResponseDTO LoginUser(const internview::dto::user::LoginDTO& dto) const;
 

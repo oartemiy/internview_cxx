@@ -169,4 +169,12 @@ internview::models::Vacancy VacancyStorage::ToggleVacancy(const boost::uuids::uu
     }
 }
 
+boost::uuids::uuid VacancyStorage::GetRecruiterIdByApplicationId(
+    const boost::uuids::uuid& application_id) {
+    auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+                                       vacancy_storage_queries::sql::kGetRecruiterIdByApplicationId,
+                                       application_id);
+    return pg_res.AsSingleRow<boost::uuids::uuid>();
+}
+
 }  // namespace internview::storages

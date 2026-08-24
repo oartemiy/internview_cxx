@@ -24,6 +24,7 @@ public:
      *
      * @param dto
      * @return internview::models::Vacancy
+     * @throw userver::server::handlers::ClientError
      */
     internview::models::Vacancy CreateVacancy(const dto::vacancy::CreateDTO& dto);
 
@@ -41,6 +42,7 @@ public:
      *
      * @param id
      * @return internview::models::Vacancy
+     * @throw userver::server::handlers::ClientError
      */
     internview::models::Vacancy GetVacancyById(const boost::uuids::uuid& id);
 
@@ -57,6 +59,7 @@ public:
      * @brief Update the Vacancy
      *
      * @param dto
+     * @throw userver::server::handlers::ClientError
      * @return internview::models::Vacancy
      */
     internview::models::Vacancy UpdateVacancy(const dto::vacancy::UpdateDTO& dto);
@@ -66,6 +69,7 @@ public:
      *
      * @param id
      * @param recruiter_id
+     * @throw userver::server::handlers::ConflictError
      */
     void DeleteVacancy(const boost::uuids::uuid& id, const boost::uuids::uuid& recruiter_id);
 
@@ -75,9 +79,18 @@ public:
      * @param id
      * @param recruiter_id
      * @return internview::models::Vacancy
+     * @throw userver::server::handlers::ClientError
      */
     internview::models::Vacancy ToggleVacancy(const boost::uuids::uuid& id,
                                               const boost::uuids::uuid& recruiter_id);
+
+    /**
+     * @brief Get the Recruiter Id By Application Id object
+     *
+     * @param application_id
+     * @return boost::uuids::uuid
+     */
+    boost::uuids::uuid GetRecruiterIdByApplicationId(const boost::uuids::uuid& application_id);
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;

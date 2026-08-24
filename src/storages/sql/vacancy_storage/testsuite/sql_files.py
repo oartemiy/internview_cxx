@@ -12,6 +12,9 @@ def sql_files() -> set:
         # Generated from delete_vacancy.sql
         "delete_vacancy",
     
+        # Generated from get_recruiter_id_by_application_id.sql
+        "get_recruiter_id_by_application_id",
+    
         # Generated from get_recruiter_vacancies.sql
         "get_recruiter_vacancies",
     

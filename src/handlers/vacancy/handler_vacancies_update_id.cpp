@@ -26,7 +26,7 @@ Value HandlerVacancyUpdate::HandleRequestJsonThrow(const HttpRequest& request,
 
     auto id = boost::uuids::uuid_from_string(request.GetPathArg("id"));
     if (auth_res.role != "recruiter") {
-        throw ClientError(MakeObject("message", "invalid role for this action"));
+        throw ClientError(MakeObject("message", "Invalid role for this action"));
     }
 
     auto dto = request_json.As<dto::vacancy::UpdateDTO>();

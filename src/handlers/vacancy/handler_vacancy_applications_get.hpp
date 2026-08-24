@@ -11,7 +11,8 @@ namespace internview::handlers {
 
 class HandlerVacancyApplicationsGet final : public HttpHandlerJsonBase {
 public:
-    HandlerVacancyApplicationsGet(const ComponentConfig& config, const ComponentContext& component_context);
+    HandlerVacancyApplicationsGet(const ComponentConfig& config,
+                                  const ComponentContext& component_context);
 
     static constexpr std::string_view kName = "handler-vacancy-applications-get";
 

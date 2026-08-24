@@ -32,6 +32,28 @@ RETURNING
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
+// Generated from get_recruiter_id_by_application_id.sql
+const USERVER_NAMESPACE::storages::Query kGetRecruiterIdByApplicationId = {
+    R"-(
+SELECT
+    recruiter_id
+FROM
+    internview_schema.vacancies
+WHERE
+    id =(
+        SELECT
+            vacancy_id
+        FROM
+            internview_schema.applications
+        WHERE
+            id = $1);
+
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("get_recruiter_id_by_application_id"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
 // Generated from get_recruiter_vacancies.sql
 const USERVER_NAMESPACE::storages::Query kGetRecruiterVacancies = {
     R"-(

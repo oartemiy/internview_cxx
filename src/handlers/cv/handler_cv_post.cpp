@@ -16,7 +16,7 @@ Value HandlerCvPost::HandleRequestJsonThrow(const HttpRequest& request, const Va
     auto auth_res = auth_service_ptr_->CheckAuthorization(auth_header);
 
     if (auth_res.role != "intern") {
-        throw ClientError(MakeObject("message", "invalid role for this action"));
+        throw ClientError(MakeObject("message", "Invalid role for this action"));
     }
 
     dto.user_id = auth_res.user_id;

@@ -12,6 +12,9 @@ extern const USERVER_NAMESPACE::storages::Query kCreateVacancy;
 // Generated from delete_vacancy.sql
 extern const USERVER_NAMESPACE::storages::Query kDeleteVacancy;
 
+// Generated from get_recruiter_id_by_application_id.sql
+extern const USERVER_NAMESPACE::storages::Query kGetRecruiterIdByApplicationId;
+
 // Generated from get_recruiter_vacancies.sql
 extern const USERVER_NAMESPACE::storages::Query kGetRecruiterVacancies;
 
