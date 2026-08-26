@@ -23,7 +23,7 @@ ApplicationStorage::ApplicationStorage(
 }
 
 models::Application ApplicationStorage::GetApplicationById(const boost::uuids::uuid& id) {
-    auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+    auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
                                        application_storage_queries::sql::kGetApplicationById, id);
     if (pg_res.IsEmpty()) {
         throw userver::server::handlers::ClientError(
@@ -55,7 +55,7 @@ models::Application ApplicationStorage::CreateApplication(const dto::application
 std::vector<models::Application> ApplicationStorage::GetInternsApplications(
     const boost::uuids::uuid& intern_id) {
     auto pg_res =
-        pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+        pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
                              application_storage_queries::sql::kGetInternsApplications, intern_id);
     std::vector<models::Application> vec;
     vec.reserve(pg_res.Size());
@@ -67,7 +67,7 @@ std::vector<models::Application> ApplicationStorage::GetInternsApplications(
 
 std::vector<models::Application> ApplicationStorage::GetRecruiterApplications(
     const boost::uuids::uuid& recruiter_id) {
-    auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+    auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
                                        application_storage_queries::sql::kGetRecruiterApplications,
                                        recruiter_id);
     std::vector<models::Application> vec;
@@ -81,7 +81,7 @@ std::vector<models::Application> ApplicationStorage::GetRecruiterApplications(
 std::vector<models::Application> ApplicationStorage::GetVacancyApplications(
     const boost::uuids::uuid& vacancy_id) {
     auto pg_res =
-        pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+        pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
                              application_storage_queries::sql::kGetVacancyApplications, vacancy_id);
     std::vector<models::Application> res_vec;
     res_vec.reserve(pg_res.Size());
@@ -130,7 +130,7 @@ void ApplicationStorage::DeleteApplication(const boost::uuids::uuid& id,
 
 bool ApplicationStorage::CheckInternApplied(const boost::uuids::uuid& intern_id,
                                             const boost::uuids::uuid& recruiter_id) {
-    auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+    auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
                                        application_storage_queries::sql::kCheckInternApplied,
                                        intern_id, recruiter_id);
     if (pg_res.IsEmpty()) {

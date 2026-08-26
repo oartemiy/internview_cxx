@@ -43,6 +43,8 @@
 #include "handlers/vacancy/handler_vacancy_post.hpp"
 #include "userver/storages/secdist/provider_component.hpp"
 
+// TODO: add pool for slave HOSTTYPE
+
 int main(int argc, char* argv[]) {
     auto component_list =
         userver::components::MinimalServerComponentList()

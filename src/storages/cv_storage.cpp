@@ -54,7 +54,7 @@ dto::cv::ResponseDTO CvStorage::CreateCv(const dto::cv::CreateDTO& dto) const {
 
 std::vector<internview::models::CV> CvStorage::GetUserCvs(const boost::uuids::uuid& user_id) const {
     try {
-        auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+        auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
                                            cv_storage_queries::sql::kGetCvs, user_id);
         std::vector<internview::models::CV> res_vec;
         res_vec.reserve(pg_res.Size());
@@ -70,7 +70,7 @@ std::vector<internview::models::CV> CvStorage::GetUserCvs(const boost::uuids::uu
 
 internview::models::CV CvStorage::GetCvById(const boost::uuids::uuid& id,
                                             const boost::uuids::uuid& user_id) const {
-    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
                                        cv_storage_queries::sql::kGetCvById, id, user_id);
     if (pg_res.IsEmpty()) {
         throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(

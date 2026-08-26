@@ -46,7 +46,7 @@ internview::models::Vacancy VacancyStorage::CreateVacancy(const dto::vacancy::Cr
 }
 
 std::vector<internview::models::Vacancy> VacancyStorage::GetVacancies(int limit, int offset) {
-    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
                                        vacancy_storage_queries::sql::kGetVacancies, limit, offset);
     std::vector<models::Vacancy> vec;
     vec.reserve(pg_res.Size());
@@ -57,7 +57,7 @@ std::vector<internview::models::Vacancy> VacancyStorage::GetVacancies(int limit,
 }
 
 internview::models::Vacancy VacancyStorage::GetVacancyById(const boost::uuids::uuid& id) {
-    auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+    auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
                                        vacancy_storage_queries::sql::kGetVacancyById, id);
 
     if (pg_res.IsEmpty()) {
@@ -72,7 +72,7 @@ internview::models::Vacancy VacancyStorage::GetVacancyById(const boost::uuids::u
 std::vector<internview::models::Vacancy> VacancyStorage::GetRecruiterVacancies(
     const boost::uuids::uuid& recruiter_id) {
     auto pg_res =
-        pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+        pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
                              vacancy_storage_queries::sql::kGetRecruiterVacancies, recruiter_id);
     std::vector<models::Vacancy> vec;
     vec.reserve(pg_res.Size());
@@ -171,7 +171,7 @@ internview::models::Vacancy VacancyStorage::ToggleVacancy(const boost::uuids::uu
 
 boost::uuids::uuid VacancyStorage::GetRecruiterIdByApplicationId(
     const boost::uuids::uuid& application_id) {
-    auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+    auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
                                        vacancy_storage_queries::sql::kGetRecruiterIdByApplicationId,
                                        application_id);
     return pg_res.AsSingleRow<boost::uuids::uuid>();

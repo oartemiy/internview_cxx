@@ -40,7 +40,7 @@ UserStorage::UserStorage(std::shared_ptr<services::AuthService> auth_service_ptr
 }
 
 models::User UserStorage::GetUserById(const boost::uuids::uuid& id) const {
-    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
                                        user_storage_queries::sql::kGetUserById, id);
 
     if (pg_res.IsEmpty()) {
@@ -160,7 +160,7 @@ void UserStorage::DeleteUser(const internview::dto::user::DeleteDTO& dto) {
 
 dto::user::ResponseDTO UserStorage::LoginUser(const internview::dto::user::LoginDTO& dto) const {
 
-    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
                                        user_storage_queries::sql::kLoginUser, dto.login);
     if (pg_res.IsEmpty()) {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
