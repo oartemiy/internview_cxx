@@ -22,6 +22,7 @@ struct User {
     std::optional<std::string> description;
     std::optional<std::string> profile_pic;
     std::chrono::system_clock::time_point created_at;
+    int password_version;
 
     internview::dto::user::ResponseDTO ToResponseDTO() const {
         internview::dto::user::ResponseDTO resp;

@@ -120,7 +120,8 @@ struct ResponseDTO {
     std::optional<std::string> description;
     std::optional<std::string> profile_pic;
     std::chrono::system_clock::time_point created_at;
-    std::optional<std::string> token;
+    std::optional<std::string> access_token;
+    std::optional<std::string> refresh_token = std::nullopt;
 };
 
 inline auto Serialize(const ResponseDTO& dto,
@@ -133,11 +134,13 @@ inline auto Serialize(const ResponseDTO& dto,
     builder["description"] = dto.description;
     builder["profile_pic"] = dto.profile_pic;
     builder["created_at"] = dto.created_at;
-    if (dto.token) {
-        builder["token"] = dto.token;
+    if (dto.access_token) {
+        builder["access_token"] = dto.access_token;
     }
-    auto json = builder.ExtractValue();
-    return json;
+    if (dto.refresh_token) {
+        builder["refresh_token"] = dto.refresh_token;
+    }
+    return builder.ExtractValue();
 }
 
 }  // namespace internview::dto::user

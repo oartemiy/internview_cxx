@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS internview_schema.users(
     description text,
     profile_pic text,
     created_at timestamptz DEFAULT NOW(),
-    CONSTRAINT user_role_check CHECK (role IN ('intern', 'recruiter'))
+    password_version INTEGER DEFAULT 0,
+    CONSTRAINT user_role_check CHECK (ROLE IN ('intern', 'recruiter'))
 );
 
 CREATE TABLE IF NOT EXISTS internview_schema.cvs(
@@ -54,6 +55,15 @@ CREATE TABLE IF NOT EXISTS internview_schema.applications(
     CONSTRAINT check_status CHECK (status IN ('pending', 'reviewed', 'approved', 'rejected', 'cancelled'))
 );
 
+CREATE TABLE IF NOT EXISTS internview_schema.refresh_tokens(
+    id uuid PRIMARY KEY NOT NULL,
+    user_id uuid NOT NULL,
+    token_hash text NOT NULL UNIQUE,
+    revoked boolean DEFAULT FALSE,
+    created_at timestamptz DEFAULT NOW(),
+    expires_at timestamptz NOT NULL
+);
+
 -- Added Foreign keys
 ALTER TABLE internview_schema.cvs
     ADD CONSTRAINT fk_cv_user FOREIGN KEY (user_id) REFERENCES internview_schema.users(id) ON DELETE CASCADE;
@@ -69,6 +79,9 @@ ALTER TABLE internview_schema.applications
 
 ALTER TABLE internview_schema.applications
     ADD CONSTRAINT fk_application_cv FOREIGN KEY (cv_id) REFERENCES internview_schema.cvs(id) ON DELETE CASCADE;
+
+ALTER TABLE internview_schema.refresh_tokens
+    ADD CONSTRAINT fk_refresh_token FOREIGN KEY (user_id) REFERENCES internview_schema.users(id) ON DELETE CASCADE;
 
 -- Create an index on 'internview_schema.cvs' for better query performance
 CREATE INDEX IF NOT EXISTS idx_cvs_user_id ON internview_schema.cvs(user_id);
@@ -87,3 +100,6 @@ CREATE INDEX IF NOT EXISTS idx_applications_cv_id ON internview_schema.applicati
 
 CREATE INDEX IF NOT EXISTS idx_applications_status ON internview_schema.applications(status);
 
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_id ON internview_schema.refresh_tokens(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_token_hash ON internview_schema.refresh_tokens(token_hash);

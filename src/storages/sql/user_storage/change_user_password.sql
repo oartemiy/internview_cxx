@@ -2,7 +2,8 @@
 UPDATE
     internview_schema.users
 SET
-    password_hash = $2
+    password_hash = $2,
+    password_version = password_version + 1
 WHERE
     id = $1
 RETURNING

@@ -73,11 +73,24 @@ userver_add_sql_library(
     *.sql
 )
 
+userver_add_sql_library(
+    ${PROJECT_NAME}_refresh_token_storage_sql
+    NAMESPACE
+    refresh_token_storage_queries
+    SOURCE_DIR
+    src/storages/sql/refresh_token_storage
+    OUTPUT_DIR
+    ${CMAKE_SOURCE_DIR}/src/storages/sql/refresh_token_storage
+    SQL_FILES
+    *.sql
+)
+
+
 target_include_directories(${PROJECT_NAME}_user_storage_sql PUBLIC ${CMAKE_SOURCE_DIR}/src/storages/sql/user_storage/include)
 target_include_directories(${PROJECT_NAME}_cv_storage_sql PUBLIC ${CMAKE_SOURCE_DIR}/src/storages/sql/cv_storage/include)
 target_include_directories(${PROJECT_NAME}_vacancy_storage_sql PUBLIC ${CMAKE_SOURCE_DIR}/src/storages/sql/vacancy_storage/include)
 target_include_directories(${PROJECT_NAME}_application_storage_sql PUBLIC ${CMAKE_SOURCE_DIR}/src/storages/sql/application_storage/include)
-
+target_include_directories(${PROJECT_NAME}_refresh_token_storage_sql PUBLIC ${CMAKE_SOURCE_DIR}/src/storages/sql/refresh_token_storage/include)
 
 add_library(
     ${PROJECT_NAME}_objs OBJECT
@@ -97,6 +110,7 @@ add_library(
     src/storages/cv_storage.cpp
     src/storages/vacancy_storage.cpp
     src/storages/application_storage.cpp
+    src/storages/refresh_token_storage.cpp
 
 
     # handlers
@@ -154,7 +168,8 @@ target_link_libraries(
     ${PROJECT_NAME}_cv_storage_sql
     ${PROJECT_NAME}_vacancy_storage_sql
     ${PROJECT_NAME}_application_storage_sql
-
+    ${PROJECT_NAME}_refresh_token_storage_sql
+    
     PRIVATE
     sodium
     jwt-cpp::jwt-cpp

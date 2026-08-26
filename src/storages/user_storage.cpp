@@ -74,7 +74,8 @@ dto::user::ResponseDTO UserStorage::CreateUser(const internview::dto::user::Crea
                                    dto.description,
                                    dto.profile_pic,
                                    pg_res[0][0].As<std::chrono::system_clock::time_point>(),
-                                   auth_service_ptr_->GenerateJwtToken(id, dto.role)};
+                                   auth_service_ptr_->GenerateAccessToken(id, dto.role, 0),
+                                   auth_service_ptr_->GenerateRefreshToken(id)};
         return resp_dto;
     } catch (userver::storages::postgres::UniqueViolation& e) {
         throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
@@ -178,10 +179,12 @@ dto::user::ResponseDTO UserStorage::LoginUser(const internview::dto::user::Login
         throw userver::server::handlers::ClientError(
             userver::formats::json::MakeObject("message", "Password is incorrect"));
     }
-    auto token = auth_service_ptr_->GenerateJwtToken(user.id, user.role);
-    auto resp_dto =
-        dto::user::ResponseDTO{user.id,          user.login,       user.name,       user.role,
-                               user.description, user.profile_pic, user.created_at, token};
+    auto access_token =
+        auth_service_ptr_->GenerateAccessToken(user.id, user.role, user.password_version);
+    auto refresh_token = auth_service_ptr_->GenerateRefreshToken(user.id);
+    auto resp_dto = dto::user::ResponseDTO{user.id,         user.login,       user.name,
+                                           user.role,       user.description, user.profile_pic,
+                                           user.created_at, access_token,     refresh_token};
     return resp_dto;
 }
 
@@ -211,6 +214,7 @@ void UserStorage::ChangeUserPassword(const dto::user::ChangePasswordDTO& dto) co
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
             "message", "User with login: " + user.login + " not found"));
     }
+    auth_service_ptr_->RevokeRefreshTokens(dto.id);
 }
 
 void UserStorage::UploadProfilePic(const boost::uuids::uuid& id,
