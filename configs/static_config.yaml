@@ -100,6 +100,11 @@ components_manager:
             method: POST
             task_processor: main-task-processor
 
+        handler-auth-logout-post:
+            path: /auth/logout
+            method: POST
+            task_processor: main-task-processor
+
         handler-user-delete:
             path: /users/me
             method: DELETE
