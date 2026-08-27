@@ -17,6 +17,7 @@
 #include "handlers/application/handler_applications_get.hpp"
 #include "handlers/auth/handler_auth_change_password_post.hpp"
 #include "handlers/auth/handler_auth_login_post.hpp"
+#include "handlers/auth/handler_auth_refresh_post.hpp"
 #include "handlers/auth/handler_auth_register_post.hpp"
 #include "handlers/cv/handler_cv_delete.hpp"
 #include "handlers/cv/handler_cv_get.hpp"
@@ -65,6 +66,7 @@ int main(int argc, char* argv[]) {
             .Append<internview::handlers::HandlerAuthRegisterPost>()
             .Append<internview::handlers::HandlerAuthLoginPost>()
             .Append<internview::handlers::HandlerAuthChangePasswordPost>()
+            .Append<internview::handlers::HandlerAuthRefreshPost>()
 
             .Append<internview::handlers::HandlerUserDelete>()
             .Append<internview::handlers::HandlerUserUpdate>()

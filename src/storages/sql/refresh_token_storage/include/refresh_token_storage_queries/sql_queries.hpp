@@ -11,6 +11,10 @@ namespace refresh_token_storage_queries::sql {
 extern const USERVER_NAMESPACE::storages::Query kCreate;
 
 
+// Generated from delete.sql
+extern const USERVER_NAMESPACE::storages::Query kDelete;
+
+
 // Generated from get_by_token_hash.sql
 extern const USERVER_NAMESPACE::storages::Query kGetByTokenHash;
 

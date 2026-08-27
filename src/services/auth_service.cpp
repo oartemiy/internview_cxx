@@ -4,6 +4,7 @@
 #include <userver/storages/secdist/provider_component.hpp>
 
 #include "components/internview_component.hpp"
+#include "userver/crypto/base64.hpp"
 #include "userver/crypto/hash.hpp"
 #include "userver/crypto/random.hpp"
 #include "userver/formats/json/value.hpp"
@@ -57,7 +58,7 @@ AuthService::AuthResult AuthService::CheckAuthorization(const std::string& http_
 }
 
 std::string AuthService::GenerateRefreshToken(const boost::uuids::uuid& user_id) const {
-    auto token = userver::crypto::GenerateRandomBlock(32);
+    auto token = userver::crypto::base64::Base64Encode(userver::crypto::GenerateRandomBlock(32));
     auto token_hash = userver::crypto::hash::Sha256(token);
 
     refresh_token_storage_->Create(user_id, token_hash);
@@ -67,6 +68,18 @@ std::string AuthService::GenerateRefreshToken(const boost::uuids::uuid& user_id)
 
 void AuthService::RevokeRefreshTokens(const boost::uuids::uuid& user_id) const {
     refresh_token_storage_->RevokeAllUserTokens(user_id);
+}
+
+AuthService::NewTokens AuthService::RefreshTokens(const std::string& refresh_token) const {
+    auto new_refresh_token = refresh_token_storage_->RefreshToken(refresh_token);
+    auto pg_res = pg_cluster_->Execute(
+        userver::v3_1::storages::postgres::ClusterHostType::kSlave,
+        "SELECT role, password_version FROM internview_schema.users WHERE id = $1",
+        new_refresh_token.user_id);
+    auto role = pg_res[0][0].As<std::string>();
+    auto password_version = pg_res[0][1].As<int>();
+    return {new_refresh_token.token,
+            GenerateAccessToken(new_refresh_token.user_id, role, password_version)};
 }
 
 }  // namespace internview::services

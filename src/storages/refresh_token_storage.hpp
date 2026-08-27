@@ -14,6 +14,11 @@ namespace internview::storages {
 // TODO: add documentation
 class RefreshTokenStorage {
 public:
+    struct NewRefreshToken {
+        std::string token;
+        boost::uuids::uuid user_id;
+    };
+
     explicit RefreshTokenStorage(const userver::components::ComponentConfig& config,
                                  const userver::components::ComponentContext& component_context,
                                  std::chrono::seconds limit = std::chrono::days(14));
@@ -26,8 +31,9 @@ public:
 
     void RevokeAllUserTokens(const boost::uuids::uuid& user_id) const;
 
-    // TODO: First thing to do
-    models::RefreshToken RefreshRefreshToken(const std::string& );
+    void DeleteToken(const boost::uuids::uuid& id) const;
+
+    NewRefreshToken RefreshToken(const std::string& refresh_token) const;
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;

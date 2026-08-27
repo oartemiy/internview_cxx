@@ -95,6 +95,11 @@ components_manager:
             method: POST
             task_processor: main-task-processor
 
+        handler-auth-refresh-post:
+            path: /auth/refresh
+            method: POST
+            task_processor: main-task-processor
+
         handler-user-delete:
             path: /users/me
             method: DELETE

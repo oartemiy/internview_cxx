@@ -20,6 +20,22 @@ INSERT INTO internview_schema.refresh_tokens(id, user_id, token_hash, expires_at
 
 
 
+// Generated from delete.sql
+const USERVER_NAMESPACE::storages::Query kDelete = {
+R"-(
+-- Delete rows from 'internview_schema.refresh_tokens' where condition is met
+DELETE FROM internview_schema.refresh_tokens
+WHERE id = $1;
+
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("delete"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
+
+
+
 // Generated from get_by_token_hash.sql
 const USERVER_NAMESPACE::storages::Query kGetByTokenHash = {
 R"-(

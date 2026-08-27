@@ -9,6 +9,9 @@ def sql_files() -> set:
         # Generated from create.sql
         "create",
     
+        # Generated from delete.sql
+        "delete",
+    
         # Generated from get_by_token_hash.sql
         "get_by_token_hash",
     

@@ -16,10 +16,16 @@ namespace internview::services {
 class AuthService {
 public:
     struct AuthResult {
-        std::string token;
+        std::string access_token;
         boost::uuids::uuid user_id;
         std::string role;
     };
+
+    struct NewTokens {
+        std::string access_token;
+        std::string refresh_token;
+    };
+
 
     AuthService(const userver::components::ComponentContext& component_context,
                 std::shared_ptr<storages::RefreshTokenStorage> refresh_token_storage_ptr);
@@ -51,6 +57,8 @@ public:
     std::string GenerateRefreshToken(const boost::uuids::uuid& user_id) const;
 
     void RevokeRefreshTokens(const boost::uuids::uuid& user_id) const;
+
+    NewTokens RefreshTokens(const std::string& refresh_token) const;
 
 private:
     internview::services::JwtService jwt_service_;

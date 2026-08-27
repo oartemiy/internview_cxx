@@ -123,6 +123,7 @@ add_library(
     src/handlers/auth/handler_auth_register_post.cpp
     src/handlers/auth/handler_auth_login_post.cpp
     src/handlers/auth/handler_auth_change_password_post.cpp
+    src/handlers/auth/handler_auth_refresh_post.cpp
 
 
     # user
