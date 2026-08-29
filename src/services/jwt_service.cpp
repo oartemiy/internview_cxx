@@ -12,7 +12,7 @@
 namespace internview::services {
 
 JwtService::JwtService(const std::string& secret_code)
-    : secret_key_(secret_code), token_expiration_(std::chrono::hours(24)) {
+    : secret_key_(secret_code), token_expiration_(std::chrono::minutes(30)) {
 }
 
 std::string JwtService::GenerateToken(const boost::uuids::uuid& user_id, const std::string& role,

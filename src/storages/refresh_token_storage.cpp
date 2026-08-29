@@ -17,7 +17,6 @@
 #include "userver/storages/postgres/io/chrono.hpp"
 #include "userver/storages/postgres/io/row_types.hpp"
 #include "userver/utils/boost_uuid7.hpp"
-#include "userver/utils/datetime_light.hpp"
 
 namespace internview::storages {
 

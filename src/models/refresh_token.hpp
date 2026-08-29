@@ -2,6 +2,7 @@
 
 #include <boost/uuid.hpp>
 #include <chrono>
+
 #include "userver/storages/postgres/io/io_fwd.hpp"
 #include "userver/storages/postgres/io/pg_types.hpp"
 
@@ -25,4 +26,4 @@ struct CppToUserPg<internview::models::RefreshToken> {
     static constexpr DBTypeName postgres_name = "internview_schema.refresh_tokens";  // NOLINT
 };
 
-}
+}  // namespace userver::storages::postgres::io

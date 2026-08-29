@@ -1,9 +1,9 @@
 #include "auth_service.hpp"
 
+#include <chrono>
 #include <string_view>
 #include <userver/storages/secdist/provider_component.hpp>
 
-#include "components/internview_component.hpp"
 #include "userver/crypto/base64.hpp"
 #include "userver/crypto/hash.hpp"
 #include "userver/crypto/random.hpp"
@@ -11,8 +11,6 @@
 #include "userver/server/handlers/exceptions.hpp"
 #include "userver/storages/postgres/cluster_types.hpp"
 #include "userver/storages/postgres/component.hpp"
-#include "userver/storages/postgres/io/row_types.hpp"
-#include "userver/utils/boost_uuid7.hpp"
 
 namespace internview::services {
 
@@ -26,10 +24,13 @@ AuthService::AuthService(const userver::components::ComponentContext& component_
                        .As<std::string>()),
       refresh_token_storage_(refresh_token_storage_ptr),
       pg_cluster_(component_context.FindComponent<userver::components::Postgres>("postgres-db")
-                      .GetCluster()) {
+                      .GetCluster()),
+      cache_(16, 256) {
+    // !NOTE:
+    cache_.SetMaxLifetime(std::chrono::minutes(30));  // = access_token_lifetime
 }
 
-AuthService::AuthResult AuthService::CheckAuthorization(const std::string& http_auth_header) const {
+AuthService::AuthResult AuthService::CheckAuthorization(const std::string& http_auth_header) {
     if (http_auth_header.empty()) {
         throw userver::server::handlers::Unauthorized(
             userver::formats::json::MakeObject("message", "No authorization"));
@@ -44,16 +45,16 @@ AuthService::AuthResult AuthService::CheckAuthorization(const std::string& http_
             userver::formats::json::MakeObject("message", "Empty JWT token"));
     }
     auto [id, role, version] = jwt_service_.VerifyToken(token);
-    // TODO: make autorization without queries to db
-    auto pg_res = pg_cluster_->Execute(
-        userver::v3_1::storages::postgres::ClusterHostType::kSlave,
-        "SELECT password_version FROM internview_schema.users WHERE id = $1", id);
-    int password_version = pg_res.AsSingleRow<int>();
-    if (password_version == version) {
+    auto auth_cache_info = cache_.GetOptionalNoUpdate(id);
+    if (!auth_cache_info) {
         return {token, id, role};
     } else {
-        throw userver::server::handlers::Unauthorized(userver::formats::json::MakeObject(
-            "message", "User has changed password, this access token has expired"));
+        if (auth_cache_info->password_version == version) {
+            return {token, id, role};
+        } else {
+            throw userver::server::handlers::Unauthorized(userver::formats::json::MakeObject(
+                "message", "User has changed password, this access token has expired"));
+        }
     }
 }
 
@@ -80,6 +81,11 @@ AuthService::NewTokens AuthService::RefreshTokens(const std::string& refresh_tok
     auto password_version = pg_res[0][1].As<int>();
     return {new_refresh_token.token,
             GenerateAccessToken(new_refresh_token.user_id, role, password_version)};
+}
+
+void AuthService::MarkUserAsChanged(const boost::uuids::uuid& user_id, int password_version,
+                                    const std::string& role) {
+    cache_.Put(user_id, {password_version, role});
 }
 
 }  // namespace internview::services

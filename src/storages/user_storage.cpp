@@ -215,6 +215,8 @@ void UserStorage::ChangeUserPassword(const dto::user::ChangePasswordDTO& dto) co
             "message", "User with login: " + user.login + " not found"));
     }
     auth_service_ptr_->RevokeRefreshTokens(dto.id);
+    // Mark user as changed
+    auth_service_ptr_->MarkUserAsChanged(dto.id, user.password_version + 1, user.role);
 }
 
 void UserStorage::UploadProfilePic(const boost::uuids::uuid& id,

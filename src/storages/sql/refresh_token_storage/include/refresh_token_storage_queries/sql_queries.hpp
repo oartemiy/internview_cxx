@@ -6,22 +6,17 @@
 
 namespace refresh_token_storage_queries::sql {
 
-
 // Generated from create.sql
 extern const USERVER_NAMESPACE::storages::Query kCreate;
-
 
 // Generated from delete.sql
 extern const USERVER_NAMESPACE::storages::Query kDelete;
 
-
 // Generated from get_by_token_hash.sql
 extern const USERVER_NAMESPACE::storages::Query kGetByTokenHash;
 
-
 // Generated from revoke.sql
 extern const USERVER_NAMESPACE::storages::Query kRevoke;
-
 
 // Generated from revoke_all_user_tokens.sql
 extern const USERVER_NAMESPACE::storages::Query kRevokeAllUserTokens;

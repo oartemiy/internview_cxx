@@ -7,9 +7,8 @@
 
 #include "services/jwt_service.hpp"
 #include "storages/refresh_token_storage.hpp"
+#include "userver/cache/expirable_lru_cache.hpp"
 #include "userver/components/component_context.hpp"
-#include "userver/crypto/hash.hpp"
-#include "userver/storages/postgres/cluster.hpp"
 
 namespace internview::services {
 
@@ -26,6 +25,10 @@ public:
         std::string refresh_token;
     };
 
+    struct AuthInfo {
+        int password_version;
+        std::string role;
+    };
 
     AuthService(const userver::components::ComponentContext& component_context,
                 std::shared_ptr<storages::RefreshTokenStorage> refresh_token_storage_ptr);
@@ -37,10 +40,7 @@ public:
      * @return AuthResult
      * @throw userver::server::handlers::Unauthorized
      */
-    // TODO: add temporary cache for deleted user (their access token expires in 24 hours)
-    AuthResult CheckAuthorization(const std::string& http_auth_header) const;
-
-    
+    AuthResult CheckAuthorization(const std::string& http_auth_header);
 
     /**
      * @brief Generated JWT token
@@ -54,17 +54,45 @@ public:
         return jwt_service_.GenerateToken(user_id, role, password_version);
     }
 
+    /**
+     * @brief Generates single refresh token
+     *
+     * @param user_id
+     * @return std::string
+     */
     std::string GenerateRefreshToken(const boost::uuids::uuid& user_id) const;
 
+    /**
+     * @brief Revokes all user's refresh tokens
+     *
+     * @param user_id
+     */
     void RevokeRefreshTokens(const boost::uuids::uuid& user_id) const;
 
+    /**
+     * @brief Generates new access and refresh tokens
+     *
+     * @param refresh_token
+     * @return NewTokens
+     */
     NewTokens RefreshTokens(const std::string& refresh_token) const;
+
+    /**
+     * @brief Add user to cache to omit database quiry while last access token alive
+     *
+     * @param user_id
+     * @param password_version
+     * @param role
+     */
+    void MarkUserAsChanged(const boost::uuids::uuid& user_id, int password_version,
+                           const std::string& role);
 
 private:
     internview::services::JwtService jwt_service_;
     std::shared_ptr<internview::storages::RefreshTokenStorage> refresh_token_storage_;
-    // TODO: rework auth_service
+
     userver::storages::postgres::ClusterPtr pg_cluster_;
+    userver::cache::ExpirableLruCache<boost::uuids::uuid, AuthInfo> cache_;
 };
 
 }  // namespace internview::services
