@@ -47,6 +47,8 @@
 
 // ?: Add pool for slave HOSTTYPE
 
+// TODO: add search for vacancies
+
 int main(int argc, char* argv[]) {
     auto component_list =
         userver::components::MinimalServerComponentList()

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <optional>
 #include <userver/storages/postgres/cluster.hpp>
 #include <vector>
 
