@@ -67,6 +67,8 @@ public:
      */
     NewRefreshToken RefreshToken(const std::string& refresh_token) const;
 
+    void ClearExpiredTokens() const;
+
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;
     std::chrono::seconds limit_;

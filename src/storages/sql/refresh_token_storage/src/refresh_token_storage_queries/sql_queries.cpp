@@ -4,6 +4,19 @@
 
 namespace refresh_token_storage_queries::sql {
 
+// Generated from clear_expired_tokens.sql
+const USERVER_NAMESPACE::storages::Query kClearExpiredTokens = {
+    R"-(
+DELETE FROM internview_schema.refresh_tokens
+WHERE revoked = TRUE
+    OR expires_at <= NOW();
+
+
+)-",
+    USERVER_NAMESPACE::storages::Query::NameLiteral("clear_expired_tokens"),
+    USERVER_NAMESPACE::storages::Query::LogMode::kFull,
+};
+
 // Generated from create.sql
 const USERVER_NAMESPACE::storages::Query kCreate = {
     R"-(

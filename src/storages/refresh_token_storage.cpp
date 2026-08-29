@@ -94,4 +94,9 @@ RefreshTokenStorage::NewRefreshToken RefreshTokenStorage::RefreshToken(
     }
 }
 
+void RefreshTokenStorage::ClearExpiredTokens() const {
+    auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
+                                       refresh_token_storage_queries::sql::kClearExpiredTokens);
+}
+
 }  // namespace internview::storages

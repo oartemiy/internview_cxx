@@ -6,6 +6,9 @@ import pytest
 @pytest.fixture(scope='session')
 def sql_files() -> set:
     return set([
+        # Generated from clear_expired_tokens.sql
+        "clear_expired_tokens",
+    
         # Generated from create.sql
         "create",
     

@@ -103,3 +103,5 @@ CREATE INDEX IF NOT EXISTS idx_applications_status ON internview_schema.applicat
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_id ON internview_schema.refresh_tokens(user_id);
 
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_token_hash ON internview_schema.refresh_tokens(token_hash);
+
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_cleanup ON internview_schema.refresh_tokens(revoked, expires_at);

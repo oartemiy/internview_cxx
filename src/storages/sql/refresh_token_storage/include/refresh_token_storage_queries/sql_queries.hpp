@@ -6,6 +6,9 @@
 
 namespace refresh_token_storage_queries::sql {
 
+// Generated from clear_expired_tokens.sql
+extern const USERVER_NAMESPACE::storages::Query kClearExpiredTokens;
+
 // Generated from create.sql
 extern const USERVER_NAMESPACE::storages::Query kCreate;
 

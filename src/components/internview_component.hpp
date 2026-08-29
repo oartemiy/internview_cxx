@@ -12,6 +12,7 @@
 #include "userver/components/component_base.hpp"
 #include "userver/components/component_config.hpp"
 #include "userver/components/component_context.hpp"
+#include "userver/utils/periodic_task.hpp"
 
 namespace internview::components {
 
@@ -56,6 +57,8 @@ private:
     std::shared_ptr<internview::storages::CvStorage> cv_storage_ptr_;
     std::shared_ptr<internview::storages::VacancyStorage> vacancy_storage_ptr_;
     std::shared_ptr<internview::storages::ApplicationStorage> application_storage_ptr_;
+
+    userver::utils::PeriodicTask periodic_task_;
 };
 
 }  // namespace internview::components
