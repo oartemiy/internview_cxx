@@ -97,4 +97,10 @@ inline auto Parse(const userver::formats::json::Value& json,
     return dto;
 }
 
+struct GetDTO {
+    std::optional<int> limit = 15;
+    std::optional<int> offset = 0;
+    std::optional<std::string> query = std::nullopt;
+};
+
 }  // namespace internview::dto::vacancy

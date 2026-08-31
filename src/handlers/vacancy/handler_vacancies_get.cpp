@@ -4,6 +4,7 @@
 #include <string>
 
 #include "components/internview_component.hpp"
+#include "dto/vacancy_dto.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
 #include "utils/common_handler.hpp"
 
@@ -20,15 +21,18 @@ HandlerVacanciesGet::HandlerVacanciesGet(const ComponentConfig& config,
 Value HandlerVacanciesGet::HandleRequestJsonThrow(const HttpRequest& request,
                                                   [[maybe_unused]] const Value& request_json,
                                                   [[maybe_unused]] RequestContext& context) const {
-    int offset = 0;
-    int limit = 15;
+    dto::vacancy::GetDTO dto;
+
     if (request.HasArg("limit")) {
-        limit = std::stoi(request.GetArg("limit"));
+        dto.limit = std::stoi(request.GetArg("limit"));
     }
     if (request.HasArg("offset")) {
-        offset = std::stoi(request.GetArg("offset"));
+        dto.offset = std::stoi(request.GetArg("offset"));
     }
-    auto res = vacancy_storage_ptr_->GetVacancies(limit, offset);
+    if (request.HasArg("query")) {
+        dto.query = request.GetArg("query");
+    }
+    auto res = vacancy_storage_ptr_->GetVacancies(dto);
     return ValueBuilder(res).ExtractValue();
 }
 

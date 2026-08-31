@@ -45,9 +45,11 @@ internview::models::Vacancy VacancyStorage::CreateVacancy(const dto::vacancy::Cr
     }
 }
 
-std::vector<internview::models::Vacancy> VacancyStorage::GetVacancies(int limit, int offset) {
+std::vector<internview::models::Vacancy> VacancyStorage::GetVacancies(
+    const dto::vacancy::GetDTO& dto) {
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
-                                       vacancy_storage_queries::sql::kGetVacancies, limit, offset);
+                                       vacancy_storage_queries::sql::kGetVacancies, dto.limit,
+                                       dto.offset, dto.query);
     std::vector<models::Vacancy> vec;
     vec.reserve(pg_res.Size());
     for (const auto& row : pg_res) {

@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS internview_schema.users(
     description text,
     profile_pic text,
     created_at timestamptz DEFAULT NOW(),
-    password_version INTEGER DEFAULT 0,
+    password_version integer DEFAULT 0,
     CONSTRAINT user_role_check CHECK (ROLE IN ('intern', 'recruiter'))
 );
 
@@ -64,6 +64,14 @@ CREATE TABLE IF NOT EXISTS internview_schema.refresh_tokens(
     expires_at timestamptz NOT NULL
 );
 
+ALTER TABLE internview_schema.vacancies
+    ADD COLUMN search_vector tsvector GENERATED ALWAYS AS (
+    setweight(to_tsvector('russian', coalesce(title, '')), 'A') ||
+    setweight(to_tsvector('english', coalesce(title, '')), 'A') ||
+    setweight(to_tsvector('russian', coalesce(description, '')), 'B') ||
+    setweight(to_tsvector('english', coalesce(description, '')), 'B')
+) STORED;
+
 -- Added Foreign keys
 ALTER TABLE internview_schema.cvs
     ADD CONSTRAINT fk_cv_user FOREIGN KEY (user_id) REFERENCES internview_schema.users(id) ON DELETE CASCADE;
@@ -105,3 +113,5 @@ CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_id ON internview_schema.refre
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_token_hash ON internview_schema.refresh_tokens(token_hash);
 
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_cleanup ON internview_schema.refresh_tokens(revoked, expires_at);
+
+CREATE INDEX idx_vacancies_search_vector ON internview_schema.vacancies USING GIN(search_vector);

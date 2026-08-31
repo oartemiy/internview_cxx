@@ -6,11 +6,11 @@ namespace vacancy_storage_queries::sql {
 
 // Generated from create_vacancy.sql
 const USERVER_NAMESPACE::storages::Query kCreateVacancy = {
-    R"-(
+R"-(
 INSERT INTO internview_schema.vacancies(id, recruiter_id, title, description, requirements, salary_range, location, work_mode, experience_level)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 RETURNING
-    *;
+    id, recruiter_id, title, description, requirements, salary_range, location, work_mode, experience_level, is_active, created_at, updated_at;
 
 
 )-",
@@ -18,9 +18,12 @@ RETURNING
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
+
+
+
 // Generated from delete_vacancy.sql
 const USERVER_NAMESPACE::storages::Query kDeleteVacancy = {
-    R"-(
+R"-(
 DELETE FROM internview_schema.vacancies
 WHERE id = $1
     AND recruiter_id = $2
@@ -32,9 +35,12 @@ RETURNING
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
+
+
+
 // Generated from get_recruiter_id_by_application_id.sql
 const USERVER_NAMESPACE::storages::Query kGetRecruiterIdByApplicationId = {
-    R"-(
+R"-(
 SELECT
     recruiter_id
 FROM
@@ -54,12 +60,26 @@ WHERE
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
+
+
+
 // Generated from get_recruiter_vacancies.sql
 const USERVER_NAMESPACE::storages::Query kGetRecruiterVacancies = {
-    R"-(
+R"-(
 -- Select all rows from 'internview_schema.vacancies'
 SELECT
-    *
+    id,
+    recruiter_id,
+    title,
+    description,
+    requirements,
+    salary_range,
+    location,
+    work_mode,
+    experience_level,
+    is_active,
+    created_at,
+    updated_at
 FROM
     internview_schema.vacancies
 WHERE
@@ -71,16 +91,33 @@ WHERE
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
+
+
+
 // Generated from get_vacancies.sql
 const USERVER_NAMESPACE::storages::Query kGetVacancies = {
-    R"-(
+R"-(
 -- Select all rows from 'internview_schema.vacancies'
 SELECT
-    *
+    id,
+    recruiter_id,
+    title,
+    description,
+    requirements,
+    salary_range,
+    location,
+    work_mode,
+    experience_level,
+    is_active,
+    created_at,
+    updated_at
 FROM
     internview_schema.vacancies
 WHERE
     is_active = TRUE
+    AND ($3 IS NULL
+        OR search_vector @@ plainto_tsquery('russian', $3)
+        OR search_vector @@ plainto_tsquery('english', $3))
 ORDER BY
     created_at DESC
 LIMIT $1 OFFSET $2;
@@ -91,12 +128,26 @@ LIMIT $1 OFFSET $2;
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
+
+
+
 // Generated from get_vacancy_by_id.sql
 const USERVER_NAMESPACE::storages::Query kGetVacancyById = {
-    R"-(
+R"-(
 -- Select all rows from 'internview_schema.vacancies'
 SELECT
-    *
+    id,
+    recruiter_id,
+    title,
+    description,
+    requirements,
+    salary_range,
+    location,
+    work_mode,
+    experience_level,
+    is_active,
+    created_at,
+    updated_at
 FROM
     internview_schema.vacancies
 WHERE
@@ -108,9 +159,12 @@ WHERE
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
+
+
+
 // Generated from toggle_vacancy.sql
 const USERVER_NAMESPACE::storages::Query kToggleVacancy = {
-    R"-(
+R"-(
 -- Update rows in 'internview_schema.vacancies' where condition is met
 UPDATE
     internview_schema.vacancies
@@ -118,17 +172,34 @@ SET
     is_active = NOT is_active,
     updated_at = NOW()
 WHERE
-    id = $1 AND recruiter_id = $2
+    id = $1
+    AND recruiter_id = $2
 RETURNING
-    *
+    id,
+    recruiter_id,
+    title,
+    description,
+    requirements,
+    salary_range,
+    location,
+    work_mode,
+    experience_level,
+    is_active,
+    created_at,
+    updated_at;
+
+
 )-",
     USERVER_NAMESPACE::storages::Query::NameLiteral("toggle_vacancy"),
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
+
+
+
 // Generated from update_vacancy.sql
 const USERVER_NAMESPACE::storages::Query kUpdateVacancy = {
-    R"-(
+R"-(
 -- Update rows in 'internview_schema.vacancies' where condition is met
 UPDATE
     internview_schema.vacancies
@@ -151,5 +222,6 @@ RETURNING
     USERVER_NAMESPACE::storages::Query::NameLiteral("update_vacancy"),
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
+
 
 }  // namespace vacancy_storage_queries::sql

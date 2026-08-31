@@ -35,7 +35,7 @@ public:
      * @param offset
      * @return std::vector<internview::models::Vacancy>
      */
-    std::vector<internview::models::Vacancy> GetVacancies(int limit, int offset);
+    std::vector<internview::models::Vacancy> GetVacancies(const dto::vacancy::GetDTO& dto);
 
     /**
      * @brief Get the Vacancy By Id object
