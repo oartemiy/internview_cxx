@@ -28,8 +28,7 @@ RefreshTokenStorage::RefreshTokenStorage(
       limit_(limit) {
 }
 
-void RefreshTokenStorage::Create(const boost::uuids::uuid& user_id,
-                                 const std::string& token_hash) const {
+void RefreshTokenStorage::Create(const boost::uuids::uuid& user_id, const std::string& token_hash) {
     boost::uuids::uuid id = userver::utils::generators::GenerateBoostUuidV7();
     auto expires_at =
         userver::storages::postgres::TimePointTz{std::chrono::system_clock::now() + limit_};
@@ -44,7 +43,7 @@ void RefreshTokenStorage::Create(const boost::uuids::uuid& user_id,
 }
 
 std::optional<models::RefreshToken> RefreshTokenStorage::GetByTokenHash(
-    const std::string& token_hash) const {
+    const std::string& token_hash) {
 
     auto pg_res =
         pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
@@ -55,24 +54,24 @@ std::optional<models::RefreshToken> RefreshTokenStorage::GetByTokenHash(
     return pg_res.AsSingleRow<models::RefreshToken>(userver::v3_1::storages::postgres::kRowTag);
 }
 
-void RefreshTokenStorage::Revoke(const boost::uuids::uuid& id) const {
+void RefreshTokenStorage::Revoke(const boost::uuids::uuid& id) {
     auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
                                        refresh_token_storage_queries::sql::kRevoke, id);
 }
 
-void RefreshTokenStorage::RevokeAllUserTokens(const boost::uuids::uuid& user_id) const {
+void RefreshTokenStorage::RevokeAllUserTokens(const boost::uuids::uuid& user_id) {
     auto pg_res =
         pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
                              refresh_token_storage_queries::sql::kRevokeAllUserTokens, user_id);
 }
 
-void RefreshTokenStorage::DeleteToken(const boost::uuids::uuid& id) const {
+void RefreshTokenStorage::DeleteToken(const boost::uuids::uuid& id) {
     auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
                                        refresh_token_storage_queries::sql::kDelete, id);
 }
 
 RefreshTokenStorage::NewRefreshToken RefreshTokenStorage::RefreshToken(
-    const std::string& refresh_token) const {
+    const std::string& refresh_token) {
     auto token_hash = userver::crypto::hash::Sha256(refresh_token);
     auto token_opt = GetByTokenHash(token_hash);
     if (token_opt) {
@@ -94,7 +93,7 @@ RefreshTokenStorage::NewRefreshToken RefreshTokenStorage::RefreshToken(
     }
 }
 
-void RefreshTokenStorage::ClearExpiredTokens() const {
+void RefreshTokenStorage::ClearExpiredTokens() {
     auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
                                        refresh_token_storage_queries::sql::kClearExpiredTokens);
 }

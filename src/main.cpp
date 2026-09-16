@@ -46,6 +46,8 @@
 #include "userver/storages/secdist/provider_component.hpp"
 
 // ?: Add pool for slave HOSTTYPE
+// TODO: add DI container for db
+// TODO: add DI container for files storage
 
 int main(int argc, char* argv[]) {
     auto component_list =

@@ -3,7 +3,6 @@
 #include <sodium.h>
 
 #include <cctype>
-#include <chrono>
 #include <filesystem>
 #include <optional>
 #include <stdexcept>
@@ -19,19 +18,18 @@
 #include "userver/storages/postgres/component.hpp"
 #include "userver/storages/postgres/exceptions.hpp"
 #include "userver/storages/postgres/io/row_types.hpp"
-#include "userver/utils/boost_uuid7.hpp"
 #include "userver/utils/uuid4.hpp"
 #include "utils/password.hpp"
 
 namespace internview::storages {
 
-UserStorage::UserStorage(std::shared_ptr<services::AuthService> auth_service_ptr,
+UserStorage::UserStorage(/*std::shared_ptr<services::AuthService> auth_service_ptr,*/
                          const userver::components::ComponentConfig& config,
                          const userver::components::ComponentContext& component_context)
     : crypto_tp_(component_context.GetTaskProcessor("crypt-task-processor")),
       pg_cluster_(component_context.FindComponent<userver::components::Postgres>("postgres-db")
                       .GetCluster()),
-      auth_service_ptr_(auth_service_ptr),
+    //   auth_service_ptr_(auth_service_ptr),
       file_service_(config, component_context) {
     // !NOTE: For password verifing and hashing
     if (sodium_init() != 0) {
@@ -39,7 +37,7 @@ UserStorage::UserStorage(std::shared_ptr<services::AuthService> auth_service_ptr
     }
 }
 
-models::User UserStorage::GetUserById(const boost::uuids::uuid& id) const {
+models::User UserStorage::GetUserById(const boost::uuids::uuid& id) {
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
                                        user_storage_queries::sql::kGetUserById, id);
 
@@ -49,38 +47,6 @@ models::User UserStorage::GetUserById(const boost::uuids::uuid& id) const {
     }
     auto user = pg_res.AsSingleRow<internview::models::User>(userver::storages::postgres::kRowTag);
     return user;
-}
-
-dto::user::ResponseDTO UserStorage::CreateUser(const internview::dto::user::CreateDTO& dto) const {
-    auto id = userver::utils::generators::GenerateBoostUuidV7();
-    auto password_hash_fut = userver::engine::AsyncNoTracing(
-        crypto_tp_, [&dto]() { return internview::utils::HashPassword(dto.password); });
-
-    auto password_hash = password_hash_fut.Get();
-    if (password_hash.empty()) {
-        throw std::runtime_error("Sodium error");
-    }
-    try {
-        auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
-                                           user_storage_queries::sql::kCreateUser, id, dto.login,
-                                           password_hash, dto.name, dto.role, dto.description,
-                                           dto.profile_pic);
-
-        auto resp_dto =
-            dto::user::ResponseDTO{id,
-                                   dto.login,
-                                   dto.name,
-                                   dto.role,
-                                   dto.description,
-                                   dto.profile_pic,
-                                   pg_res[0][0].As<std::chrono::system_clock::time_point>(),
-                                   auth_service_ptr_->GenerateAccessToken(id, dto.role, 0),
-                                   auth_service_ptr_->GenerateRefreshToken(id)};
-        return resp_dto;
-    } catch (userver::storages::postgres::UniqueViolation& e) {
-        throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
-            "message", "Login: " + dto.login + " is taken. Try another one"));
-    }
 }
 
 dto::user::ResponseDTO UserStorage::UpdateUser(const internview::dto::user::UpdateDTO& dto) {
@@ -157,66 +123,6 @@ void UserStorage::DeleteUser(const internview::dto::user::DeleteDTO& dto) {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
             "message", "User with login: " + dto.login + " not found"));
     }
-}
-
-dto::user::ResponseDTO UserStorage::LoginUser(const internview::dto::user::LoginDTO& dto) const {
-
-    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
-                                       user_storage_queries::sql::kLoginUser, dto.login);
-    if (pg_res.IsEmpty()) {
-        throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
-            "message", "User with login: " + dto.login + " not found"));
-    }
-    auto user = pg_res.AsSingleRow<internview::models::User>(userver::storages::postgres::kRowTag);
-
-    auto verify_res_fut = userver::engine::AsyncNoTracing(crypto_tp_, [&dto, &user] {
-        return internview::utils::VerifyPassword(dto.password, user.password_hash);
-    });
-
-    auto verify_res = verify_res_fut.Get();
-
-    if (!verify_res) {
-        throw userver::server::handlers::ClientError(
-            userver::formats::json::MakeObject("message", "Password is incorrect"));
-    }
-    auto access_token =
-        auth_service_ptr_->GenerateAccessToken(user.id, user.role, user.password_version);
-    auto refresh_token = auth_service_ptr_->GenerateRefreshToken(user.id);
-    auto resp_dto = dto::user::ResponseDTO{user.id,         user.login,       user.name,
-                                           user.role,       user.description, user.profile_pic,
-                                           user.created_at, access_token,     refresh_token};
-    return resp_dto;
-}
-
-void UserStorage::ChangeUserPassword(const dto::user::ChangePasswordDTO& dto) const {
-    auto user = GetUserById(dto.id);
-
-    auto verify_res_fut = userver::engine::AsyncNoTracing(crypto_tp_, [&dto, &user] {
-        return internview::utils::VerifyPassword(dto.old_password, user.password_hash);
-    });
-
-    auto verify_res = verify_res_fut.Get();
-
-    if (!verify_res) {
-        throw userver::server::handlers::ClientError(
-            userver::formats::json::MakeObject("message", "Password is incorrect"));
-    }
-
-    auto new_password_hash_fut = userver::engine::AsyncNoTracing(
-        crypto_tp_, [&dto]() { return internview::utils::HashPassword(dto.new_password); });
-
-    auto new_password_hash = new_password_hash_fut.Get();
-
-    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
-                                       user_storage_queries::sql::kChangeUserPassword, dto.id,
-                                       new_password_hash);
-    if (pg_res.IsEmpty()) {
-        throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
-            "message", "User with login: " + user.login + " not found"));
-    }
-    auth_service_ptr_->RevokeRefreshTokens(dto.id);
-    // Mark user as changed
-    auth_service_ptr_->MarkUserAsChanged(dto.id, user.password_version + 1, user.role);
 }
 
 void UserStorage::UploadProfilePic(const boost::uuids::uuid& id,

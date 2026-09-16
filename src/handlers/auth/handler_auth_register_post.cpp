@@ -10,7 +10,6 @@ namespace internview::handlers {
 HandlerAuthRegisterPost::HandlerAuthRegisterPost(const ComponentConfig& config,
                                                  const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
-      user_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetUserStoragePtr()),
       auth_service_ptr_(
           component_context.FindComponent<InternviewComponent>().GetAuthServicePtr()) {
 }
@@ -31,7 +30,7 @@ Value HandlerAuthRegisterPost::HandleRequestJsonThrow(
         throw userver::server::handlers::ClientError(
             MakeObject("message", "Password must be at least 2 chars"));
     }
-    auto res = user_storage_ptr_->CreateUser(dto);
+    auto res = auth_service_ptr_->Register(dto);
     return ValueBuilder(res).ExtractValue();
 }
 

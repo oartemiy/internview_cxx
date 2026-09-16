@@ -1,10 +1,12 @@
 #pragma once
 
+#include <dto/user_dto.hpp>
 #include <memory>
 #include <string>
 #include <userver/formats/json/serialize.hpp>
 #include <userver/formats/json/value_builder.hpp>
 
+#include "models/user.hpp"
 #include "services/jwt_service.hpp"
 #include "storages/refresh_token_storage.hpp"
 #include "userver/cache/expirable_lru_cache.hpp"
@@ -87,12 +89,43 @@ public:
     void MarkUserAsChanged(const boost::uuids::uuid& user_id, int password_version,
                            const std::string& role);
 
+    /**
+     * @brief Login User
+     *
+     * @param dto
+     * @return dto::user::ResponseDTO
+     * @throws userver::server::handlers::ClientError
+     */
+    internview::dto::user::ResponseDTO LoginUser(const internview::dto::user::LoginDTO& dto);
+
+    /**
+     * @brief Change user's password
+     *
+     * @param dto
+     * @throws userver::server::handlers::ResourceNotFound
+               userver::server::handlers::ClientError
+     */
+    void ChangeUserPassword(const dto::user::ChangePasswordDTO& dto);
+
+    /**
+     * @brief Create a User object
+     *
+     * @param dto
+     * @return dto::user::ResponseDTO
+     * @throws userver::server::handlers::ConflictError
+               std::runtime_error
+     */
+    dto::user::ResponseDTO Register(const internview::dto::user::CreateDTO& dto);
+
 private:
     internview::services::JwtService jwt_service_;
     std::shared_ptr<internview::storages::RefreshTokenStorage> refresh_token_storage_;
 
     userver::storages::postgres::ClusterPtr pg_cluster_;
     userver::cache::ExpirableLruCache<boost::uuids::uuid, AuthInfo> cache_;
+    userver::engine::TaskProcessor& crypto_tp_;
+
+    models::User GetUserById(const boost::uuids::uuid& id);
 };
 
 }  // namespace internview::services

@@ -9,7 +9,6 @@ namespace internview::handlers {
 HandlerAuthLoginPost::HandlerAuthLoginPost(const ComponentConfig& config,
                                            const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
-      user_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetUserStoragePtr()),
       auth_service_ptr_(
           component_context.FindComponent<InternviewComponent>().GetAuthServicePtr()) {
 }
@@ -18,7 +17,7 @@ Value HandlerAuthLoginPost::HandleRequestJsonThrow([[maybe_unused]] const HttpRe
                                                    const Value& request_json,
                                                    [[maybe_unused]] RequestContext& context) const {
     auto dto = request_json.As<dto::user::LoginDTO>();
-    auto responce = user_storage_ptr_->LoginUser(dto);
+    auto responce = auth_service_ptr_->LoginUser(dto);
     return ValueBuilder(responce).ExtractValue();
 }
 

@@ -5,7 +5,6 @@
 
 #include "dto/vacancy_dto.hpp"
 #include "models/vacancy.hpp"
-#include "services/auth_service.hpp"
 #include "userver/components/component_config.hpp"
 #include "userver/components/component_context.hpp"
 #include "userver/storages/postgres/postgres_fwd.hpp"
@@ -15,8 +14,7 @@ namespace internview::storages {
 
 class VacancyStorage {
 public:
-    VacancyStorage(std::shared_ptr<internview::services::AuthService> auth_service,
-                   const userver::components::ComponentConfig& config,
+    VacancyStorage(const userver::components::ComponentConfig& config,
                    const userver::components::ComponentContext& component_context);
 
     /**
@@ -94,7 +92,6 @@ public:
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;
-    std::shared_ptr<internview::services::AuthService> auth_service_ptr_;
 };
 
 }  // namespace internview::storages

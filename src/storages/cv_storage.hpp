@@ -7,7 +7,6 @@
 
 #include "dto/cv_dto.hpp"
 #include "models/cv.hpp"
-#include "services/auth_service.hpp"
 #include "services/file_service.hpp"
 
 namespace internview::storages {
@@ -17,8 +16,7 @@ namespace internview::storages {
 // AND: models support json serialization
 class CvStorage {
 public:
-    explicit CvStorage(std::shared_ptr<services::AuthService> auth_service_ptr,
-                       const userver::components::ComponentConfig& config,
+    explicit CvStorage(const userver::components::ComponentConfig& config,
                        const userver::components::ComponentContext& component_context);
 
     /**
@@ -28,7 +26,7 @@ public:
      * @return dto::cv::ResponseDTO
      * @throw userver::server::handlers::ConflictError
      */
-    dto::cv::ResponseDTO CreateCv(const dto::cv::CreateDTO& dto) const;
+    dto::cv::ResponseDTO CreateCv(const dto::cv::CreateDTO& dto);
 
     /**
      * @brief Get the User Cvs objects
@@ -37,7 +35,7 @@ public:
      * @return std::vector<internview::models::CV>
      * @throw userver::server::handlers::ResourceNotFound
      */
-    std::vector<internview::models::CV> GetUserCvs(const boost::uuids::uuid& user_id) const;
+    std::vector<internview::models::CV> GetUserCvs(const boost::uuids::uuid& user_id);
 
     /**
      * @brief Get the Cv By Id object
@@ -47,7 +45,7 @@ public:
      * @return internview::models::CV
      */
     internview::models::CV GetCvById(const boost::uuids::uuid& id,
-                                     const boost::uuids::uuid& user_id) const;
+                                     const boost::uuids::uuid& user_id);
 
     /**
      * @brief Update CV object
@@ -90,7 +88,6 @@ public:
 
 private:
     userver::storages::postgres::ClusterPtr pg_cluster_;
-    std::shared_ptr<services::AuthService> auth_service_ptr_;
     internview::services::FileService file_service_;
 };
 

@@ -24,16 +24,16 @@
 
 namespace internview::storages {
 
-CvStorage::CvStorage(std::shared_ptr<services::AuthService> auth_service_ptr,
+CvStorage::CvStorage(
                      const userver::components::ComponentConfig& config,
                      const userver::components::ComponentContext& component_context)
     : pg_cluster_(component_context.FindComponent<userver::components::Postgres>("postgres-db")
                       .GetCluster()),
-      auth_service_ptr_(auth_service_ptr),
+    
       file_service_(config, component_context) {
 }
 
-dto::cv::ResponseDTO CvStorage::CreateCv(const dto::cv::CreateDTO& dto) const {
+dto::cv::ResponseDTO CvStorage::CreateCv(const dto::cv::CreateDTO& dto) {
     auto id = userver::utils::generators::GenerateBoostUuidV7();
     try {
         auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
@@ -52,7 +52,7 @@ dto::cv::ResponseDTO CvStorage::CreateCv(const dto::cv::CreateDTO& dto) const {
     }
 }
 
-std::vector<internview::models::CV> CvStorage::GetUserCvs(const boost::uuids::uuid& user_id) const {
+std::vector<internview::models::CV> CvStorage::GetUserCvs(const boost::uuids::uuid& user_id) {
     try {
         auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
                                            cv_storage_queries::sql::kGetCvs, user_id);
@@ -69,7 +69,7 @@ std::vector<internview::models::CV> CvStorage::GetUserCvs(const boost::uuids::uu
 }
 
 internview::models::CV CvStorage::GetCvById(const boost::uuids::uuid& id,
-                                            const boost::uuids::uuid& user_id) const {
+                                            const boost::uuids::uuid& user_id) {
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
                                        cv_storage_queries::sql::kGetCvById, id, user_id);
     if (pg_res.IsEmpty()) {

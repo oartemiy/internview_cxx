@@ -6,7 +6,7 @@ namespace user_storage_queries::sql {
 
 // Generated from change_user_password.sql
 const USERVER_NAMESPACE::storages::Query kChangeUserPassword = {
-    R"-(
+R"-(
 -- Update rows in 'internview_schema.users' where condition is met
 UPDATE
     internview_schema.users
@@ -23,9 +23,12 @@ RETURNING
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
+
+
+
 // Generated from create_user.sql
 const USERVER_NAMESPACE::storages::Query kCreateUser = {
-    R"-(
+R"-(
 -- Insert data into 'internview_schema.users'
 INSERT INTO internview_schema.users(id, login, password_hash, name, role, description, profile_pic)
     VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -37,9 +40,12 @@ RETURNING
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
+
+
+
 // Generated from delete_user.sql
 const USERVER_NAMESPACE::storages::Query kDeleteUser = {
-    R"-(
+R"-(
 -- Delete rows from 'internview_schema.users' where condition is met
 DELETE FROM internview_schema.users
 WHERE id = $1
@@ -51,9 +57,12 @@ RETURNING
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
+
+
+
 // Generated from get_user_by_id.sql
 const USERVER_NAMESPACE::storages::Query kGetUserById = {
-    R"-(
+R"-(
 -- Select all rows from 'internview_schema.users'
 SELECT
     *
@@ -67,9 +76,12 @@ WHERE
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
+
+
+
 // Generated from login_user.sql
 const USERVER_NAMESPACE::storages::Query kLoginUser = {
-    R"-(
+R"-(
 -- Select all rows from 'internview_schema.users'
 SELECT
     *
@@ -83,9 +95,12 @@ WHERE
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
+
+
+
 // Generated from update_user.sql
 const USERVER_NAMESPACE::storages::Query kUpdateUser = {
-    R"-(
+R"-(
 -- Update rows in 'internview_schema.users' where condition is met
 UPDATE
     internview_schema.users
@@ -103,5 +118,6 @@ RETURNING
     USERVER_NAMESPACE::storages::Query::NameLiteral("update_user"),
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
+
 
 }  // namespace user_storage_queries::sql

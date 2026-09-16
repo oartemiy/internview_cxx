@@ -3,10 +3,9 @@
 #include <cstddef>
 #include <vector>
 
-#include "components/internview_component.hpp"
 #include "models/vacancy.hpp"
 #include "userver/formats/json/inline.hpp"
-#include "userver/logging/log.hpp"
+// #include "userver/logging/log.hpp"
 #include "userver/server/handlers/exceptions.hpp"
 #include "userver/storages/postgres/cluster_types.hpp"
 #include "userver/storages/postgres/component.hpp"
@@ -18,12 +17,10 @@
 
 namespace internview::storages {
 
-VacancyStorage::VacancyStorage(std::shared_ptr<internview::services::AuthService> auth_service,
-                               [[maybe_unused]] const userver::components::ComponentConfig& config,
+VacancyStorage::VacancyStorage([[maybe_unused]] const userver::components::ComponentConfig& config,
                                const userver::components::ComponentContext& component_context)
     : pg_cluster_(component_context.FindComponent<userver::components::Postgres>("postgres-db")
-                      .GetCluster()),
-      auth_service_ptr_(auth_service) {
+                      .GetCluster()) {
 }
 
 internview::models::Vacancy VacancyStorage::CreateVacancy(const dto::vacancy::CreateDTO& dto) {
