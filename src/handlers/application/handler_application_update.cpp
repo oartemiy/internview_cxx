@@ -2,7 +2,6 @@
 
 #include "components/internview_component.hpp"
 #include "dto/application_dto.hpp"
-#include "userver/formats/json/inline.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
 #include "utils/common_handler.hpp"
 

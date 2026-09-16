@@ -6,7 +6,8 @@ namespace internview::handlers {
 
 HandlerCvPost::HandlerCvPost(const ComponentConfig& config,
                              const ComponentContext& component_context)
-    : HttpHandlerJsonBase(config, component_context) {
+    : HttpHandlerJsonBase(config, component_context),
+      cv_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetCvStoragePtr()) {
 }
 
 Value HandlerCvPost::HandleRequestJsonThrow([[maybe_unused]] const HttpRequest& request,
