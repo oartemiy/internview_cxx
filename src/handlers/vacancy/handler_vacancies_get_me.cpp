@@ -9,16 +9,14 @@ namespace internview::handlers {
 HandlerVacanciesGetMe::HandlerVacanciesGetMe(const ComponentConfig& config,
                                              const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
-      auth_service_ptr_(component_context.FindComponent<InternviewComponent>().GetAuthServicePtr()),
       vacancy_storage_ptr_(
           component_context.FindComponent<InternviewComponent>().GetVacancyStoragePtr()) {
 }
 
 Value HandlerVacanciesGetMe::HandleRequestJsonThrow(
-    const HttpRequest& request, [[maybe_unused]] const Value& request_json,
+    [[maybe_unused]] const HttpRequest& request, [[maybe_unused]] const Value& request_json,
     [[maybe_unused]] RequestContext& context) const {
-    auto auth_header = request.GetHeader("Authorization");
-    auto auth_res = auth_service_ptr_->CheckAuthorization(auth_header);
+    auto auth_res = context.GetUserData<AuthResult>();
     if (auth_res.role != "recruiter") {
         throw ClientError(MakeObject("message", "Invalid role for this action"));
     }

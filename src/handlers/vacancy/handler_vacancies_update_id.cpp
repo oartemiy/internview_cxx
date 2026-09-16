@@ -10,9 +10,7 @@ HandlerVacancyUpdate::HandlerVacancyUpdate(const ComponentConfig& config,
                                            const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
       vacancy_storage_ptr_(
-          component_context.FindComponent<InternviewComponent>().GetVacancyStoragePtr()),
-      auth_service_ptr_(
-          component_context.FindComponent<InternviewComponent>().GetAuthServicePtr()) {
+          component_context.FindComponent<InternviewComponent>().GetVacancyStoragePtr()) {
 }
 
 Value HandlerVacancyUpdate::HandleRequestJsonThrow(const HttpRequest& request,
@@ -21,8 +19,7 @@ Value HandlerVacancyUpdate::HandleRequestJsonThrow(const HttpRequest& request,
     if (request_json.IsEmpty()) {
         throw ClientError(MakeObject("message", "Empty json"));
     }
-    auto auth_header = request.GetHeader("Authorization");
-    auto auth_res = auth_service_ptr_->CheckAuthorization(auth_header);
+    auto auth_res = context.GetUserData<AuthResult>();
 
     auto id = boost::uuids::uuid_from_string(request.GetPathArg("id"));
     if (auth_res.role != "recruiter") {

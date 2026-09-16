@@ -11,16 +11,13 @@ HandlerUserGetById::HandlerUserGetById(const ComponentConfig& config,
     : HttpHandlerJsonBase(config, component_context),
       application_storage_ptr_(
           component_context.FindComponent<InternviewComponent>().GetApplicationStoragePtr()),
-      user_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetUserStoragePtr()),
-      auth_service_ptr_(
-          component_context.FindComponent<InternviewComponent>().GetAuthServicePtr()) {
+      user_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetUserStoragePtr()) {
 }
 
 Value HandlerUserGetById::HandleRequestJsonThrow(const HttpRequest& request,
                                                  [[maybe_unused]] const Value& request_json,
                                                  [[maybe_unused]] RequestContext& context) const {
-    auto auth_header = request.GetHeader("Authorization");
-    auto auth_res = auth_service_ptr_->CheckAuthorization(auth_header);
+    auto auth_res = context.GetUserData<AuthResult>();
     auto id = boost::uuids::uuid_from_string(request.GetPathArg("id"));
     if (auth_res.user_id == id || auth_res.role == "recruiter") {
         if (auth_res.user_id != id &&

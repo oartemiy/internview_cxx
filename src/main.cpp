@@ -10,6 +10,7 @@
 #include <userver/testsuite/testsuite_support.hpp>
 #include <userver/utils/daemon_run.hpp>
 
+#include "auth/auth_checker.hpp"
 #include "components/internview_component.hpp"
 #include "handlers/application/handler_application_delete.hpp"
 #include "handlers/application/handler_application_post.hpp"
@@ -43,6 +44,7 @@
 #include "handlers/vacancy/handler_vacancies_update_id.hpp"
 #include "handlers/vacancy/handler_vacancy_applications_get.hpp"
 #include "handlers/vacancy/handler_vacancy_post.hpp"
+#include "userver/server/handlers/auth/auth_checker_factory.hpp"
 #include "userver/storages/secdist/provider_component.hpp"
 
 // ?: Add pool for slave HOSTTYPE
@@ -50,6 +52,9 @@
 // TODO: add DI container for files storage
 
 int main(int argc, char* argv[]) {
+    userver::server::handlers::auth::RegisterAuthCheckerFactory<
+        internview::auth::JwtAuthCheckerFactory>();
+    
     auto component_list =
         userver::components::MinimalServerComponentList()
             .Append<userver::server::handlers::Ping>()

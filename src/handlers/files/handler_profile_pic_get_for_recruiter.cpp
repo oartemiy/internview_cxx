@@ -11,15 +11,12 @@ HandlerProfilePicGetForRecruiter::HandlerProfilePicGetForRecruiter(
     : HttpHandlerBase(config, component_context),
       user_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetUserStoragePtr()),
       application_storage_ptr_(
-          component_context.FindComponent<InternviewComponent>().GetApplicationStoragePtr()),
-      auth_service_ptr_(
-          component_context.FindComponent<InternviewComponent>().GetAuthServicePtr()) {
+          component_context.FindComponent<InternviewComponent>().GetApplicationStoragePtr()) {
 }
 
 std::string HandlerProfilePicGetForRecruiter::HandleRequestThrow(
     const HttpRequest& request, [[maybe_unused]] RequestContext& context) const {
-    auto auth_header = request.GetHeader("Authorization");
-    auto auth_res = auth_service_ptr_->CheckAuthorization(auth_header);
+    auto auth_res = context.GetUserData<AuthResult>();
 
     if (auth_res.role != "recruiter") {
         throw ClientError(MakeObject("message", "Invalid role for this action"));

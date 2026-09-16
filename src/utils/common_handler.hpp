@@ -1,6 +1,7 @@
 #pragma once
 
 #include "components/internview_component.hpp"
+#include "services/auth_service.hpp"
 #include "userver/components/component_config.hpp"
 #include "userver/components/component_context.hpp"
 #include "userver/formats/json/inline.hpp"
@@ -27,5 +28,7 @@ using internview::components::InternviewComponent;
 
 using userver::server::http::HttpRequest;
 using userver::server::request::RequestContext;
+
+using AuthResult = internview::services::AuthService::AuthResult;
 
 }  // namespace internview::handlers

@@ -15,7 +15,6 @@ public:
     std::string HandleRequest(HttpRequest& request, RequestContext& context) const override;
 
 private:
-    std::shared_ptr<internview::services::AuthService> auth_service_ptr_;
     std::shared_ptr<internview::storages::CvStorage> cv_storage_ptr_;
 };
 

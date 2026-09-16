@@ -10,16 +10,13 @@ HandlerVacanciesDelete::HandlerVacanciesDelete(const ComponentConfig& config,
                                                const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
       vacancy_storage_ptr_(
-          component_context.FindComponent<InternviewComponent>().GetVacancyStoragePtr()),
-      auth_service_ptr_(
-          component_context.FindComponent<InternviewComponent>().GetAuthServicePtr()) {
+          component_context.FindComponent<InternviewComponent>().GetVacancyStoragePtr()) {
 }
 
 Value HandlerVacanciesDelete::HandleRequestJsonThrow(
     const HttpRequest& request, [[maybe_unused]] const Value& request_json,
     [[maybe_unused]] RequestContext& context) const {
-    auto auth_header = request.GetHeader("Authorization");
-    auto auth_res = auth_service_ptr_->CheckAuthorization(auth_header);
+    auto auth_res = context.GetUserData<AuthResult>();
 
     if (auth_res.role != "recruiter") {
         throw ClientError(MakeObject("message", "Invalid role for this action"));

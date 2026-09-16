@@ -13,7 +13,7 @@ HandlerApplicationUpdate::HandlerApplicationUpdate(const ComponentConfig& config
     : HttpHandlerJsonBase(config, component_context),
       application_storage_ptr_(
           component_context.FindComponent<InternviewComponent>().GetApplicationStoragePtr()),
-      auth_service_ptr_(component_context.FindComponent<InternviewComponent>().GetAuthServicePtr()),
+
       vacancy_storage_ptr_(
           component_context.FindComponent<InternviewComponent>().GetVacancyStoragePtr()) {
 }
@@ -21,8 +21,7 @@ HandlerApplicationUpdate::HandlerApplicationUpdate(const ComponentConfig& config
 Value HandlerApplicationUpdate::HandleRequestJsonThrow(
     const HttpRequest& request, const Value& request_json,
     [[maybe_unused]] RequestContext& context) const {
-    auto auth_header = request.GetHeader("Authorization");
-    auto auth_res = auth_service_ptr_->CheckAuthorization(auth_header);
+    auto auth_res = context.GetUserData<AuthResult>();
     auto dto = request_json.As<dto::application::UpdateDTO>();
     auto id = boost::uuids::uuid_from_string(request.GetPathArg("id"));
     dto.id = id;

@@ -2,7 +2,6 @@
 
 #include <memory>
 
-#include "services/auth_service.hpp"
 #include "storages/vacancy_storage.hpp"
 #include "utils/common_handler.hpp"
 
@@ -19,7 +18,6 @@ public:
 
 private:
     std::shared_ptr<internview::storages::VacancyStorage> vacancy_storage_ptr_;
-    std::shared_ptr<internview::services::AuthService> auth_service_ptr_;
 };
 
 }  // namespace internview::handlers

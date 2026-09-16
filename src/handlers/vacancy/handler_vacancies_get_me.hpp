@@ -3,7 +3,6 @@
 #include <memory>
 #include <string_view>
 
-#include "services/auth_service.hpp"
 #include "storages/vacancy_storage.hpp"
 #include "utils/common_handler.hpp"
 
@@ -19,7 +18,6 @@ public:
                                  RequestContext& context) const override;
 
 private:
-    std::shared_ptr<services::AuthService> auth_service_ptr_;
     std::shared_ptr<storages::VacancyStorage> vacancy_storage_ptr_;
 };
 

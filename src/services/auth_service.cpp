@@ -86,11 +86,11 @@ std::string AuthService::GenerateRefreshToken(const boost::uuids::uuid& user_id)
     return token;
 }
 
-void AuthService::RevokeRefreshTokens(const boost::uuids::uuid& user_id) const {
+void AuthService::Revoke(const boost::uuids::uuid& user_id) const {
     refresh_token_storage_->RevokeAllUserTokens(user_id);
 }
 
-AuthService::NewTokens AuthService::RefreshTokens(const std::string& refresh_token) const {
+AuthService::NewTokens AuthService::Refresh(const std::string& refresh_token) const {
     auto new_refresh_token = refresh_token_storage_->RefreshToken(refresh_token);
     auto pg_res = pg_cluster_->Execute(
         userver::v3_1::storages::postgres::ClusterHostType::kSlave,
@@ -102,12 +102,12 @@ AuthService::NewTokens AuthService::RefreshTokens(const std::string& refresh_tok
             GenerateAccessToken(new_refresh_token.user_id, role, password_version)};
 }
 
-void AuthService::MarkUserAsChanged(const boost::uuids::uuid& user_id, int password_version,
+void AuthService::MarkAsChanged(const boost::uuids::uuid& user_id, int password_version,
                                     const std::string& role) {
     cache_.Put(user_id, {password_version, role});
 }
 
-internview::dto::user::ResponseDTO AuthService::LoginUser(
+internview::dto::user::ResponseDTO AuthService::Login(
     const internview::dto::user::LoginDTO& dto) {
 
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
@@ -136,7 +136,7 @@ internview::dto::user::ResponseDTO AuthService::LoginUser(
     return resp_dto;
 }
 
-void AuthService::ChangeUserPassword(const dto::user::ChangePasswordDTO& dto) {
+void AuthService::ChangePassword(const dto::user::ChangePasswordDTO& dto) {
     auto user = GetUserById(dto.id);
 
     auto verify_res_fut = userver::engine::AsyncNoTracing(crypto_tp_, [&dto, &user] {
@@ -162,9 +162,9 @@ void AuthService::ChangeUserPassword(const dto::user::ChangePasswordDTO& dto) {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
             "message", "User with login: " + user.login + " not found"));
     }
-    RevokeRefreshTokens(dto.id);
+    Revoke(dto.id);
     // Mark user as changed
-    MarkUserAsChanged(dto.id, user.password_version + 1, user.role);
+    MarkAsChanged(dto.id, user.password_version + 1, user.role);
 }
 
 dto::user::ResponseDTO AuthService::Register(const internview::dto::user::CreateDTO& dto) {

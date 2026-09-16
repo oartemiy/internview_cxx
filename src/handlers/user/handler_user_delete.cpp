@@ -12,18 +12,14 @@ HandlerUserDelete::HandlerUserDelete(const ComponentConfig& config,
       user_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetUserStoragePtr()),
       cv_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetCvStoragePtr()),
       vacancy_storage_ptr_(
-          component_context.FindComponent<InternviewComponent>().GetVacancyStoragePtr()),
-      auth_service_ptr_(
-          component_context.FindComponent<InternviewComponent>().GetAuthServicePtr()) {
+          component_context.FindComponent<InternviewComponent>().GetVacancyStoragePtr()) {
 }
 
-Value HandlerUserDelete::HandleRequestJsonThrow(const HttpRequest& request,
+Value HandlerUserDelete::HandleRequestJsonThrow([[maybe_unused]] const HttpRequest& request,
                                                 const Value& request_json,
-                                                [[maybe_unused]] RequestContext& context) const {
+                                                RequestContext& context) const {
     auto dto = request_json.As<dto::user::DeleteDTO>();
-    auto auth_header = request.GetHeader("Authorization");
-    auto auth_res = auth_service_ptr_->CheckAuthorization(auth_header);
-
+    auto auth_res = context.GetUserData<AuthResult>();
     auto user_id = auth_res.user_id;
     dto.id = user_id;
 

@@ -12,10 +12,9 @@ HandlerAuthLogoutPost::HandlerAuthLogoutPost(const ComponentConfig& config,
 }
 
 std::string HandlerAuthLogoutPost::HandleRequestThrow(
-    const HttpRequest& request, [[maybe_unused]] RequestContext& context) const {
-    auto auth_header = request.GetHeader("Authorization");
-    auto auth_res = auth_service_ptr_->CheckAuthorization(auth_header);
-    auth_service_ptr_->RevokeRefreshTokens(auth_res.user_id);
+    [[maybe_unused]] const HttpRequest& request, RequestContext& context) const {
+    auto auth_res = context.GetUserData<AuthResult>();
+    auth_service_ptr_->Revoke(auth_res.user_id);
     return "All sessions are finished";
 }
 

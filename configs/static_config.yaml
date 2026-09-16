@@ -94,6 +94,9 @@ components_manager:
             path: /auth/change-password
             method: POST
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-auth-refresh-post:
             path: /auth/refresh
@@ -104,42 +107,66 @@ components_manager:
             path: /auth/logout
             method: POST
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-user-delete:
             path: /users/me
             method: DELETE
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-user-update:
             path: /users/me
             method: PATCH
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-user-get:
             path: /users/me
             method: GET
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-user-get-by-id:
             path: /users/{id}
             method: GET
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-profile-pic-post:
             path: /users/me/profile-pic
             method: POST
             task_processor: main-task-processor
             max_request_size: 5242880
+            auth:
+                types:
+                    - jwt
 
         handler-profile-pic-get:
             path: /users/me/profile-pic
             method: GET
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-profile-pic-get-for-recruiter:
             path: /users/{id}/profile-pic
             method: GET
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         # NOTE: while fs-cache does not support mac os
 
@@ -147,41 +174,65 @@ components_manager:
             path: /cvs
             method: POST
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-cv-get:
             path: /cvs/me
             method: GET
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-cv-get-by-id:
             path: /cvs/{id}
             method: GET
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-cv-update-by:
             path: /cvs/{id}
             method: PATCH
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-cv-delete:
             path: /cvs/{id}
             method: DELETE
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-cv-pdf-post:
             path: /cvs/{id}/pdf
             method: POST
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-cv-pdf-get:
             path: /cvs/{id}/pdf
             method: GET
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-vacancy-post:
             path: /vacancies
             method: POST
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-vacancies-get:
             path: /vacancies
@@ -192,6 +243,9 @@ components_manager:
             path: /vacancies/me
             method: GET
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-vacancies-get-by-id:
             path: /vacancies/{id}
@@ -202,38 +256,62 @@ components_manager:
             path: /vacancies/{id}
             method: PATCH
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-vacancies-delete:
             path: /vacancies/{id}
             method: DELETE
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-vacancies-toggle:
             path: /vacancies/{id}/toggle
             method: PATCH
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-application-post:
             path: /applications
             method: POST
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-applications-get:
             path: /applications/me
             method: GET
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-vacancy-applications-get:
             path: /vacancies/{id}/applications
             method: GET
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-application-update:
             path: /applications/{id}
             method: PATCH
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt
 
         handler-application-delete:
             path: /applications/{id}
             method: DELETE
             task_processor: main-task-processor
+            auth:
+                types:
+                    - jwt

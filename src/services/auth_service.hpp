@@ -27,11 +27,6 @@ public:
         std::string refresh_token;
     };
 
-    struct AuthInfo {
-        int password_version;
-        std::string role;
-    };
-
     AuthService(const userver::components::ComponentContext& component_context,
                 std::shared_ptr<storages::RefreshTokenStorage> refresh_token_storage_ptr);
 
@@ -69,7 +64,7 @@ public:
      *
      * @param user_id
      */
-    void RevokeRefreshTokens(const boost::uuids::uuid& user_id) const;
+    void Revoke(const boost::uuids::uuid& user_id) const;
 
     /**
      * @brief Generates new access and refresh tokens
@@ -77,7 +72,7 @@ public:
      * @param refresh_token
      * @return NewTokens
      */
-    NewTokens RefreshTokens(const std::string& refresh_token) const;
+    NewTokens Refresh(const std::string& refresh_token) const;
 
     /**
      * @brief Add user to cache to omit database quiry while last access token alive
@@ -86,7 +81,7 @@ public:
      * @param password_version
      * @param role
      */
-    void MarkUserAsChanged(const boost::uuids::uuid& user_id, int password_version,
+    void MarkAsChanged(const boost::uuids::uuid& user_id, int password_version,
                            const std::string& role);
 
     /**
@@ -96,7 +91,7 @@ public:
      * @return dto::user::ResponseDTO
      * @throws userver::server::handlers::ClientError
      */
-    internview::dto::user::ResponseDTO LoginUser(const internview::dto::user::LoginDTO& dto);
+    internview::dto::user::ResponseDTO Login(const internview::dto::user::LoginDTO& dto);
 
     /**
      * @brief Change user's password
@@ -105,10 +100,10 @@ public:
      * @throws userver::server::handlers::ResourceNotFound
                userver::server::handlers::ClientError
      */
-    void ChangeUserPassword(const dto::user::ChangePasswordDTO& dto);
+    void ChangePassword(const dto::user::ChangePasswordDTO& dto);
 
     /**
-     * @brief Create a User object
+     * @brief Register a User object
      *
      * @param dto
      * @return dto::user::ResponseDTO
@@ -118,11 +113,16 @@ public:
     dto::user::ResponseDTO Register(const internview::dto::user::CreateDTO& dto);
 
 private:
+    struct CacheAuthInfo {
+        int password_version;
+        std::string role;
+    };
+
     internview::services::JwtService jwt_service_;
     std::shared_ptr<internview::storages::RefreshTokenStorage> refresh_token_storage_;
 
     userver::storages::postgres::ClusterPtr pg_cluster_;
-    userver::cache::ExpirableLruCache<boost::uuids::uuid, AuthInfo> cache_;
+    userver::cache::ExpirableLruCache<boost::uuids::uuid, CacheAuthInfo> cache_;
     userver::engine::TaskProcessor& crypto_tp_;
 
     models::User GetUserById(const boost::uuids::uuid& id);
