@@ -11,11 +11,11 @@
 #include <userver/utils/daemon_run.hpp>
 
 #include "auth/auth_checker.hpp"
-
 #include "components/cv_storage_component.hpp"
 #include "components/img_storage_component.hpp"
 #include "components/internview_component.hpp"
 #include "components/pdf_storage_component.hpp"
+#include "components/refresh_token_storage_component.hpp"
 #include "components/user_storage_component.hpp"
 #include "handlers/application/handler_application_delete.hpp"
 #include "handlers/application/handler_application_post.hpp"
@@ -73,13 +73,16 @@ int main(int argc, char* argv[]) {
             .Append<userver::components::DefaultSecdistProvider>("default-secdist-provider")
 
             .Append<internview::components::ImgStorageComponent>("img-storage")
+        
             .Append<internview::components::PdfStorageComponent>("pdf-storage")
-
-            .Append<internview::components::InternviewComponent>("internview-component")
 
             .Append<internview::components::UserStorageComponent>("user-storage")
 
             .Append<internview::components::CvStorageComponent>("cv-storage")
+
+            .Append<internview::components::RefreshTokenStorage>("refresh-token-storage")
+
+            .Append<internview::components::InternviewComponent>("internview-component")
 
             .Append<internview::handlers::status::HandlerStatusGet>()
 

@@ -1,34 +1,39 @@
-#include "refresh_token_storage.hpp"
-
-#include <__chrono/duration.h>
+#include "postgres_refresh_token_storage.hpp"
 
 #include <chrono>
 #include <userver/storages/postgres/exceptions.hpp>
 
 #include "models/refresh_token.hpp"
 #include "refresh_token_storage_queries/sql_queries.hpp"
+#include "userver/components/component_config.hpp"
+#include "userver/components/component_context.hpp"
 #include "userver/crypto/base64.hpp"
 #include "userver/crypto/hash.hpp"
 #include "userver/crypto/random.hpp"
 #include "userver/formats/json/inline.hpp"
+#include "userver/logging/log.hpp"
 #include "userver/server/handlers/exceptions.hpp"
+#include "userver/storages/postgres/cluster.hpp"
 #include "userver/storages/postgres/cluster_types.hpp"
 #include "userver/storages/postgres/component.hpp"
 #include "userver/storages/postgres/io/chrono.hpp"
 #include "userver/storages/postgres/io/row_types.hpp"
 #include "userver/utils/boost_uuid7.hpp"
 
-namespace internview::storages {
+namespace internview::storages::postgres {
 
-RefreshTokenStorage::RefreshTokenStorage(
-    [[maybe_unused]] const userver::components::ComponentConfig& config,
-    const userver::components::ComponentContext& component_context, std::chrono::seconds limit)
+PostgresRefreshTokenStorage::PostgresRefreshTokenStorage(
+    const userver::components::ComponentConfig& config,
+    const userver::components::ComponentContext& component_context)
     : pg_cluster_(component_context.FindComponent<userver::components::Postgres>("postgres-db")
                       .GetCluster()),
-      limit_(limit) {
+      limit_(config["token-lifetime-seconds"].As<std::chrono::seconds>(std::chrono::days(14))) {
 }
 
-void RefreshTokenStorage::Create(const boost::uuids::uuid& user_id, const std::string& token_hash) {
+void PostgresRefreshTokenStorage::Create(const boost::uuids::uuid& user_id,
+                                         const std::string& token_hash) {
+    LOG_INFO() << "Refresh token limit: " << limit_;
+    
     boost::uuids::uuid id = userver::utils::generators::GenerateBoostUuidV7();
     auto expires_at =
         userver::storages::postgres::TimePointTz{std::chrono::system_clock::now() + limit_};
@@ -42,9 +47,8 @@ void RefreshTokenStorage::Create(const boost::uuids::uuid& user_id, const std::s
     }
 }
 
-std::optional<models::RefreshToken> RefreshTokenStorage::GetByTokenHash(
+std::optional<models::RefreshToken> PostgresRefreshTokenStorage::GetByTokenHash(
     const std::string& token_hash) {
-
     auto pg_res =
         pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
                              refresh_token_storage_queries::sql::kGetByTokenHash, token_hash);
@@ -54,24 +58,24 @@ std::optional<models::RefreshToken> RefreshTokenStorage::GetByTokenHash(
     return pg_res.AsSingleRow<models::RefreshToken>(userver::v3_1::storages::postgres::kRowTag);
 }
 
-void RefreshTokenStorage::Revoke(const boost::uuids::uuid& id) {
+void PostgresRefreshTokenStorage::Revoke(const boost::uuids::uuid& id) {
     auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
                                        refresh_token_storage_queries::sql::kRevoke, id);
 }
 
-void RefreshTokenStorage::RevokeAllUserTokens(const boost::uuids::uuid& user_id) {
+void PostgresRefreshTokenStorage::RevokeAllUserTokens(const boost::uuids::uuid& user_id) {
     auto pg_res =
         pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
                              refresh_token_storage_queries::sql::kRevokeAllUserTokens, user_id);
 }
 
-void RefreshTokenStorage::DeleteToken(const boost::uuids::uuid& id) {
+void PostgresRefreshTokenStorage::DeleteToken(const boost::uuids::uuid& id) {
     auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
                                        refresh_token_storage_queries::sql::kDelete, id);
 }
 
-RefreshTokenStorage::NewRefreshToken RefreshTokenStorage::RefreshToken(
-    const std::string& refresh_token) {
+internview::storages::interfaces::IRefreshTokenStorage::NewRefreshToken
+PostgresRefreshTokenStorage::RefreshToken(const std::string& refresh_token) {
     auto token_hash = userver::crypto::hash::Sha256(refresh_token);
     auto token_opt = GetByTokenHash(token_hash);
     if (token_opt) {
@@ -93,9 +97,9 @@ RefreshTokenStorage::NewRefreshToken RefreshTokenStorage::RefreshToken(
     }
 }
 
-void RefreshTokenStorage::ClearExpiredTokens() {
+void PostgresRefreshTokenStorage::ClearExpiredTokens() {
     auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
                                        refresh_token_storage_queries::sql::kClearExpiredTokens);
 }
 
-}  // namespace internview::storages
+}  // namespace internview::storages::postgres

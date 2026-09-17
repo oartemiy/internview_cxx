@@ -5,12 +5,10 @@
 
 #include "services/auth_service.hpp"
 #include "storages/application_storage.hpp"
-#include "storages/refresh_token_storage.hpp"
 #include "storages/vacancy_storage.hpp"
 #include "userver/components/component_base.hpp"
 #include "userver/components/component_config.hpp"
 #include "userver/components/component_context.hpp"
-#include "userver/utils/periodic_task.hpp"
 
 namespace internview::components {
 
@@ -33,18 +31,11 @@ public:
         return application_storage_ptr_;
     }
 
-    std::shared_ptr<internview::storages::RefreshTokenStorage> GetRefreshTokenStoragePtr() {
-        return refresh_token_storage_ptr_;
-    }
 
 private:
-    std::shared_ptr<internview::storages::RefreshTokenStorage> refresh_token_storage_ptr_;
-
     std::shared_ptr<internview::services::AuthService> auth_service_ptr_;
     std::shared_ptr<internview::storages::VacancyStorage> vacancy_storage_ptr_;
     std::shared_ptr<internview::storages::ApplicationStorage> application_storage_ptr_;
-
-    userver::utils::PeriodicTask periodic_task_;
 };
 
 }  // namespace internview::components

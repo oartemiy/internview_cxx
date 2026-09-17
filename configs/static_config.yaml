@@ -89,6 +89,9 @@ components_manager:
 
         cv-storage: {}
 
+        refresh-token-storage:
+            token-lifetime-seconds: 1209600 # 14 days
+
         handler-status-get:
             path: /status
             method: GET

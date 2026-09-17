@@ -8,8 +8,8 @@
 
 #include "models/user.hpp"
 #include "services/jwt_service.hpp"
+#include "storages/interfaces/refresh_token_storage.hpp"
 #include "storages/interfaces/user_storage.hpp"
-#include "storages/refresh_token_storage.hpp"
 #include "userver/cache/expirable_lru_cache.hpp"
 #include "userver/components/component_context.hpp"
 
@@ -28,8 +28,7 @@ public:
         std::string refresh_token;
     };
 
-    AuthService(const userver::components::ComponentContext& component_context,
-                std::shared_ptr<storages::RefreshTokenStorage> refresh_token_storage_ptr);
+    AuthService(const userver::components::ComponentContext& component_context);
 
     /**
      * @brief Check authoriation
@@ -120,7 +119,7 @@ private:
     };
 
     internview::services::JwtService jwt_service_;
-    std::shared_ptr<internview::storages::RefreshTokenStorage> refresh_token_storage_;
+    std::shared_ptr<internview::storages::interfaces::IRefreshTokenStorage> refresh_token_storage_;
 
 
     std::shared_ptr<internview::storages::interfaces::IUserStorage> user_storage_;

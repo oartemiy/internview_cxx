@@ -4,6 +4,7 @@
 #include <string_view>
 #include <userver/storages/secdist/provider_component.hpp>
 
+#include "components/refresh_token_storage_component.hpp"
 #include "models/user.hpp"
 #include "storages/sql/user_storage/include/user_storage_queries/sql_queries.hpp"
 #include "userver/crypto/base64.hpp"
@@ -11,23 +12,24 @@
 #include "userver/crypto/random.hpp"
 #include "userver/formats/json/value.hpp"
 #include "userver/server/handlers/exceptions.hpp"
+#include "userver/storages/postgres/cluster.hpp"
 #include "userver/storages/postgres/cluster_types.hpp"
 #include "userver/storages/postgres/component.hpp"
-#include "utils/password.hpp"
 #include "userver/utils/boost_uuid7.hpp"
-
+#include "utils/password.hpp"
 
 namespace internview::services {
 
-AuthService::AuthService(const userver::components::ComponentContext& component_context,
-                         std::shared_ptr<storages::RefreshTokenStorage> refresh_token_storage_ptr)
+AuthService::AuthService(const userver::components::ComponentContext& component_context)
     : jwt_service_(component_context
                        .FindComponent<userver::components::DefaultSecdistProvider>(
                            "default-secdist-provider")
                        .Get()
                        .As<userver::formats::json::Value>()["jwt_secret"]
                        .As<std::string>()),
-      refresh_token_storage_(refresh_token_storage_ptr),
+      refresh_token_storage_(
+          component_context.FindComponent<internview::components::RefreshTokenStorage>()
+              .GetStorage()),
       pg_cluster_(component_context.FindComponent<userver::components::Postgres>("postgres-db")
                       .GetCluster()),
       cache_(16, 256),
@@ -103,12 +105,11 @@ AuthService::NewTokens AuthService::Refresh(const std::string& refresh_token) co
 }
 
 void AuthService::MarkAsChanged(const boost::uuids::uuid& user_id, int password_version,
-                                    const std::string& role) {
+                                const std::string& role) {
     cache_.Put(user_id, {password_version, role});
 }
 
-internview::dto::user::ResponseDTO AuthService::Login(
-    const internview::dto::user::LoginDTO& dto) {
+internview::dto::user::ResponseDTO AuthService::Login(const internview::dto::user::LoginDTO& dto) {
 
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
                                        user_storage_queries::sql::kLoginUser, dto.login);
