@@ -78,13 +78,15 @@ components_manager:
         img-storage:
             fs-task-processor: fs-task-processor
             base-dir: /Users/oartemiy/code/internview/uploads/img/
+            supported-extensions: [".jpg", ".jpeg", ".png"]
 
         pdf-storage:
             fs-task-processor: fs-task-processor
             base-dir: /Users/oartemiy/code/internview/uploads/pdf/
+            supported-extensions: [".pdf"]
 
         user-storage: {}
-            
+
         handler-status-get:
             path: /status
             method: GET

@@ -6,7 +6,6 @@
 #include "storages/application_storage.hpp"
 #include "storages/cv_storage.hpp"
 #include "storages/refresh_token_storage.hpp"
-#include "storages/user_storage.hpp"
 #include "storages/vacancy_storage.hpp"
 #include "userver/components/component_base.hpp"
 #include "userver/logging/log.hpp"
@@ -21,12 +20,8 @@ InternviewComponent::InternviewComponent(const ComponentConfig& config,
           config, component_context /* add here lifetime param*/)),
       auth_service_ptr_(
           std::make_shared<services::AuthService>(component_context, refresh_token_storage_ptr_)),
-      user_storage_ptr_(
-          std::make_shared<storages::UserStorage>(config, component_context)),
-      cv_storage_ptr_(
-          std::make_shared<storages::CvStorage>(config, component_context)),
-      vacancy_storage_ptr_(
-          std::make_shared<storages::VacancyStorage>(config, component_context)),
+      cv_storage_ptr_(std::make_shared<storages::CvStorage>(config, component_context)),
+      vacancy_storage_ptr_(std::make_shared<storages::VacancyStorage>(config, component_context)),
       application_storage_ptr_(
           std::make_shared<storages::ApplicationStorage>(config, component_context)),
       periodic_task_("clear-expired-tokens",

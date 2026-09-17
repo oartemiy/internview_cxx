@@ -110,10 +110,8 @@ add_library(
 
     # stotages
     src/storages/local/local_file_storage.cpp
-
     src/storages/postgres/postgres_user_storage.cpp
 
-    src/storages/user_storage.cpp
     src/storages/cv_storage.cpp
     src/storages/vacancy_storage.cpp
     src/storages/application_storage.cpp

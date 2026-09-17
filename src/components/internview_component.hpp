@@ -7,7 +7,6 @@
 #include "storages/application_storage.hpp"
 #include "storages/cv_storage.hpp"
 #include "storages/refresh_token_storage.hpp"
-#include "storages/user_storage.hpp"
 #include "storages/vacancy_storage.hpp"
 #include "userver/components/component_base.hpp"
 #include "userver/components/component_config.hpp"
@@ -27,10 +26,6 @@ public:
 
     std::shared_ptr<internview::services::AuthService> GetAuthServicePtr() {
         return auth_service_ptr_;
-    }
-
-    std::shared_ptr<internview::storages::UserStorage> GetUserStoragePtr() {
-        return user_storage_ptr_;
     }
 
     std::shared_ptr<internview::storages::CvStorage> GetCvStoragePtr() {
@@ -53,7 +48,6 @@ private:
     std::shared_ptr<internview::storages::RefreshTokenStorage> refresh_token_storage_ptr_;
 
     std::shared_ptr<internview::services::AuthService> auth_service_ptr_;
-    std::shared_ptr<internview::storages::UserStorage> user_storage_ptr_;
     std::shared_ptr<internview::storages::CvStorage> cv_storage_ptr_;
     std::shared_ptr<internview::storages::VacancyStorage> vacancy_storage_ptr_;
     std::shared_ptr<internview::storages::ApplicationStorage> application_storage_ptr_;
