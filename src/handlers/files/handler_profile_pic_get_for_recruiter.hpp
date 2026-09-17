@@ -2,7 +2,8 @@
 
 #include <string_view>
 
-#include "storages/user_storage.hpp"
+#include "storages/interfaces/user_storage.hpp"
+
 #include "utils/common_handler.hpp"
 
 namespace internview::handlers {
@@ -18,7 +19,7 @@ public:
                                    RequestContext& context) const override;
 
 private:
-    std::shared_ptr<internview::storages::UserStorage> user_storage_ptr_;
+    std::shared_ptr<internview::storages::interfaces::IUserStorage> user_storage_ptr_;
     std::shared_ptr<internview::storages::ApplicationStorage> application_storage_ptr_;
 };
 

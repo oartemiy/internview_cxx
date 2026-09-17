@@ -1,6 +1,6 @@
 #include "handler_user_update.hpp"
 
-#include "components/internview_component.hpp"
+#include "components/user_storage_component.hpp"
 #include "dto/user_dto.hpp"
 #include "services/auth_service.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
@@ -12,7 +12,8 @@ HandlerUserUpdate::HandlerUserUpdate(const ComponentConfig& config,
                                      const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
       user_storage_ptr_(
-          component_context.FindComponent<InternviewComponent>().GetUserStoragePtr()) {
+          component_context.FindComponent<internview::components::UserStorageComponent>()
+              .GetStorage()) {
 }
 
 Value HandlerUserUpdate::HandleRequestJsonThrow([[maybe_unused]] const HttpRequest& request,

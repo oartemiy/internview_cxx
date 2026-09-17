@@ -11,7 +11,10 @@
 #include <userver/utils/daemon_run.hpp>
 
 #include "auth/auth_checker.hpp"
+#include "components/img_storage_component.hpp"
 #include "components/internview_component.hpp"
+#include "components/pdf_storage_component.hpp"
+#include "components/user_storage_component.hpp"
 #include "handlers/application/handler_application_delete.hpp"
 #include "handlers/application/handler_application_post.hpp"
 #include "handlers/application/handler_application_update.hpp"
@@ -48,13 +51,13 @@
 #include "userver/storages/secdist/provider_component.hpp"
 
 // ?: Add pool for slave HOSTTYPE
-// TODO: add DI container for db
+// TODO: add DI container for storages
 // TODO: add DI container for files storage
 
 int main(int argc, char* argv[]) {
     userver::server::handlers::auth::RegisterAuthCheckerFactory<
         internview::auth::JwtAuthCheckerFactory>();
-    
+
     auto component_list =
         userver::components::MinimalServerComponentList()
             .Append<userver::server::handlers::Ping>()
@@ -67,7 +70,13 @@ int main(int argc, char* argv[]) {
 
             .Append<userver::components::DefaultSecdistProvider>("default-secdist-provider")
 
+            .Append<internview::components::ImgStorageComponent>("img-storage")
+            .Append<internview::components::PdfStorageComponent>("pdf-storage")
+
+            .Append<internview::components::UserStorageComponent>("user-storage")
+
             .Append<internview::components::InternviewComponent>("internview-component")
+
 
             .Append<internview::handlers::status::HandlerStatusGet>()
 

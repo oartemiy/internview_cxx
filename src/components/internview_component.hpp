@@ -23,7 +23,7 @@ class InternviewComponent final : public userver::components::ComponentBase {
 public:
     static constexpr std::string_view kName = "internview-component";
 
-    InternviewComponent(const ComponentConfig& config, const ComponentContext& component_context);
+    explicit InternviewComponent(const ComponentConfig& config, const ComponentContext& component_context);
 
     std::shared_ptr<internview::services::AuthService> GetAuthServicePtr() {
         return auth_service_ptr_;

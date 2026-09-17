@@ -1,6 +1,6 @@
 #include "handler_profile_pic_post.hpp"
 
-#include "components/internview_component.hpp"
+#include "components/user_storage_component.hpp"
 #include "userver/server/http/http_status.hpp"
 #include "utils/common_handler.hpp"
 
@@ -9,7 +9,7 @@ namespace internview::handlers {
 HandlerProfilePicPost::HandlerProfilePicPost(const ComponentConfig& config,
                                              const ComponentContext& component_context)
     : HttpHandlerBase(config, component_context),
-      user_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetUserStoragePtr()) {
+      user_storage_ptr_(component_context.FindComponent<internview::components::UserStorageComponent>().GetStorage()) {
 }
 
 std::string HandlerProfilePicPost::HandleRequestThrow(

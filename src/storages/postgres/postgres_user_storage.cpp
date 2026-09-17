@@ -1,43 +1,41 @@
-#include "user_storage.hpp"
+#include "postgres_user_storage.hpp"
 
 #include <sodium.h>
 
 #include <cctype>
-#include <filesystem>
 #include <optional>
 #include <stdexcept>
 #include <string>
 #include <userver/server/handlers/exceptions.hpp>
 
+#include "components/img_storage_component.hpp"
 #include "dto/user_dto.hpp"
 #include "models/user.hpp"
-#include "services/file_service.hpp"
 #include "user_storage_queries/sql_queries.hpp"
 #include "userver/engine/async.hpp"
 #include "userver/storages/postgres/cluster_types.hpp"
 #include "userver/storages/postgres/component.hpp"
 #include "userver/storages/postgres/exceptions.hpp"
 #include "userver/storages/postgres/io/row_types.hpp"
-#include "userver/utils/uuid4.hpp"
 #include "utils/password.hpp"
 
-namespace internview::storages {
+namespace internview::storages::postgres {
 
-UserStorage::UserStorage(/*std::shared_ptr<services::AuthService> auth_service_ptr,*/
-                         const userver::components::ComponentConfig& config,
-                         const userver::components::ComponentContext& component_context)
+PostgresUserStorage::PostgresUserStorage(
+    [[maybe_unused]] const userver::components::ComponentConfig& config,
+    const userver::components::ComponentContext& component_context)
     : crypto_tp_(component_context.GetTaskProcessor("crypt-task-processor")),
       pg_cluster_(component_context.FindComponent<userver::components::Postgres>("postgres-db")
                       .GetCluster()),
-    //   auth_service_ptr_(auth_service_ptr),
-      file_service_(config, component_context) {
+      img_storage_(component_context.FindComponent<internview::components::ImgStorageComponent>()
+                       .GetStorage()) {
     // !NOTE: For password verifing and hashing
-    // if (sodium_init() != 0) {
-    //     throw std::runtime_error{"Sodium init error"};
-    // }
+    if (sodium_init() != 0) {
+        throw std::runtime_error{"Sodium init error"};
+    }
 }
 
-models::User UserStorage::GetUserById(const boost::uuids::uuid& id) {
+User PostgresUserStorage::GetUserById(const boost::uuids::uuid& id) {
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
                                        user_storage_queries::sql::kGetUserById, id);
 
@@ -49,7 +47,7 @@ models::User UserStorage::GetUserById(const boost::uuids::uuid& id) {
     return user;
 }
 
-dto::user::ResponseDTO UserStorage::UpdateUser(const internview::dto::user::UpdateDTO& dto) {
+ResponseDTO PostgresUserStorage::UpdateUser(const internview::dto::user::UpdateDTO& dto) {
     if (!dto.has_description_in_request && !dto.has_login_in_request && !dto.has_name_in_request &&
         !dto.has_profile_pic_in_request) {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
@@ -88,7 +86,7 @@ dto::user::ResponseDTO UserStorage::UpdateUser(const internview::dto::user::Upda
                                  user_storage_queries::sql::kUpdateUser, model.login, model.name,
                                  model.description, model.profile_pic, dto.id);
         if (old_profile_pic != std::nullopt && model.profile_pic == std::nullopt) {
-            file_service_.DeleteFile(services::FileService::img_folder + *old_profile_pic);
+            img_storage_->Delete(*old_profile_pic);
         }
         auto resp_dto =
             dto::user::ResponseDTO{dto.id,           model.login,       model.name,
@@ -101,7 +99,7 @@ dto::user::ResponseDTO UserStorage::UpdateUser(const internview::dto::user::Upda
     }
 }
 
-void UserStorage::DeleteUser(const internview::dto::user::DeleteDTO& dto) {
+void PostgresUserStorage::DeleteUser(const internview::dto::user::DeleteDTO& dto) {
     auto user = GetUserById(dto.id);
 
     auto verify_res_fut = userver::engine::AsyncNoTracing(crypto_tp_, [&dto, &user] {
@@ -117,7 +115,7 @@ void UserStorage::DeleteUser(const internview::dto::user::DeleteDTO& dto) {
     auto res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
                                     user_storage_queries::sql::kDeleteUser, dto.id);
     if (user.profile_pic != std::nullopt) {
-        file_service_.DeleteFile(services::FileService::img_folder + *user.profile_pic);
+        img_storage_->Delete(*user.profile_pic);
     }
     if (res.IsEmpty()) {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
@@ -125,29 +123,20 @@ void UserStorage::DeleteUser(const internview::dto::user::DeleteDTO& dto) {
     }
 }
 
-void UserStorage::UploadProfilePic(const boost::uuids::uuid& id,
-                                   const userver::server::http::FormDataArg& file_arg) {
-    auto ext =
-        std::filesystem::path(file_arg.filename ? *file_arg.filename : "").extension().string();
-    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-    if (ext != ".jpg" && ext != ".png" && ext != ".jpeg") {
-        throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
-            "message", "Invalid image format. Supported: jpeg, jpg, png"));
-    }
+void PostgresUserStorage::UploadProfilePic(const boost::uuids::uuid& id,
+                                           const userver::server::http::FormDataArg& file_arg) {
+
     auto user = GetUserById(id);
     if (user.profile_pic != std::nullopt) {
-        file_service_.DeleteFile(services::FileService::img_folder + *user.profile_pic);
+        img_storage_->Delete(*user.profile_pic);
     }
-    auto new_uuid = userver::utils::generators::GenerateUuid();
-    auto full_path = file_service_.img_folder + new_uuid + ext;
-    file_service_.WriteFile(full_path, file_arg.value);
-    auto server_path = new_uuid + ext;
+    auto key = img_storage_->Save(file_arg);
     auto update_dto =
-        dto::user::UpdateDTO{false, false, false, true, id, "", "", std::nullopt, server_path};
+        dto::user::UpdateDTO{false, false, false, true, id, "", "", std::nullopt, key};
     auto res = UpdateUser(update_dto);
 }
 
-std::optional<std::pair<std::string, std::string>> UserStorage::GetProfilePic(
+std::optional<std::pair<std::string, std::string>> PostgresUserStorage::GetProfilePic(
     const boost::uuids::uuid& id) {
 
     auto user = GetUserById(id);
@@ -157,7 +146,8 @@ std::optional<std::pair<std::string, std::string>> UserStorage::GetProfilePic(
         return std::nullopt;
     }
     try {
-        auto file = file_service_.ReadFile(services::FileService::img_folder + *pic);
+        // TODO: impl later
+        auto file = img_storage_->Load(*pic);
         std::pair<std::string, std::string> res{*pic, std::move(file)};
         return res;
     } catch (std::runtime_error& e) {
@@ -165,4 +155,4 @@ std::optional<std::pair<std::string, std::string>> UserStorage::GetProfilePic(
     }
 }
 
-}  // namespace internview::storages
+}  // namespace internview::storages::postgres

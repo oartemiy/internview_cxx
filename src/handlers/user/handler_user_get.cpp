@@ -1,6 +1,6 @@
 #include "handler_user_get.hpp"
 
-#include "components/internview_component.hpp"
+#include "components/user_storage_component.hpp"
 #include "dto/user_dto.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
 #include "utils/common_handler.hpp"
@@ -10,10 +10,12 @@ namespace internview::handlers {
 HandlerUserGet::HandlerUserGet(const ComponentConfig& config,
                                const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
-      user_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetUserStoragePtr()) {
+      user_storage_ptr_(
+          component_context.FindComponent<internview::components::UserStorageComponent>()
+              .GetStorage()) {
 }
 
-Value HandlerUserGet::HandleRequestJsonThrow([[maybe_unused]]const HttpRequest& request,
+Value HandlerUserGet::HandleRequestJsonThrow([[maybe_unused]] const HttpRequest& request,
                                              [[maybe_unused]] const Value& request_json,
                                              [[maybe_unused]] RequestContext& context) const {
     auto auth_res = context.GetUserData<AuthResult>();

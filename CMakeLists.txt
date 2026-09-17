@@ -104,8 +104,15 @@ add_library(
 
     # components
     src/components/internview_component.cpp
+    src/components/pdf_storage_component.cpp
+    src/components/img_storage_component.cpp
+    src/components/user_storage_component.cpp
 
     # stotages
+    src/storages/local/local_file_storage.cpp
+
+    src/storages/postgres/postgres_user_storage.cpp
+
     src/storages/user_storage.cpp
     src/storages/cv_storage.cpp
     src/storages/vacancy_storage.cpp
@@ -173,7 +180,7 @@ target_link_libraries(
     ${PROJECT_NAME}_vacancy_storage_sql
     ${PROJECT_NAME}_application_storage_sql
     ${PROJECT_NAME}_refresh_token_storage_sql
-    
+
     PRIVATE
     sodium
     jwt-cpp::jwt-cpp

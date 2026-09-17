@@ -75,6 +75,16 @@ components_manager:
 
         internview-component: {}
 
+        img-storage:
+            fs-task-processor: fs-task-processor
+            base-dir: /Users/oartemiy/code/internview/uploads/img/
+
+        pdf-storage:
+            fs-task-processor: fs-task-processor
+            base-dir: /Users/oartemiy/code/internview/uploads/pdf/
+
+        user-storage: {}
+            
         handler-status-get:
             path: /status
             method: GET

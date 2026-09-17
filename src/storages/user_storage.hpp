@@ -17,8 +17,7 @@ using internview::models::User;
 
 class UserStorage {
 public:
-    explicit UserStorage(/*std::shared_ptr<services::AuthService> auth_service_ptr,*/
-                         const userver::components::ComponentConfig& config,
+    explicit UserStorage(const userver::components::ComponentConfig& config,
                          const userver::components::ComponentContext& component_context);
 
     /**
@@ -29,8 +28,6 @@ public:
      * @throw userver::server::handlers::ResourceNotFound
      */
     User GetUserById(const boost::uuids::uuid& id);
-
-    
 
     /**
      * @brief Update the User object
@@ -58,7 +55,6 @@ public:
      * @param description
      * @throws userver::server::handlers::ClientError
                std::runtime_error
-     * NOTE: To delele optional field use DELETE in a json_request
      */
     void UploadProfilePic(const boost::uuids::uuid& id,
                           const userver::server::http::FormDataArg& file_arg);
@@ -76,9 +72,7 @@ public:
 private:
     userver::engine::TaskProcessor& crypto_tp_;
     userver::storages::postgres::ClusterPtr pg_cluster_;
-    // std::shared_ptr<services::AuthService> auth_service_ptr_;
     internview::services::FileService file_service_;
-
 };
 
 }  // namespace internview::storages
