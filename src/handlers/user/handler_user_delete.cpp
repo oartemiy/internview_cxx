@@ -1,5 +1,6 @@
 #include "handler_user_delete.hpp"
 
+#include "components/cv_storage_component.hpp"
 #include "components/internview_component.hpp"
 #include "components/user_storage_component.hpp"
 #include "dto/user_dto.hpp"
@@ -13,7 +14,7 @@ HandlerUserDelete::HandlerUserDelete(const ComponentConfig& config,
       user_storage_ptr_(
           component_context.FindComponent<internview::components::UserStorageComponent>()
               .GetStorage()),
-      cv_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetCvStoragePtr()),
+      cv_storage_ptr_(component_context.FindComponent<components::CvStorageComponent>().GetStorage()),
       vacancy_storage_ptr_(
           component_context.FindComponent<InternviewComponent>().GetVacancyStoragePtr()) {
 }

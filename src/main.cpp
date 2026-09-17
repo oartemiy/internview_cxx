@@ -11,6 +11,8 @@
 #include <userver/utils/daemon_run.hpp>
 
 #include "auth/auth_checker.hpp"
+
+#include "components/cv_storage_component.hpp"
 #include "components/img_storage_component.hpp"
 #include "components/internview_component.hpp"
 #include "components/pdf_storage_component.hpp"
@@ -74,10 +76,10 @@ int main(int argc, char* argv[]) {
             .Append<internview::components::PdfStorageComponent>("pdf-storage")
 
             .Append<internview::components::InternviewComponent>("internview-component")
-        
+
             .Append<internview::components::UserStorageComponent>("user-storage")
 
-
+            .Append<internview::components::CvStorageComponent>("cv-storage")
 
             .Append<internview::handlers::status::HandlerStatusGet>()
 

@@ -8,6 +8,7 @@
 
 #include "userver/fs/read.hpp"
 #include "userver/fs/write.hpp"
+#include "userver/logging/log.hpp"
 #include "userver/server/handlers/exceptions.hpp"
 #include "userver/utils/uuid4.hpp"
 
@@ -26,12 +27,16 @@ std::string LocalFileStorage::GenerateFileKey(const File& file) {
     auto ext = std::filesystem::path(file.filename).extension().string();
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
     if (ext.empty()) {
+        LOG_WARNING() << "Empty extension";
         throw userver::server::handlers::ClientError(
+            
             userver::formats::json::MakeObject("message", "Empty file extension"));
     }
     if (auto it = std::ranges::find(supported_extensions_, ext);
         it == supported_extensions_.end()) {
         // TODO: add more info
+        LOG_WARNING() << "Invalid extension";
+
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
             "message", "Invalid file extension"));
     }
@@ -47,6 +52,7 @@ std::string LocalFileStorage::FullPath(const std::string& key) {
 std::string LocalFileStorage::Save(const File& file) {
     auto file_key = GenerateFileKey(file);
     auto path = FullPath(file_key);
+    LOG_INFO() << "New file:" << path;
     userver::fs::RewriteFileContentsAtomically(
         fs_tp_, path, file.data,
         boost::filesystem::perms::owner_write | boost::filesystem::perms::owner_read);

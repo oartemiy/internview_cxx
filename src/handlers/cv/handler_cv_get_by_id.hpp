@@ -3,7 +3,8 @@
 #include <memory>
 
 #include "storages/application_storage.hpp"
-#include "storages/cv_storage.hpp"
+
+#include "storages/interfaces/cv_storage.hpp"
 #include "utils/common_handler.hpp"
 
 namespace internview::handlers {
@@ -19,7 +20,7 @@ public:
 
 private:
     std::shared_ptr<internview::storages::ApplicationStorage> application_storage_;
-    std::shared_ptr<internview::storages::CvStorage> cv_storage_ptr_;
+    std::shared_ptr<internview::storages::interfaces::ICvStorage> cv_storage_ptr_;
 };
 
 }  // namespace internview::handlers

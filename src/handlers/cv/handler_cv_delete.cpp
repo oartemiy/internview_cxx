@@ -1,6 +1,6 @@
 #include "handler_cv_delete.hpp"
 
-#include "components/internview_component.hpp"
+#include "components/cv_storage_component.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
 #include "utils/common_handler.hpp"
 
@@ -9,7 +9,7 @@ namespace internview::handlers {
 HandlerCvDelete::HandlerCvDelete(const ComponentConfig& config,
                                  const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
-      cv_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetCvStoragePtr()) {
+      cv_storage_ptr_(component_context.FindComponent<components::CvStorageComponent>().GetStorage()) {
 }
 
 Value HandlerCvDelete::HandleRequestJsonThrow(const HttpRequest& request,

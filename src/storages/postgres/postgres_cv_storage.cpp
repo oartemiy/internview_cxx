@@ -1,39 +1,24 @@
-#include "cv_storage.hpp"
+#include "postgres_cv_storage.hpp"
 
-#include <algorithm>
-#include <cctype>
-#include <chrono>
-#include <filesystem>
-#include <optional>
-#include <string>
-#include <vector>
-
+#include "components/pdf_storage_component.hpp"
 #include "cv_storage_queries/sql_queries.hpp"
-#include "dto/cv_dto.hpp"
-#include "models/cv.hpp"
-#include "services/file_service.hpp"
-#include "userver/formats/json/inline.hpp"
-// #include "userver/logging/log.hpp"
 #include "userver/server/handlers/exceptions.hpp"
-#include "userver/storages/postgres/cluster_types.hpp"
+#include "userver/storages/postgres/cluster.hpp"
 #include "userver/storages/postgres/component.hpp"
-#include "userver/storages/postgres/exceptions.hpp"
-#include "userver/storages/postgres/io/row_types.hpp"
 #include "userver/utils/boost_uuid7.hpp"
-#include "userver/utils/uuid4.hpp"
 
-namespace internview::storages {
+namespace internview::storages::postgres {
 
-CvStorage::CvStorage(
-                     const userver::components::ComponentConfig& config,
-                     const userver::components::ComponentContext& component_context)
+PostgresCvStorage::PostgresCvStorage(
+    [[maybe_unused]] const userver::components::ComponentConfig& config,
+    const userver::components::ComponentContext& component_context)
     : pg_cluster_(component_context.FindComponent<userver::components::Postgres>("postgres-db")
                       .GetCluster()),
-    
-      file_service_(config, component_context) {
+      pdf_storage_(component_context.FindComponent<internview::components::PdfStorageComponent>()
+                       .GetStorage()) {
 }
 
-dto::cv::ResponseDTO CvStorage::CreateCv(const dto::cv::CreateDTO& dto) {
+dto::cv::ResponseDTO PostgresCvStorage::CreateCv(const dto::cv::CreateDTO& dto) {
     auto id = userver::utils::generators::GenerateBoostUuidV7();
     try {
         auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
@@ -52,14 +37,14 @@ dto::cv::ResponseDTO CvStorage::CreateCv(const dto::cv::CreateDTO& dto) {
     }
 }
 
-std::vector<internview::models::CV> CvStorage::GetUserCvs(const boost::uuids::uuid& user_id) {
+std::vector<models::CV> PostgresCvStorage::GetUserCvs(const boost::uuids::uuid& user_id) {
     try {
         auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
                                            cv_storage_queries::sql::kGetCvs, user_id);
-        std::vector<internview::models::CV> res_vec;
+        std::vector<models::CV> res_vec;
         res_vec.reserve(pg_res.Size());
         for (const auto& row : pg_res) {
-            res_vec.push_back(row.As<internview::models::CV>(userver::storages::postgres::kRowTag));
+            res_vec.push_back(row.As<models::CV>(userver::storages::postgres::kRowTag));
         }
         return res_vec;
     } catch (userver::storages::postgres::ForeignKeyViolation& e) {
@@ -68,8 +53,7 @@ std::vector<internview::models::CV> CvStorage::GetUserCvs(const boost::uuids::uu
     }
 }
 
-internview::models::CV CvStorage::GetCvById(const boost::uuids::uuid& id,
-                                            const boost::uuids::uuid& user_id) {
+models::CV PostgresCvStorage::GetCvById(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id) {
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
                                        cv_storage_queries::sql::kGetCvById, id, user_id);
     if (pg_res.IsEmpty()) {
@@ -81,7 +65,7 @@ internview::models::CV CvStorage::GetCvById(const boost::uuids::uuid& id,
     return models;
 }
 
-internview::dto::cv::ResponseDTO CvStorage::UpdateCv(const internview::dto::cv::UpdateDTO& dto) {
+dto::cv::ResponseDTO PostgresCvStorage::UpdateCv(const internview::dto::cv::UpdateDTO& dto) {
     if (!dto.has_cv_pdf_in_request && !dto.has_description_in_request &&
         !dto.has_title_in_request) {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
@@ -117,7 +101,7 @@ internview::dto::cv::ResponseDTO CvStorage::UpdateCv(const internview::dto::cv::
                                            cv_storage_queries::sql::kUpdateCv, dto.id, model.title,
                                            model.description, model.cv_pdf);
         if (old_cv_pdf != std::nullopt && model.cv_pdf == std::nullopt) {
-            file_service_.DeleteFile(services::FileService::pdf_folder + *old_cv_pdf);
+            pdf_storage_->Delete(*old_cv_pdf);
         }
         auto updated_at = pg_res[0][0].As<std::chrono::system_clock::time_point>();
         return {dto.id,       dto.user_id,      model.title, model.description,
@@ -131,13 +115,13 @@ internview::dto::cv::ResponseDTO CvStorage::UpdateCv(const internview::dto::cv::
     }
 }
 
-void CvStorage::DeleteCv(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id) {
+void PostgresCvStorage::DeleteCv(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id) {
     auto cv_model = GetCvById(id, user_id);
 
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
                                        cv_storage_queries::sql::kDeleteCv, id, user_id);
     if (cv_model.cv_pdf != std::nullopt) {
-        file_service_.DeleteFile(services::FileService::pdf_folder + *cv_model.cv_pdf);
+        pdf_storage_->Delete(*cv_model.cv_pdf);
     }
     if (pg_res.IsEmpty()) {
         throw userver::server::handlers::ClientError(
@@ -145,28 +129,20 @@ void CvStorage::DeleteCv(const boost::uuids::uuid& id, const boost::uuids::uuid&
     }
 }
 
-void CvStorage::UploadCvPdf(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id,
-                            const userver::server::http::FormDataArg& file_arg) {
-    auto ext =
-        std::filesystem::path(file_arg.filename ? *file_arg.filename : "").extension().string();
-    std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-    if (ext != ".pdf") {
-        throw userver::server::handlers::ClientError(
-            userver::formats::json::MakeObject("message", "Invalid cv format. Supported: pdf"));
-    }
-    auto cv_model = GetCvById(id, user_id);
-    if (cv_model.cv_pdf != std::nullopt) {
-        file_service_.DeleteFile(services::FileService::pdf_folder + *cv_model.cv_pdf);
-    }
-    auto pdf_id = userver::utils::generators::GenerateUuid();
-    auto full_path = internview::services::FileService::pdf_folder + pdf_id + ext;
-    file_service_.WriteFile(full_path, file_arg.value);
+void PostgresCvStorage::UploadCvPdf(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id,
+                                    const userver::server::http::FormDataArg& file_arg) {
 
-    auto server_path = pdf_id + ext;
-    UpdateCv({false, false, true, id, user_id, "", std::nullopt, pdf_id + ".pdf"});
+    auto cv_model = GetCvById(id, user_id);
+
+    if (cv_model.cv_pdf != std::nullopt) {
+        pdf_storage_->Delete(*cv_model.cv_pdf);
+    }
+    auto key = pdf_storage_->Save(file_arg);
+
+    UpdateCv({false, false, true, id, user_id, "", std::nullopt, key});
 }
 
-std::optional<std::pair<std::string, std::string>> CvStorage::GetCvPdf(
+std::optional<std::pair<std::string, std::string>> PostgresCvStorage::GetCvPdf(
     const boost::uuids::uuid& id, const boost::uuids::uuid& user_id) {
     auto cv_model = GetCvById(id, user_id);
     if (!cv_model.cv_pdf) {
@@ -174,7 +150,7 @@ std::optional<std::pair<std::string, std::string>> CvStorage::GetCvPdf(
     }
     auto pic = cv_model.cv_pdf;
     try {
-        auto file = file_service_.ReadFile(services::FileService::pdf_folder + *pic);
+        auto file = pdf_storage_->Load(*pic);
         std::pair<std::string, std::string> res{*pic, file};
         return res;
     } catch (std::runtime_error& e) {
@@ -182,4 +158,4 @@ std::optional<std::pair<std::string, std::string>> CvStorage::GetCvPdf(
     }
 }
 
-}  // namespace internview::storages
+}  // namespace internview::storages::postgres

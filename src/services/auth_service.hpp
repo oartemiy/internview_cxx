@@ -8,6 +8,7 @@
 
 #include "models/user.hpp"
 #include "services/jwt_service.hpp"
+#include "storages/interfaces/user_storage.hpp"
 #include "storages/refresh_token_storage.hpp"
 #include "userver/cache/expirable_lru_cache.hpp"
 #include "userver/components/component_context.hpp"
@@ -121,6 +122,8 @@ private:
     internview::services::JwtService jwt_service_;
     std::shared_ptr<internview::storages::RefreshTokenStorage> refresh_token_storage_;
 
+
+    std::shared_ptr<internview::storages::interfaces::IUserStorage> user_storage_;
     userver::storages::postgres::ClusterPtr pg_cluster_;
     userver::cache::ExpirableLruCache<boost::uuids::uuid, CacheAuthInfo> cache_;
     userver::engine::TaskProcessor& crypto_tp_;

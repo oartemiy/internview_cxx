@@ -1,5 +1,6 @@
 #include "handler_cv_pdf_get.hpp"
 
+#include "components/cv_storage_component.hpp"
 #include "components/internview_component.hpp"
 #include "userver/server/handlers/http_handler_base.hpp"
 #include "utils/common_handler.hpp"
@@ -11,7 +12,7 @@ HandlerCvPdfGet::HandlerCvPdfGet(const ComponentConfig& config,
     : HttpHandlerBase(config, component_context),
       application_storage_ptr_(
           component_context.FindComponent<InternviewComponent>().GetApplicationStoragePtr()),
-      cv_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetCvStoragePtr()) {
+      cv_storage_ptr_(component_context.FindComponent<internview::components::CvStorageComponent>().GetStorage()) {
 }
 
 std::string HandlerCvPdfGet::HandleRequestThrow(const HttpRequest& request,

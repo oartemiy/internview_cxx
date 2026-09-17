@@ -3,7 +3,8 @@
 #include <memory>
 #include <string_view>
 
-#include "storages/cv_storage.hpp"
+
+#include "storages/interfaces/cv_storage.hpp"
 #include "storages/interfaces/user_storage.hpp"
 #include "storages/vacancy_storage.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
@@ -22,7 +23,7 @@ public:
 
 private:
     std::shared_ptr<internview::storages::interfaces::IUserStorage> user_storage_ptr_;
-    std::shared_ptr<internview::storages::CvStorage> cv_storage_ptr_;
+    std::shared_ptr<internview::storages::interfaces::ICvStorage> cv_storage_ptr_;
     std::shared_ptr<internview::storages::VacancyStorage> vacancy_storage_ptr_;
 };
 

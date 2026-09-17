@@ -1,6 +1,6 @@
 #include "handler_cv_update.hpp"
 
-#include "components/internview_component.hpp"
+#include "components/cv_storage_component.hpp"
 #include "dto/cv_dto.hpp"
 #include "userver/server/handlers/exceptions.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
@@ -11,7 +11,8 @@ namespace internview::handlers {
 HandlerCvUpdate::HandlerCvUpdate(const ComponentConfig& config,
                                  const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
-      cv_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetCvStoragePtr()) {
+      cv_storage_ptr_(component_context.FindComponent<internview::components::CvStorageComponent>()
+                          .GetStorage()) {
 }
 
 Value HandlerCvUpdate::HandleRequestJsonThrow(const HttpRequest& request, const Value& request_json,

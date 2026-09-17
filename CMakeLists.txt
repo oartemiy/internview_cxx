@@ -99,7 +99,6 @@ add_library(
 
     # services
     src/services/jwt_service.cpp
-    src/services/file_service.cpp
     src/services/auth_service.cpp
 
     # components
@@ -107,12 +106,13 @@ add_library(
     src/components/pdf_storage_component.cpp
     src/components/img_storage_component.cpp
     src/components/user_storage_component.cpp
+    src/components/cv_storage_component.cpp
 
-    # stotages
+    # storages
     src/storages/local/local_file_storage.cpp
     src/storages/postgres/postgres_user_storage.cpp
+    src/storages/postgres/postgres_cv_storage.cpp
 
-    src/storages/cv_storage.cpp
     src/storages/vacancy_storage.cpp
     src/storages/application_storage.cpp
     src/storages/refresh_token_storage.cpp

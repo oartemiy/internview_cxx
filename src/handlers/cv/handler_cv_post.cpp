@@ -1,5 +1,6 @@
 #include "handler_cv_post.hpp"
 
+#include "components/cv_storage_component.hpp"
 #include "utils/common_handler.hpp"
 
 namespace internview::handlers {
@@ -7,7 +8,8 @@ namespace internview::handlers {
 HandlerCvPost::HandlerCvPost(const ComponentConfig& config,
                              const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
-      cv_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetCvStoragePtr()) {
+      cv_storage_ptr_(component_context.FindComponent<internview::components::CvStorageComponent>()
+                          .GetStorage()) {
 }
 
 Value HandlerCvPost::HandleRequestJsonThrow([[maybe_unused]] const HttpRequest& request,

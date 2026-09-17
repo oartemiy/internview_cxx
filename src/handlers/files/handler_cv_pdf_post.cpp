@@ -1,6 +1,6 @@
 #include "handler_cv_pdf_post.hpp"
 
-#include "components/internview_component.hpp"
+#include "components/cv_storage_component.hpp"
 #include "userver/server/handlers/http_handler_base.hpp"
 #include "utils/common_handler.hpp"
 
@@ -9,7 +9,8 @@ namespace internview::handlers {
 HandlerCvPdfPost::HandlerCvPdfPost(const ComponentConfig& config,
                                    const ComponentContext& component_context)
     : HttpHandlerBase(config, component_context),
-      cv_storage_ptr_(component_context.FindComponent<InternviewComponent>().GetCvStoragePtr()) {
+      cv_storage_ptr_(
+          component_context.FindComponent<components::CvStorageComponent>().GetStorage()) {
 }
 
 std::string HandlerCvPdfPost::HandleRequest(HttpRequest& request,

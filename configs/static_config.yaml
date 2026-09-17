@@ -87,6 +87,8 @@ components_manager:
 
         user-storage: {}
 
+        cv-storage: {}
+
         handler-status-get:
             path: /status
             method: GET

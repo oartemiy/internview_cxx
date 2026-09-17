@@ -5,7 +5,6 @@
 
 #include "services/auth_service.hpp"
 #include "storages/application_storage.hpp"
-#include "storages/cv_storage.hpp"
 #include "storages/refresh_token_storage.hpp"
 #include "storages/vacancy_storage.hpp"
 #include "userver/components/component_base.hpp"
@@ -15,21 +14,15 @@
 
 namespace internview::components {
 
-using userver::components::ComponentConfig;
-using userver::components::ComponentContext;
 
 class InternviewComponent final : public userver::components::ComponentBase {
 public:
     static constexpr std::string_view kName = "internview-component";
 
-    explicit InternviewComponent(const ComponentConfig& config, const ComponentContext& component_context);
+    explicit InternviewComponent(const userver::components::ComponentConfig& config, const userver::components::ComponentContext& component_context);
 
     std::shared_ptr<internview::services::AuthService> GetAuthServicePtr() {
         return auth_service_ptr_;
-    }
-
-    std::shared_ptr<internview::storages::CvStorage> GetCvStoragePtr() {
-        return cv_storage_ptr_;
     }
 
     std::shared_ptr<internview::storages::VacancyStorage> GetVacancyStoragePtr() {
@@ -48,7 +41,6 @@ private:
     std::shared_ptr<internview::storages::RefreshTokenStorage> refresh_token_storage_ptr_;
 
     std::shared_ptr<internview::services::AuthService> auth_service_ptr_;
-    std::shared_ptr<internview::storages::CvStorage> cv_storage_ptr_;
     std::shared_ptr<internview::storages::VacancyStorage> vacancy_storage_ptr_;
     std::shared_ptr<internview::storages::ApplicationStorage> application_storage_ptr_;
 

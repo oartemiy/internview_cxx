@@ -2,6 +2,8 @@
 
 #include <userver/storages/postgres/cluster.hpp>
 
+#include "dto/user_dto.hpp"
+#include "models/user.hpp"
 #include "storages/interfaces/file_storage.hpp"
 #include "storages/interfaces/user_storage.hpp"
 #include "userver/components/component_config.hpp"
@@ -15,13 +17,9 @@ public:
                                  const userver::components::ComponentContext& component_context);
 
     ~PostgresUserStorage() override = default;
-
     PostgresUserStorage(const PostgresUserStorage&) = delete;
-
     PostgresUserStorage& operator=(const PostgresUserStorage&) = delete;
-
     PostgresUserStorage(PostgresUserStorage&&) = delete;
-
     PostgresUserStorage& operator=(PostgresUserStorage&&) = delete;
 
 
@@ -32,7 +30,7 @@ public:
      * @return User
      * @throw userver::server::handlers::ResourceNotFound
      */
-    User GetUserById(const boost::uuids::uuid& id) override;
+    internview::models::User GetUserById(const boost::uuids::uuid& id) override;
 
     /**
      * @brief Update the User object
@@ -42,7 +40,7 @@ public:
      * @throws userver::server::handlers::ConflictError
                userver::server::handlers::ResourceNotFound
      */
-    ResponseDTO UpdateUser(const UpdateDTO& dto) override;
+    internview::dto::user::ResponseDTO UpdateUser(const internview::dto::user::UpdateDTO& dto) override;
 
     /**
      * @brief Delete the User object
@@ -51,7 +49,7 @@ public:
      * @throws userver::server::handlers::ClientError
                userver::server::handlers::ResourceNotFound
      */
-    void DeleteUser(const DeleteDTO& dto) override;
+    void DeleteUser(const dto::user::DeleteDTO& dto) override;
 
     /**
      * @brief Uploads and sets new user's profile picture
