@@ -12,7 +12,8 @@ HandlerCvPdfGet::HandlerCvPdfGet(const ComponentConfig& config,
     : HttpHandlerBase(config, component_context),
       application_storage_ptr_(
           component_context.FindComponent<InternviewComponent>().GetApplicationStoragePtr()),
-      cv_storage_ptr_(component_context.FindComponent<internview::components::CvStorageComponent>().GetStorage()) {
+      cv_storage_ptr_(component_context.FindComponent<internview::components::CvStorageComponent>()
+                          .GetStorage()) {
 }
 
 std::string HandlerCvPdfGet::HandleRequestThrow(const HttpRequest& request,

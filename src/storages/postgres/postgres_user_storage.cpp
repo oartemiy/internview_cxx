@@ -47,7 +47,8 @@ models::User PostgresUserStorage::GetUserById(const boost::uuids::uuid& id) {
     return user;
 }
 
-dto::user::ResponseDTO PostgresUserStorage::UpdateUser(const internview::dto::user::UpdateDTO& dto) {
+dto::user::ResponseDTO PostgresUserStorage::UpdateUser(
+    const internview::dto::user::UpdateDTO& dto) {
     if (!dto.has_description_in_request && !dto.has_login_in_request && !dto.has_name_in_request &&
         !dto.has_profile_pic_in_request) {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(

@@ -17,7 +17,8 @@ ImgStorageComponent::ImgStorageComponent(
     : userver::components::ComponentBase(config, component_context) {
     auto& fs_tp = component_context.GetTaskProcessor(config["fs-task-processor"].As<std::string>());
     auto base_dir = config["base-dir"].As<std::string>();
-    std::vector<std::string> extensions = config["supported-extensions"].As<std::vector<std::string>>();
+    std::vector<std::string> extensions =
+        config["supported-extensions"].As<std::vector<std::string>>();
     storage_ = std::make_shared<internview::storages::local::LocalFileStorage>(
         fs_tp, base_dir, std::move(extensions));
 }

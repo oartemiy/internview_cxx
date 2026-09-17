@@ -3,7 +3,6 @@
 #include <memory>
 
 #include "storages/application_storage.hpp"
-
 #include "storages/interfaces/cv_storage.hpp"
 #include "utils/common_handler.hpp"
 

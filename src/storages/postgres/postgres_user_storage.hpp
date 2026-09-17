@@ -22,7 +22,6 @@ public:
     PostgresUserStorage(PostgresUserStorage&&) = delete;
     PostgresUserStorage& operator=(PostgresUserStorage&&) = delete;
 
-
     /**
      * @brief Get the User By Id object
      *
@@ -40,7 +39,8 @@ public:
      * @throws userver::server::handlers::ConflictError
                userver::server::handlers::ResourceNotFound
      */
-    internview::dto::user::ResponseDTO UpdateUser(const internview::dto::user::UpdateDTO& dto) override;
+    internview::dto::user::ResponseDTO UpdateUser(
+        const internview::dto::user::UpdateDTO& dto) override;
 
     /**
      * @brief Delete the User object

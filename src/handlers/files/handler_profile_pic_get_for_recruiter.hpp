@@ -3,7 +3,6 @@
 #include <string_view>
 
 #include "storages/interfaces/user_storage.hpp"
-
 #include "utils/common_handler.hpp"
 
 namespace internview::handlers {

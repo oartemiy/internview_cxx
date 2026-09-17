@@ -7,6 +7,7 @@
 #include "userver/components/component_config.hpp"
 #include "userver/components/component_context.hpp"
 #include "userver/utils/periodic_task.hpp"
+
 namespace internview::components {
 
 class RefreshTokenStorage final : public userver::components::ComponentBase {

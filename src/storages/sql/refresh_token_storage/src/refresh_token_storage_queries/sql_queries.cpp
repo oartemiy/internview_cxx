@@ -6,7 +6,7 @@ namespace refresh_token_storage_queries::sql {
 
 // Generated from clear_expired_tokens.sql
 const USERVER_NAMESPACE::storages::Query kClearExpiredTokens = {
-R"-(
+    R"-(
 DELETE FROM internview_schema.refresh_tokens
 WHERE revoked = TRUE
     OR expires_at <= NOW();
@@ -17,12 +17,9 @@ WHERE revoked = TRUE
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
-
-
-
 // Generated from create.sql
 const USERVER_NAMESPACE::storages::Query kCreate = {
-R"-(
+    R"-(
 -- Insert data into 'refresh_tokens'
 INSERT INTO internview_schema.refresh_tokens(id, user_id, token_hash, expires_at)
     VALUES ($1, $2, $3, $4);
@@ -33,12 +30,9 @@ INSERT INTO internview_schema.refresh_tokens(id, user_id, token_hash, expires_at
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
-
-
-
 // Generated from delete.sql
 const USERVER_NAMESPACE::storages::Query kDelete = {
-R"-(
+    R"-(
 -- Delete rows from 'internview_schema.refresh_tokens' where condition is met
 DELETE FROM internview_schema.refresh_tokens
 WHERE id = $1;
@@ -49,12 +43,9 @@ WHERE id = $1;
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
-
-
-
 // Generated from get_by_token_hash.sql
 const USERVER_NAMESPACE::storages::Query kGetByTokenHash = {
-R"-(
+    R"-(
 -- Select all rows from 'internview_schema.refresh_tokens'
 SELECT
     *
@@ -69,12 +60,9 @@ WHERE
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
-
-
-
 // Generated from revoke.sql
 const USERVER_NAMESPACE::storages::Query kRevoke = {
-R"-(
+    R"-(
 -- Update rows in 'internview_schema.refresh_tokens' where condition is met
 UPDATE
     internview_schema.refresh_tokens
@@ -89,12 +77,9 @@ WHERE
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
-
-
-
 // Generated from revoke_all_user_tokens.sql
 const USERVER_NAMESPACE::storages::Query kRevokeAllUserTokens = {
-R"-(
+    R"-(
 -- Update rows in 'internview_schema.refresh_tokens' where condition is met
 UPDATE
     internview_schema.refresh_tokens
@@ -108,6 +93,5 @@ WHERE
     USERVER_NAMESPACE::storages::Query::NameLiteral("revoke_all_user_tokens"),
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
-
 
 }  // namespace refresh_token_storage_queries::sql

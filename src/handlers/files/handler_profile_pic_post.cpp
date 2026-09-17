@@ -9,7 +9,9 @@ namespace internview::handlers {
 HandlerProfilePicPost::HandlerProfilePicPost(const ComponentConfig& config,
                                              const ComponentContext& component_context)
     : HttpHandlerBase(config, component_context),
-      user_storage_ptr_(component_context.FindComponent<internview::components::UserStorageComponent>().GetStorage()) {
+      user_storage_ptr_(
+          component_context.FindComponent<internview::components::UserStorageComponent>()
+              .GetStorage()) {
 }
 
 std::string HandlerProfilePicPost::HandleRequestThrow(

@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
             .Append<userver::components::DefaultSecdistProvider>("default-secdist-provider")
 
             .Append<internview::components::ImgStorageComponent>("img-storage")
-        
+
             .Append<internview::components::PdfStorageComponent>("pdf-storage")
 
             .Append<internview::components::UserStorageComponent>("user-storage")

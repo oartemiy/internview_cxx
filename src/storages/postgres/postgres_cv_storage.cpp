@@ -53,7 +53,8 @@ std::vector<models::CV> PostgresCvStorage::GetUserCvs(const boost::uuids::uuid& 
     }
 }
 
-models::CV PostgresCvStorage::GetCvById(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id) {
+models::CV PostgresCvStorage::GetCvById(const boost::uuids::uuid& id,
+                                        const boost::uuids::uuid& user_id) {
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
                                        cv_storage_queries::sql::kGetCvById, id, user_id);
     if (pg_res.IsEmpty()) {

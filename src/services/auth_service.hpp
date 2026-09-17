@@ -82,7 +82,7 @@ public:
      * @param role
      */
     void MarkAsChanged(const boost::uuids::uuid& user_id, int password_version,
-                           const std::string& role);
+                       const std::string& role);
 
     /**
      * @brief Login User
@@ -120,7 +120,6 @@ private:
 
     internview::services::JwtService jwt_service_;
     std::shared_ptr<internview::storages::interfaces::IRefreshTokenStorage> refresh_token_storage_;
-
 
     std::shared_ptr<internview::storages::interfaces::IUserStorage> user_storage_;
     userver::storages::postgres::ClusterPtr pg_cluster_;

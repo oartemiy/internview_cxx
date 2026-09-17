@@ -15,7 +15,7 @@ public:
     static constexpr std::string_view kName = "img-storage";
 
     explicit ImgStorageComponent(const userver::components::ComponentConfig& config,
-                         const userver::components::ComponentContext& component_context);
+                                 const userver::components::ComponentContext& component_context);
 
     std::shared_ptr<storages::interfaces::IFileStorage> GetStorage() {
         return storage_;

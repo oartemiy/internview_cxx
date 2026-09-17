@@ -33,7 +33,7 @@ PostgresRefreshTokenStorage::PostgresRefreshTokenStorage(
 void PostgresRefreshTokenStorage::Create(const boost::uuids::uuid& user_id,
                                          const std::string& token_hash) {
     LOG_INFO() << "Refresh token limit: " << limit_;
-    
+
     boost::uuids::uuid id = userver::utils::generators::GenerateBoostUuidV7();
     auto expires_at =
         userver::storages::postgres::TimePointTz{std::chrono::system_clock::now() + limit_};

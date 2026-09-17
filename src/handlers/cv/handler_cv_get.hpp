@@ -3,7 +3,6 @@
 #include <memory>
 #include <string_view>
 
-
 #include "storages/interfaces/cv_storage.hpp"
 #include "utils/common_handler.hpp"
 

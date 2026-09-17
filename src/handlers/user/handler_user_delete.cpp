@@ -14,7 +14,8 @@ HandlerUserDelete::HandlerUserDelete(const ComponentConfig& config,
       user_storage_ptr_(
           component_context.FindComponent<internview::components::UserStorageComponent>()
               .GetStorage()),
-      cv_storage_ptr_(component_context.FindComponent<components::CvStorageComponent>().GetStorage()),
+      cv_storage_ptr_(
+          component_context.FindComponent<components::CvStorageComponent>().GetStorage()),
       vacancy_storage_ptr_(
           component_context.FindComponent<InternviewComponent>().GetVacancyStoragePtr()) {
 }

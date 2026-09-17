@@ -29,7 +29,7 @@ std::string LocalFileStorage::GenerateFileKey(const File& file) {
     if (ext.empty()) {
         LOG_WARNING() << "Empty extension";
         throw userver::server::handlers::ClientError(
-            
+
             userver::formats::json::MakeObject("message", "Empty file extension"));
     }
     if (auto it = std::ranges::find(supported_extensions_, ext);
@@ -37,8 +37,8 @@ std::string LocalFileStorage::GenerateFileKey(const File& file) {
         // TODO: add more info
         LOG_WARNING() << "Invalid extension";
 
-        throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
-            "message", "Invalid file extension"));
+        throw userver::server::handlers::ClientError(
+            userver::formats::json::MakeObject("message", "Invalid file extension"));
     }
     std::string id = userver::utils::generators::GenerateUuid();
     std::string name = id + ext;

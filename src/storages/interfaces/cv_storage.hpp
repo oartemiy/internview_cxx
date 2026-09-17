@@ -3,7 +3,6 @@
 #include "models/cv.hpp"
 #include "userver/server/http/form_data_arg.hpp"
 
-
 namespace internview::storages::interfaces {
 
 class ICvStorage {
@@ -14,7 +13,8 @@ public:
 
     virtual std::vector<internview::models::CV> GetUserCvs(const boost::uuids::uuid& user_id) = 0;
 
-    virtual models::CV GetCvById(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id) = 0;
+    virtual models::CV GetCvById(const boost::uuids::uuid& id,
+                                 const boost::uuids::uuid& user_id) = 0;
 
     virtual dto::cv::ResponseDTO UpdateCv(const internview::dto::cv::UpdateDTO& dto) = 0;
 

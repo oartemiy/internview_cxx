@@ -7,7 +7,6 @@
 #include "userver/components/component_base.hpp"
 #include "userver/components/component_config.hpp"
 
-
 namespace internview::components {
 
 class UserStorageComponent final : public userver::components::ComponentBase {

@@ -1,4 +1,5 @@
 #include "auth_checker.hpp"
+
 #include <memory>
 
 #include "components/internview_component.hpp"

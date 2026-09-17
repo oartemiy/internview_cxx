@@ -12,12 +12,12 @@
 
 namespace internview::components {
 
-
 class InternviewComponent final : public userver::components::ComponentBase {
 public:
     static constexpr std::string_view kName = "internview-component";
 
-    explicit InternviewComponent(const userver::components::ComponentConfig& config, const userver::components::ComponentContext& component_context);
+    explicit InternviewComponent(const userver::components::ComponentConfig& config,
+                                 const userver::components::ComponentContext& component_context);
 
     std::shared_ptr<internview::services::AuthService> GetAuthServicePtr() {
         return auth_service_ptr_;
@@ -30,7 +30,6 @@ public:
     std::shared_ptr<internview::storages::ApplicationStorage> GetApplicationStoragePtr() {
         return application_storage_ptr_;
     }
-
 
 private:
     std::shared_ptr<internview::services::AuthService> auth_service_ptr_;

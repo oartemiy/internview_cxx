@@ -6,7 +6,7 @@ namespace application_storage_queries::sql {
 
 // Generated from check_intern_applied.sql
 const USERVER_NAMESPACE::storages::Query kCheckInternApplied = {
-R"-(
+    R"-(
 SELECT
     1
 FROM
@@ -27,12 +27,9 @@ WHERE
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
-
-
-
 // Generated from create_application.sql
 const USERVER_NAMESPACE::storages::Query kCreateApplication = {
-R"-(
+    R"-(
 -- Insert data into 'internview_schema.applications'
 INSERT INTO internview_schema.applications(id, vacancy_id, intern_id, cv_id, cover_letter)
     VALUES ($1, $2, $3, $4, $5)
@@ -45,12 +42,9 @@ RETURNING
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
-
-
-
 // Generated from delete_application.sql
 const USERVER_NAMESPACE::storages::Query kDeleteApplication = {
-R"-(
+    R"-(
 -- Delete rows from 'internview_schema.applications' where condition is met
 DELETE FROM internview_schema.applications
 WHERE id = $1
@@ -64,12 +58,9 @@ RETURNING
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
-
-
-
 // Generated from get_application_by_id.sql
 const USERVER_NAMESPACE::storages::Query kGetApplicationById = {
-R"-(
+    R"-(
 -- Select all rows from 'internview_schema.applications'
 SELECT
     *
@@ -84,12 +75,9 @@ WHERE
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
-
-
-
 // Generated from get_intern_id_by_cv.sql
 const USERVER_NAMESPACE::storages::Query kGetInternIdByCv = {
-R"-(
+    R"-(
 SELECT
     intern_id
 FROM
@@ -111,12 +99,9 @@ LIMIT 1;
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
-
-
-
 // Generated from get_interns_applications.sql
 const USERVER_NAMESPACE::storages::Query kGetInternsApplications = {
-R"-(
+    R"-(
 -- Select all rows from 'internview_schema.applications'
 SELECT * FROM internview_schema.applications
 WHERE intern_id = $1;
@@ -125,12 +110,9 @@ WHERE intern_id = $1;
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
-
-
-
 // Generated from get_recruiter_applications.sql
 const USERVER_NAMESPACE::storages::Query kGetRecruiterApplications = {
-R"-(
+    R"-(
 -- Select all rows from 'internview_schema.applications'
 SELECT
     *
@@ -151,12 +133,9 @@ WHERE
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
-
-
-
 // Generated from get_vacancy_applications.sql
 const USERVER_NAMESPACE::storages::Query kGetVacancyApplications = {
-R"-(
+    R"-(
 -- Select all rows from 'internview_schema.applications'
 SELECT
     *
@@ -171,12 +150,9 @@ WHERE
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
 
-
-
-
 // Generated from update_application.sql
 const USERVER_NAMESPACE::storages::Query kUpdateApplication = {
-R"-(
+    R"-(
 -- Update rows in 'internview_schema.applications' where condition is met
 UPDATE
     internview_schema.applications
@@ -194,6 +170,5 @@ RETURNING
     USERVER_NAMESPACE::storages::Query::NameLiteral("update_application"),
     USERVER_NAMESPACE::storages::Query::LogMode::kFull,
 };
-
 
 }  // namespace application_storage_queries::sql

@@ -39,10 +39,10 @@ public:
 
     /**
      * @brief Checks is file on disk
-     * 
-     * @param key 
-     * @return true 
-     * @return false 
+     *
+     * @param key
+     * @return true
+     * @return false
      */
     bool Exists(const std::string& key) override;
 
