@@ -3,7 +3,6 @@
 #include <memory>
 #include <string_view>
 
-#include "services/auth_service.hpp"
 #include "storages/vacancy_storage.hpp"
 #include "utils/common_handler.hpp"
 

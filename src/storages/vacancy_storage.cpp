@@ -7,6 +7,7 @@
 #include "userver/formats/json/inline.hpp"
 // #include "userver/logging/log.hpp"
 #include "userver/server/handlers/exceptions.hpp"
+#include "userver/storages/postgres/cluster.hpp"
 #include "userver/storages/postgres/cluster_types.hpp"
 #include "userver/storages/postgres/component.hpp"
 #include "userver/storages/postgres/exceptions.hpp"

@@ -1,7 +1,7 @@
 #include "handler_cv_get_by_id.hpp"
 
+#include "components/application_storage_component.hpp"
 #include "components/cv_storage_component.hpp"
-#include "components/internview_component.hpp"
 #include "utils/common_handler.hpp"
 
 namespace internview::handlers {
@@ -10,7 +10,7 @@ HandlerCvGetById::HandlerCvGetById(const ComponentConfig& config,
                                    const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
       application_storage_(
-          component_context.FindComponent<InternviewComponent>().GetApplicationStoragePtr()),
+          component_context.FindComponent<components::ApplicationStorageComponent>().GetStorage()),
       cv_storage_ptr_(
           component_context.FindComponent<components::CvStorageComponent>().GetStorage()) {
 }

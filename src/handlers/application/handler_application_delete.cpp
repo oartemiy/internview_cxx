@@ -1,6 +1,6 @@
 #include "handler_application_delete.hpp"
 
-#include "components/internview_component.hpp"
+#include "components/application_storage_component.hpp"
 #include "utils/common_handler.hpp"
 
 namespace internview::handlers {
@@ -9,7 +9,8 @@ HandlerApplicationDelete::HandlerApplicationDelete(const ComponentConfig& config
                                                    const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
       application_storage_ptr_(
-          component_context.FindComponent<InternviewComponent>().GetApplicationStoragePtr()) {
+          component_context.FindComponent<internview::components::ApplicationStorageComponent>()
+              .GetStorage()) {
 }
 
 Value HandlerApplicationDelete::HandleRequestJsonThrow(

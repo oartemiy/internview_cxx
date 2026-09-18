@@ -1,38 +1,21 @@
-#include "application_storage.hpp"
-
-#include <userver/storages/postgres/exceptions.hpp>
-#include <vector>
+#include "postgres_application_storage.hpp"
 
 #include "application_storage_queries/sql_queries.hpp"
-#include "models/application.hpp"
-#include "userver/formats/json/inline.hpp"
 #include "userver/server/handlers/exceptions.hpp"
-#include "userver/storages/postgres/cluster_types.hpp"
+#include "userver/storages/postgres/cluster.hpp"
 #include "userver/storages/postgres/component.hpp"
-#include "userver/storages/postgres/exceptions.hpp"
-#include "userver/storages/postgres/io/row_types.hpp"
 #include "userver/utils/boost_uuid7.hpp"
 
-namespace internview::storages {
+namespace internview::storages::postgres {
 
-ApplicationStorage::ApplicationStorage(
+PostgresApplicationStorage::PostgresApplicationStorage(
     [[maybe_unused]] const userver::components::ComponentConfig& config,
     const userver::components::ComponentContext& component_context)
-    : pg_cluster_(component_context.FindComponent<userver::components::Postgres>("postgres-db")
-                      .GetCluster()) {
+    : pg_cluster_(component_context.FindComponent<userver::components::Postgres>("postgres-db").GetCluster()) {
 }
 
-models::Application ApplicationStorage::GetApplicationById(const boost::uuids::uuid& id) {
-    auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
-                                       application_storage_queries::sql::kGetApplicationById, id);
-    if (pg_res.IsEmpty()) {
-        throw userver::server::handlers::ClientError(
-            userver::formats::json::MakeObject("message", "This application does not exists"));
-    }
-    return pg_res.AsSingleRow<models::Application>(userver::v3_1::storages::postgres::kRowTag);
-}
-
-models::Application ApplicationStorage::CreateApplication(const dto::application::CreateDTO& dto) {
+models::Application PostgresApplicationStorage::CreateApplication(
+    const dto::application::CreateDTO& dto) {
     auto id = userver::utils::generators::GenerateBoostUuidV7();
     try {
         auto pg_res =
@@ -52,7 +35,7 @@ models::Application ApplicationStorage::CreateApplication(const dto::application
     }
 }
 
-std::vector<models::Application> ApplicationStorage::GetInternsApplications(
+std::vector<models::Application> PostgresApplicationStorage::GetInternsApplications(
     const boost::uuids::uuid& intern_id) {
     auto pg_res =
         pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
@@ -65,7 +48,7 @@ std::vector<models::Application> ApplicationStorage::GetInternsApplications(
     return vec;
 }
 
-std::vector<models::Application> ApplicationStorage::GetRecruiterApplications(
+std::vector<models::Application> PostgresApplicationStorage::GetRecruiterApplications(
     const boost::uuids::uuid& recruiter_id) {
     auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
                                        application_storage_queries::sql::kGetRecruiterApplications,
@@ -78,7 +61,7 @@ std::vector<models::Application> ApplicationStorage::GetRecruiterApplications(
     return vec;
 }
 
-std::vector<models::Application> ApplicationStorage::GetVacancyApplications(
+std::vector<models::Application> PostgresApplicationStorage::GetVacancyApplications(
     const boost::uuids::uuid& vacancy_id) {
     auto pg_res =
         pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
@@ -91,7 +74,18 @@ std::vector<models::Application> ApplicationStorage::GetVacancyApplications(
     return res_vec;
 }
 
-models::Application ApplicationStorage::UpdateApplication(const dto::application::UpdateDTO& dto) {
+models::Application PostgresApplicationStorage::GetApplicationById(const boost::uuids::uuid& id) {
+    auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
+                                       application_storage_queries::sql::kGetApplicationById, id);
+    if (pg_res.IsEmpty()) {
+        throw userver::server::handlers::ClientError(
+            userver::formats::json::MakeObject("message", "This application does not exists"));
+    }
+    return pg_res.AsSingleRow<models::Application>(userver::v3_1::storages::postgres::kRowTag);
+}
+
+models::Application PostgresApplicationStorage::UpdateApplication(
+    const dto::application::UpdateDTO& dto) {
     auto model = GetApplicationById(dto.id);
     if (dto.has_cover_letter_in_request_json) {
         model.cover_letter = dto.cover_letter;
@@ -117,8 +111,8 @@ models::Application ApplicationStorage::UpdateApplication(const dto::application
     }
 }
 
-void ApplicationStorage::DeleteApplication(const boost::uuids::uuid& id,
-                                           const boost::uuids::uuid& intern_id) {
+void PostgresApplicationStorage::DeleteApplication(const boost::uuids::uuid& id,
+                                                   const boost::uuids::uuid& intern_id) {
     auto pg_res =
         pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
                              application_storage_queries::sql::kDeleteApplication, id, intern_id);
@@ -128,8 +122,8 @@ void ApplicationStorage::DeleteApplication(const boost::uuids::uuid& id,
     }
 }
 
-bool ApplicationStorage::CheckInternApplied(const boost::uuids::uuid& intern_id,
-                                            const boost::uuids::uuid& recruiter_id) {
+bool PostgresApplicationStorage::CheckInternApplied(const boost::uuids::uuid& intern_id,
+                                                    const boost::uuids::uuid& recruiter_id) {
     auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
                                        application_storage_queries::sql::kCheckInternApplied,
                                        intern_id, recruiter_id);
@@ -139,8 +133,8 @@ bool ApplicationStorage::CheckInternApplied(const boost::uuids::uuid& intern_id,
     return true;
 }
 
-boost::uuids::uuid ApplicationStorage::GetInternIdByCv(const boost::uuids::uuid& cv_id,
-                                                       const boost::uuids::uuid& recruiter_id) {
+boost::uuids::uuid PostgresApplicationStorage::GetInternIdByCv(
+    const boost::uuids::uuid& cv_id, const boost::uuids::uuid& recruiter_id) {
     auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
                                        application_storage_queries::sql::kGetInternIdByCv, cv_id,
                                        recruiter_id);
@@ -151,4 +145,4 @@ boost::uuids::uuid ApplicationStorage::GetInternIdByCv(const boost::uuids::uuid&
     return pg_res.AsSingleRow<boost::uuids::uuid>();
 }
 
-}  // namespace internview::storages
+}  // namespace internview::storages::postgres

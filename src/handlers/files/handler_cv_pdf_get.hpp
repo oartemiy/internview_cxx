@@ -3,7 +3,7 @@
 #include <memory>
 #include <string_view>
 
-#include "storages/application_storage.hpp"
+#include "storages/interfaces/application_storage.hpp"
 #include "storages/interfaces/cv_storage.hpp"
 #include "utils/common_handler.hpp"
 
@@ -18,7 +18,7 @@ public:
     std::string HandleRequestThrow(const HttpRequest& request, RequestContext& context) const;
 
 private:
-    std::shared_ptr<internview::storages::ApplicationStorage> application_storage_ptr_;
+    std::shared_ptr<internview::storages::interfaces::IApplicationStorage> application_storage_ptr_;
     std::shared_ptr<internview::storages::interfaces::ICvStorage> cv_storage_ptr_;
 };
 

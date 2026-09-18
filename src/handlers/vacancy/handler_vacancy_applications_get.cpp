@@ -1,5 +1,6 @@
 #include "handler_vacancy_applications_get.hpp"
 
+#include "components/application_storage_component.hpp"
 #include "components/internview_component.hpp"
 #include "utils/common_handler.hpp"
 
@@ -11,7 +12,7 @@ HandlerVacancyApplicationsGet::HandlerVacancyApplicationsGet(
       vacancy_storage_ptr_(
           component_context.FindComponent<InternviewComponent>().GetVacancyStoragePtr()),
       application_storage_ptr_(
-          component_context.FindComponent<InternviewComponent>().GetApplicationStoragePtr()) {
+          component_context.FindComponent<components::ApplicationStorageComponent>().GetStorage()) {
 }
 
 Value HandlerVacancyApplicationsGet::HandleRequestJsonThrow(

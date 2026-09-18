@@ -1,6 +1,6 @@
 #include "handler_applications_get.hpp"
 
-#include "components/internview_component.hpp"
+#include "components/application_storage_component.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
 #include "utils/common_handler.hpp"
 
@@ -10,7 +10,7 @@ HandlerApplicationsGet::HandlerApplicationsGet(const ComponentConfig& config,
                                                const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
       application_storage_ptr_(
-          component_context.FindComponent<InternviewComponent>().GetApplicationStoragePtr()) {
+          component_context.FindComponent<components::ApplicationStorageComponent>().GetStorage()) {
 }
 
 Value HandlerApplicationsGet::HandleRequestJsonThrow(

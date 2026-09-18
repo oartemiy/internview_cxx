@@ -1,6 +1,6 @@
 #include "handler_profile_pic_get_for_recruiter.hpp"
 
-#include "components/internview_component.hpp"
+#include "components/application_storage_component.hpp"
 #include "components/user_storage_component.hpp"
 #include "userver/server/handlers/http_handler_base.hpp"
 #include "utils/common_handler.hpp"
@@ -14,7 +14,7 @@ HandlerProfilePicGetForRecruiter::HandlerProfilePicGetForRecruiter(
           component_context.FindComponent<internview::components::UserStorageComponent>()
               .GetStorage()),
       application_storage_ptr_(
-          component_context.FindComponent<InternviewComponent>().GetApplicationStoragePtr()) {
+          component_context.FindComponent<components::ApplicationStorageComponent>().GetStorage()) {
 }
 
 std::string HandlerProfilePicGetForRecruiter::HandleRequestThrow(

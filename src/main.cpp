@@ -11,6 +11,7 @@
 #include <userver/utils/daemon_run.hpp>
 
 #include "auth/auth_checker.hpp"
+#include "components/application_storage_component.hpp"
 #include "components/cv_storage_component.hpp"
 #include "components/img_storage_component.hpp"
 #include "components/internview_component.hpp"
@@ -54,7 +55,6 @@
 
 // ?: Add pool for slave HOSTTYPE
 // TODO: add DI container for storages
-// TODO: add DI container for files storage
 
 int main(int argc, char* argv[]) {
     userver::server::handlers::auth::RegisterAuthCheckerFactory<
@@ -81,6 +81,9 @@ int main(int argc, char* argv[]) {
             .Append<internview::components::CvStorageComponent>("cv-storage")
 
             .Append<internview::components::RefreshTokenStorage>("refresh-token-storage")
+
+            .Append<internview::components::ApplicationStorageComponent>(
+                "application-storage-component")
 
             .Append<internview::components::InternviewComponent>("internview-component")
 

@@ -3,7 +3,7 @@
 #include <memory>
 #include <string_view>
 
-#include "storages/application_storage.hpp"
+#include "storages/interfaces/application_storage.hpp"
 #include "utils/common_handler.hpp"
 
 namespace internview::handlers {
@@ -19,7 +19,8 @@ public:
                                  RequestContext& context) const override;
 
 private:
-    std::shared_ptr<storages::ApplicationStorage> application_storage_ptr_;
+    std::shared_ptr<internview::storages::interfaces::IApplicationStorage> application_storage_ptr_;
+
 };
 
 }  // namespace internview::handlers

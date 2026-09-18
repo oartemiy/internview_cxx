@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "storages/application_storage.hpp"
+#include "storages/interfaces/application_storage.hpp"
 #include "storages/interfaces/cv_storage.hpp"
 #include "utils/common_handler.hpp"
 
@@ -18,7 +18,7 @@ public:
                                  RequestContext& context) const override;
 
 private:
-    std::shared_ptr<internview::storages::ApplicationStorage> application_storage_;
+    std::shared_ptr<internview::storages::interfaces::IApplicationStorage> application_storage_;
     std::shared_ptr<internview::storages::interfaces::ICvStorage> cv_storage_ptr_;
 };
 

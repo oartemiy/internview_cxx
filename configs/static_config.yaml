@@ -92,6 +92,8 @@ components_manager:
         refresh-token-storage:
             token-lifetime-seconds: 1209600 # 14 days
 
+        application-storage-component: {}
+
         handler-status-get:
             path: /status
             method: GET

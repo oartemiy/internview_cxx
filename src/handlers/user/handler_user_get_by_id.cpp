@@ -1,6 +1,6 @@
 #include "handler_user_get_by_id.hpp"
 
-#include "components/internview_component.hpp"
+#include "components/application_storage_component.hpp"
 #include "components/user_storage_component.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
 #include "utils/common_handler.hpp"
@@ -11,7 +11,7 @@ HandlerUserGetById::HandlerUserGetById(const ComponentConfig& config,
                                        const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
       application_storage_ptr_(
-          component_context.FindComponent<InternviewComponent>().GetApplicationStoragePtr()),
+          component_context.FindComponent<components::ApplicationStorageComponent>().GetStorage()),
       user_storage_ptr_(
           component_context.FindComponent<internview::components::UserStorageComponent>()
               .GetStorage()) {
