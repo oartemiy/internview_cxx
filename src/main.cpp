@@ -18,6 +18,7 @@
 #include "components/pdf_storage_component.hpp"
 #include "components/refresh_token_storage_component.hpp"
 #include "components/user_storage_component.hpp"
+#include "components/vacancy_storage_component.hpp"
 #include "handlers/application/handler_application_delete.hpp"
 #include "handlers/application/handler_application_post.hpp"
 #include "handlers/application/handler_application_update.hpp"
@@ -54,7 +55,7 @@
 #include "userver/storages/secdist/provider_component.hpp"
 
 // ?: Add pool for slave HOSTTYPE
-// TODO: add DI container for storages
+// TODO: test DI containers
 
 int main(int argc, char* argv[]) {
     userver::server::handlers::auth::RegisterAuthCheckerFactory<
@@ -84,6 +85,8 @@ int main(int argc, char* argv[]) {
 
             .Append<internview::components::ApplicationStorageComponent>(
                 "application-storage-component")
+
+            .Append<internview::components::VacancyStorageComponent>("vacancy-storage-component")
 
             .Append<internview::components::InternviewComponent>("internview-component")
 

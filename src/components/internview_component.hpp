@@ -4,7 +4,6 @@
 #include <string_view>
 
 #include "services/auth_service.hpp"
-#include "storages/vacancy_storage.hpp"
 #include "userver/components/component_base.hpp"
 #include "userver/components/component_config.hpp"
 #include "userver/components/component_context.hpp"
@@ -22,13 +21,8 @@ public:
         return auth_service_ptr_;
     }
 
-    std::shared_ptr<internview::storages::VacancyStorage> GetVacancyStoragePtr() {
-        return vacancy_storage_ptr_;
-    }
-
 private:
     std::shared_ptr<internview::services::AuthService> auth_service_ptr_;
-    std::shared_ptr<internview::storages::VacancyStorage> vacancy_storage_ptr_;
 };
 
 }  // namespace internview::components

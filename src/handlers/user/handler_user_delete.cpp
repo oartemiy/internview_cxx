@@ -1,8 +1,8 @@
 #include "handler_user_delete.hpp"
 
 #include "components/cv_storage_component.hpp"
-#include "components/internview_component.hpp"
 #include "components/user_storage_component.hpp"
+#include "components/vacancy_storage_component.hpp"
 #include "dto/user_dto.hpp"
 #include "utils/common_handler.hpp"
 
@@ -17,7 +17,7 @@ HandlerUserDelete::HandlerUserDelete(const ComponentConfig& config,
       cv_storage_ptr_(
           component_context.FindComponent<components::CvStorageComponent>().GetStorage()),
       vacancy_storage_ptr_(
-          component_context.FindComponent<InternviewComponent>().GetVacancyStoragePtr()) {
+          component_context.FindComponent<components::VacancyStorageComponent>().GetStorage()) {
 }
 
 Value HandlerUserDelete::HandleRequestJsonThrow([[maybe_unused]] const HttpRequest& request,

@@ -1,30 +1,21 @@
-#include "vacancy_storage.hpp"
+#include "postgres_vacancy_storage.hpp"
 
-#include <cstddef>
-#include <vector>
-
-#include "models/vacancy.hpp"
-#include "userver/formats/json/inline.hpp"
-// #include "userver/logging/log.hpp"
 #include "userver/server/handlers/exceptions.hpp"
 #include "userver/storages/postgres/cluster.hpp"
-#include "userver/storages/postgres/cluster_types.hpp"
 #include "userver/storages/postgres/component.hpp"
-#include "userver/storages/postgres/exceptions.hpp"
-#include "userver/storages/postgres/io/row_types.hpp"
 #include "userver/utils/boost_uuid7.hpp"
-#include "utils/common_handler.hpp"
 #include "vacancy_storage_queries/sql_queries.hpp"
 
-namespace internview::storages {
+namespace internview::storages::postgres {
 
-VacancyStorage::VacancyStorage([[maybe_unused]] const userver::components::ComponentConfig& config,
-                               const userver::components::ComponentContext& component_context)
+PostgresVacancyStorage::PostgresVacancyStorage(
+    [[maybe_unused]] const userver::components::ComponentConfig& config,
+    const userver::components::ComponentContext& component_context)
     : pg_cluster_(component_context.FindComponent<userver::components::Postgres>("postgres-db")
                       .GetCluster()) {
 }
 
-internview::models::Vacancy VacancyStorage::CreateVacancy(const dto::vacancy::CreateDTO& dto) {
+internview::models::Vacancy PostgresVacancyStorage::CreateVacancy(const dto::vacancy::CreateDTO& dto) {
     auto id = userver::utils::generators::GenerateBoostUuidV7();
     try {
         auto pg_res =
@@ -43,7 +34,7 @@ internview::models::Vacancy VacancyStorage::CreateVacancy(const dto::vacancy::Cr
     }
 }
 
-std::vector<internview::models::Vacancy> VacancyStorage::GetVacancies(
+std::vector<internview::models::Vacancy> PostgresVacancyStorage::GetVacancies(
     const dto::vacancy::GetDTO& dto) {
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
                                        vacancy_storage_queries::sql::kGetVacancies, dto.limit,
@@ -56,12 +47,12 @@ std::vector<internview::models::Vacancy> VacancyStorage::GetVacancies(
     return vec;
 }
 
-internview::models::Vacancy VacancyStorage::GetVacancyById(const boost::uuids::uuid& id) {
+internview::models::Vacancy PostgresVacancyStorage::GetVacancyById(const boost::uuids::uuid& id) {
     auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
                                        vacancy_storage_queries::sql::kGetVacancyById, id);
 
     if (pg_res.IsEmpty()) {
-        throw userver::server::handlers::ClientError(handlers::MakeObject(
+        throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
             "message", "Vacancy with id: " + boost::uuids::to_string(id) + " does not exists"));
     }
     auto vacancy = pg_res.AsSingleRow<models::Vacancy>(userver::v3_1::storages::postgres::kRowTag);
@@ -69,7 +60,7 @@ internview::models::Vacancy VacancyStorage::GetVacancyById(const boost::uuids::u
     return vacancy;
 }
 
-std::vector<internview::models::Vacancy> VacancyStorage::GetRecruiterVacancies(
+std::vector<internview::models::Vacancy> PostgresVacancyStorage::GetRecruiterVacancies(
     const boost::uuids::uuid& recruiter_id) {
     auto pg_res =
         pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
@@ -82,7 +73,7 @@ std::vector<internview::models::Vacancy> VacancyStorage::GetRecruiterVacancies(
     return vec;
 }
 
-internview::models::Vacancy VacancyStorage::UpdateVacancy(const dto::vacancy::UpdateDTO& dto) {
+internview::models::Vacancy PostgresVacancyStorage::UpdateVacancy(const dto::vacancy::UpdateDTO& dto) {
     auto model = GetVacancyById(dto.id);
     if (!dto.has_description_in_request_json && !dto.has_experience_level_in_request_json &&
         !dto.has_location_in_request_json && !dto.has_requirements_in_request_json &&
@@ -141,7 +132,7 @@ internview::models::Vacancy VacancyStorage::UpdateVacancy(const dto::vacancy::Up
     return model;
 }
 
-void VacancyStorage::DeleteVacancy(const boost::uuids::uuid& id,
+void PostgresVacancyStorage::DeleteVacancy(const boost::uuids::uuid& id,
                                    const boost::uuids::uuid& recruiter_id) {
     auto pg_res =
         pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
@@ -152,7 +143,7 @@ void VacancyStorage::DeleteVacancy(const boost::uuids::uuid& id,
     }
 }
 
-internview::models::Vacancy VacancyStorage::ToggleVacancy(const boost::uuids::uuid& id,
+internview::models::Vacancy PostgresVacancyStorage::ToggleVacancy(const boost::uuids::uuid& id,
                                                           const boost::uuids::uuid& recruiter_id) {
     try {
         auto pg_res =
@@ -169,7 +160,7 @@ internview::models::Vacancy VacancyStorage::ToggleVacancy(const boost::uuids::uu
     }
 }
 
-boost::uuids::uuid VacancyStorage::GetRecruiterIdByApplicationId(
+boost::uuids::uuid PostgresVacancyStorage::GetRecruiterIdByApplicationId(
     const boost::uuids::uuid& application_id) {
     auto pg_res = pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kSlave,
                                        vacancy_storage_queries::sql::kGetRecruiterIdByApplicationId,
@@ -177,4 +168,6 @@ boost::uuids::uuid VacancyStorage::GetRecruiterIdByApplicationId(
     return pg_res.AsSingleRow<boost::uuids::uuid>();
 }
 
-}  // namespace internview::storages
+
+
+}  // namespace internview::storages::postgres

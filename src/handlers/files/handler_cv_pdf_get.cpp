@@ -2,7 +2,6 @@
 
 #include "components/application_storage_component.hpp"
 #include "components/cv_storage_component.hpp"
-#include "components/internview_component.hpp"
 #include "userver/server/handlers/http_handler_base.hpp"
 #include "utils/common_handler.hpp"
 

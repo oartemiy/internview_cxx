@@ -1,6 +1,6 @@
 #include "handler_vacancies_toggle.hpp"
 
-#include "components/internview_component.hpp"
+#include "components/vacancy_storage_component.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
 #include "utils/common_handler.hpp"
 
@@ -10,7 +10,7 @@ HandlerVacancyToggle::HandlerVacancyToggle(const ComponentConfig& config,
                                            const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
       vacancy_storage_ptr_(
-          component_context.FindComponent<InternviewComponent>().GetVacancyStoragePtr()) {
+          component_context.FindComponent<components::VacancyStorageComponent>().GetStorage()) {
 }
 
 Value HandlerVacancyToggle::HandleRequestJsonThrow(const HttpRequest& request,

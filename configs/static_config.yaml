@@ -94,6 +94,8 @@ components_manager:
 
         application-storage-component: {}
 
+        vacancy-storage-component: {}
+
         handler-status-get:
             path: /status
             method: GET

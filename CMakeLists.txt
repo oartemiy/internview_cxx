@@ -109,6 +109,7 @@ add_library(
     src/components/cv_storage_component.cpp
     src/components/refresh_token_storage_component.cpp
     src/components/application_storage_component.cpp
+    src/components/vacancy_storage_component.cpp
 
     # storages
     src/storages/local/local_file_storage.cpp
@@ -116,8 +117,7 @@ add_library(
     src/storages/postgres/postgres_cv_storage.cpp
     src/storages/postgres/postgres_refresh_token_storage.cpp
     src/storages/postgres/postgres_application_storage.cpp
-
-    src/storages/vacancy_storage.cpp
+    src/storages/postgres/postgres_vacancy_storage.cpp
 
     # auth middleware
     src/auth/auth_checker.cpp
