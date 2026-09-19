@@ -1,6 +1,7 @@
 #include "postgres_application_storage.hpp"
 
 #include "application_storage_queries/sql_queries.hpp"
+#include "userver/formats/json/inline.hpp"
 #include "userver/server/handlers/exceptions.hpp"
 #include "userver/storages/postgres/cluster.hpp"
 #include "userver/storages/postgres/component.hpp"
@@ -142,6 +143,10 @@ boost::uuids::uuid PostgresApplicationStorage::GetInternIdByCv(
     if (pg_res.IsEmpty()) {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
             "message", "This cv does not belongs to your vacancies applications"));
+    }
+    if (pg_res.Size() != 1) {
+        throw userver::server::handlers::InternalServerError(
+            userver::formats::json::MakeObject("message", "Data is damaged"));
     }
     return pg_res.AsSingleRow<boost::uuids::uuid>();
 }

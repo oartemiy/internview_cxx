@@ -6,29 +6,38 @@
 
 namespace application_storage_queries::sql {
 
+
 // Generated from check_intern_applied.sql
 extern const USERVER_NAMESPACE::storages::Query kCheckInternApplied;
+
 
 // Generated from create_application.sql
 extern const USERVER_NAMESPACE::storages::Query kCreateApplication;
 
+
 // Generated from delete_application.sql
 extern const USERVER_NAMESPACE::storages::Query kDeleteApplication;
+
 
 // Generated from get_application_by_id.sql
 extern const USERVER_NAMESPACE::storages::Query kGetApplicationById;
 
+
 // Generated from get_intern_id_by_cv.sql
 extern const USERVER_NAMESPACE::storages::Query kGetInternIdByCv;
+
 
 // Generated from get_interns_applications.sql
 extern const USERVER_NAMESPACE::storages::Query kGetInternsApplications;
 
+
 // Generated from get_recruiter_applications.sql
 extern const USERVER_NAMESPACE::storages::Query kGetRecruiterApplications;
 
+
 // Generated from get_vacancy_applications.sql
 extern const USERVER_NAMESPACE::storages::Query kGetVacancyApplications;
+
 
 // Generated from update_application.sql
 extern const USERVER_NAMESPACE::storages::Query kUpdateApplication;

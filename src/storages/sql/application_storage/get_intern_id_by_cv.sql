@@ -11,5 +11,6 @@ WHERE
             internview_schema.vacancies
         WHERE
             recruiter_id = $2)
-LIMIT 1;
+GROUP BY
+    intern_id;
 

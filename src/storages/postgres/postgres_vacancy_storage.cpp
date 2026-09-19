@@ -1,5 +1,6 @@
 #include "postgres_vacancy_storage.hpp"
 
+#include "userver/formats/json/inline.hpp"
 #include "userver/server/handlers/exceptions.hpp"
 #include "userver/storages/postgres/cluster.hpp"
 #include "userver/storages/postgres/component.hpp"
@@ -124,6 +125,10 @@ internview::models::Vacancy PostgresVacancyStorage::UpdateVacancy(
             vacancy_storage_queries::sql::kUpdateVacancy, dto.id, dto.recruiter_id, model.title,
             model.description, model.requirements, model.salary_range, model.location,
             model.work_mode, model.experience_level);
+        if (pg_res.IsEmpty()) {
+            throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
+                "message", "This vacancy does not belongs to you"));
+        }
     } catch (userver::storages::postgres::UniqueViolation& e) {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
             "message", "You have already taken this title. Use another one"));

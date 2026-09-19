@@ -84,7 +84,7 @@ internview::models::User PostgresUserStorage::GetUserByLogin(const std::string& 
 void PostgresUserStorage::UpdatePasswordHash(const boost::uuids::uuid& id,
                                              const std::string& new_password_hash) {
     auto pg_res =
-        pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
+        pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
                              user_storage_queries::sql::kChangeUserPassword, id, new_password_hash);
     if (pg_res.IsEmpty()) {
         throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(

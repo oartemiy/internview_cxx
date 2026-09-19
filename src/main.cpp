@@ -54,8 +54,7 @@
 #include "userver/storages/secdist/provider_component.hpp"
 
 // ?: Add pool for slave HOSTTYPE
-// TODO: test DI containers
-// TODO: user services, instead of storages
+// TODO: add unit tests
 
 int main(int argc, char* argv[]) {
     userver::server::handlers::auth::RegisterAuthCheckerFactory<

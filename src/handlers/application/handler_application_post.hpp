@@ -3,6 +3,7 @@
 #include <string_view>
 
 #include "services/application_service.hpp"
+#include "services/cv_service.hpp"
 #include "utils/common_handler.hpp"
 
 namespace internview::handlers {
@@ -19,6 +20,7 @@ public:
 
 private:
     services::ApplicationService application_service_;
+    services::CvService cv_service_;
 };
 
 }  // namespace internview::handlers
