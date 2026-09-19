@@ -4,8 +4,8 @@
 #include <string_view>
 #include <userver/storages/secdist/provider_component.hpp>
 
-#include "components/refresh_token_storage_component.hpp"
-#include "components/user_storage_component.hpp"
+#include "components/storages/refresh_token_storage_component.hpp"
+#include "components/storages/user_storage_component.hpp"
 #include "models/user.hpp"
 #include "userver/crypto/base64.hpp"
 #include "userver/crypto/hash.hpp"
@@ -17,7 +17,8 @@
 
 namespace internview::services {
 
-AuthService::AuthService(const userver::components::ComponentContext& component_context)
+AuthService::AuthService([[maybe_unused]] const userver::components::ComponentConfig& config,
+                         const userver::components::ComponentContext& component_context)
     : jwt_service_(component_context
                        .FindComponent<userver::components::DefaultSecdistProvider>(
                            "default-secdist-provider")

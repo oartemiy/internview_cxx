@@ -1,5 +1,6 @@
 #include "handler_auth_change_password_post.hpp"
 
+#include "components/services/auth_service_component.hpp"
 #include "dto/user_dto.hpp"
 #include "utils/common_handler.hpp"
 
@@ -8,8 +9,8 @@ namespace internview::handlers {
 HandlerAuthChangePasswordPost::HandlerAuthChangePasswordPost(
     const ComponentConfig& config, const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
-      auth_service_ptr_(
-          component_context.FindComponent<InternviewComponent>().GetAuthServicePtr()) {
+      auth_service_(
+          component_context.FindComponent<components::AuthServiceComponent>().GetService()) {
 }
 
 Value HandlerAuthChangePasswordPost::HandleRequestJsonThrow(
@@ -20,7 +21,7 @@ Value HandlerAuthChangePasswordPost::HandleRequestJsonThrow(
     auto user_id = auth_res.user_id;
     dto.id = user_id;
 
-    auth_service_ptr_->ChangePassword(dto);
+    auth_service_->ChangePassword(dto);
 
     return MakeObject("status", "password changed");
 }

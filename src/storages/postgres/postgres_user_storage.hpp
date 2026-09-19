@@ -43,19 +43,20 @@ public:
 
     /**
      * @brief Get the User object By login
-     * 
-     * @param login 
-     * @return internview::models::User 
+     *
+     * @param login
+     * @return internview::models::User
      */
     internview::models::User GetUserByLogin(const std::string& login) override;
 
     /**
      * @brief Changes user password
-     * 
-     * @param dto 
-     * @return boost::uuids::uuid 
+     *
+     * @param dto
+     * @return boost::uuids::uuid
      */
-    void UpdatePasswordHash(const boost::uuids::uuid& id, const std::string& new_password_hash) override;
+    void UpdatePasswordHash(const boost::uuids::uuid& id,
+                            const std::string& new_password_hash) override;
 
     /**
      * @brief Update the User object

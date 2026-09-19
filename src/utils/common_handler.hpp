@@ -1,6 +1,5 @@
 #pragma once
 
-#include "components/internview_component.hpp"
 #include "services/auth_service.hpp"
 #include "userver/components/component_config.hpp"
 #include "userver/components/component_context.hpp"
@@ -23,8 +22,6 @@ using userver::components::ComponentContext;
 using userver::formats::json::MakeObject;
 using userver::formats::json::Value;
 using userver::formats::json::ValueBuilder;
-
-using internview::components::InternviewComponent;
 
 using userver::server::http::HttpRequest;
 using userver::server::request::RequestContext;

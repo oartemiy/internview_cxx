@@ -1,7 +1,5 @@
 #include "handler_cv_pdf_get.hpp"
 
-#include "components/application_storage_component.hpp"
-#include "components/cv_storage_component.hpp"
 #include "userver/server/handlers/http_handler_base.hpp"
 #include "utils/common_handler.hpp"
 
@@ -10,10 +8,8 @@ namespace internview::handlers {
 HandlerCvPdfGet::HandlerCvPdfGet(const ComponentConfig& config,
                                  const ComponentContext& component_context)
     : HttpHandlerBase(config, component_context),
-      application_storage_ptr_(
-          component_context.FindComponent<components::ApplicationStorageComponent>().GetStorage()),
-      cv_storage_ptr_(component_context.FindComponent<internview::components::CvStorageComponent>()
-                          .GetStorage()) {
+      application_service_(config, component_context),
+      cv_service_(config, component_context) {
 }
 
 std::string HandlerCvPdfGet::HandleRequestThrow(const HttpRequest& request,
@@ -23,9 +19,9 @@ std::string HandlerCvPdfGet::HandleRequestThrow(const HttpRequest& request,
     auto intern_id = auth_res.user_id;
 
     if (auth_res.role == "recruiter") {
-        intern_id = application_storage_ptr_->GetInternIdByCv(id, auth_res.user_id);
+        intern_id = application_service_.GetInternIdByCv(id, auth_res.user_id);
     }
-    auto opt = cv_storage_ptr_->GetCvPdf(id, intern_id);
+    auto opt = cv_service_.GetCvPdf(id, intern_id);
 
     if (!opt) {
         return "";

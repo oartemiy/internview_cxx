@@ -1,4 +1,4 @@
-#include "internview_component.hpp"
+#include "auth_service_component.hpp"
 
 #include <memory>
 
@@ -7,11 +7,11 @@
 
 namespace internview::components {
 
-InternviewComponent::InternviewComponent(
+AuthServiceComponent::AuthServiceComponent(
     const userver::components::ComponentConfig& config,
     const userver::components::ComponentContext& component_context)
     : userver::components::ComponentBase(config, component_context),
-      auth_service_ptr_(std::make_shared<services::AuthService>(component_context))
+      auth_service_(std::make_shared<services::AuthService>(config, component_context))
 
 {
 }

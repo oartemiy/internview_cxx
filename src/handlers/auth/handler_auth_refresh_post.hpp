@@ -17,7 +17,7 @@ public:
                                  RequestContext& context) const override;
 
 private:
-    std::shared_ptr<internview::services::AuthService> auth_service_ptr_;
+    std::shared_ptr<internview::services::AuthService> auth_service_;
 };
 
 }  // namespace internview::handlers

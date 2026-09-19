@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "components/internview_component.hpp"
+#include "components/services/auth_service_component.hpp"
 #include "services/auth_service.hpp"
 #include "userver/http/common_headers.hpp"
 #include "userver/server/handlers/auth/auth_checker_base.hpp"
@@ -26,12 +26,12 @@ AuthCheckResult JwtAuthChecker::CheckAuth(const userver::server::http::HttpReque
 
 JwtAuthCheckerFactory::JwtAuthCheckerFactory(
     const userver::components::ComponentContext& component_context)
-    : internview_component_(component_context.FindComponent<components::InternviewComponent>()) {
+    : auth_service_component_(component_context.FindComponent<components::AuthServiceComponent>()) {
 }
 
 AuthCheckerBasePtr JwtAuthCheckerFactory::MakeAuthChecker(
     [[maybe_unused]] const HandlerAuthConfig& config) const {
-    return std::make_shared<JwtAuthChecker>(internview_component_.GetAuthServicePtr());
+    return std::make_shared<JwtAuthChecker>(auth_service_component_.GetService());
 }
 
 }  // namespace internview::auth

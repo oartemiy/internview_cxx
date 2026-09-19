@@ -1,6 +1,5 @@
 #include "handler_application_post.hpp"
 
-#include "components/application_storage_component.hpp"
 #include "dto/application_dto.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
 #include "utils/common_handler.hpp"
@@ -10,8 +9,7 @@ namespace internview::handlers {
 HandlerApplicationPost::HandlerApplicationPost(const ComponentConfig& config,
                                                const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
-      application_storage_ptr_(
-          component_context.FindComponent<components::ApplicationStorageComponent>().GetStorage()) {
+      application_service_(config, component_context) {
 }
 
 Value HandlerApplicationPost::HandleRequestJsonThrow(
@@ -27,7 +25,7 @@ Value HandlerApplicationPost::HandleRequestJsonThrow(
     auto dto = request_json.As<dto::application::CreateDTO>();
     dto.intern_id = auth_res.user_id;
 
-    auto model = application_storage_ptr_->CreateApplication(dto);
+    auto model = application_service_.CreateApplication(dto);
 
     return ValueBuilder(model).ExtractValue();
 }

@@ -2,7 +2,7 @@
 
 #include <string_view>
 
-#include "storages/interfaces/cv_storage.hpp"
+#include "services/cv_service.hpp"
 #include "utils/common_handler.hpp"
 
 namespace internview::handlers {
@@ -17,7 +17,7 @@ public:
                                  RequestContext& context) const override;
 
 private:
-    std::shared_ptr<internview::storages::interfaces::ICvStorage> cv_storage_ptr_;
+    services::CvService cv_service_;
 };
 
 }  // namespace internview::handlers

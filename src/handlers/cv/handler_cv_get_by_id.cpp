@@ -1,7 +1,5 @@
 #include "handler_cv_get_by_id.hpp"
 
-#include "components/application_storage_component.hpp"
-#include "components/cv_storage_component.hpp"
 #include "utils/common_handler.hpp"
 
 namespace internview::handlers {
@@ -9,10 +7,8 @@ namespace internview::handlers {
 HandlerCvGetById::HandlerCvGetById(const ComponentConfig& config,
                                    const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
-      application_storage_(
-          component_context.FindComponent<components::ApplicationStorageComponent>().GetStorage()),
-      cv_storage_ptr_(
-          component_context.FindComponent<components::CvStorageComponent>().GetStorage()) {
+      application_service_(config, component_context),
+      cv_service_(config, component_context) {
 }
 
 Value HandlerCvGetById::HandleRequestJsonThrow(const HttpRequest& request,
@@ -23,10 +19,10 @@ Value HandlerCvGetById::HandleRequestJsonThrow(const HttpRequest& request,
     auto intern_id = auth_res.user_id;
 
     if (auth_res.role == "recruiter") {
-        intern_id = application_storage_->GetInternIdByCv(id, auth_res.user_id);
+        intern_id = application_service_.GetInternIdByCv(id, auth_res.user_id);
     }
 
-    auto resp_model = cv_storage_ptr_->GetCvById(id, intern_id);
+    auto resp_model = cv_service_.GetCvById(id, intern_id);
     return ValueBuilder(resp_model).ExtractValue();
 }
 

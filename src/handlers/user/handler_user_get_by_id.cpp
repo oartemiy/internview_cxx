@@ -1,7 +1,5 @@
 #include "handler_user_get_by_id.hpp"
 
-#include "components/application_storage_component.hpp"
-#include "components/user_storage_component.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
 #include "utils/common_handler.hpp"
 
@@ -10,11 +8,8 @@ namespace internview::handlers {
 HandlerUserGetById::HandlerUserGetById(const ComponentConfig& config,
                                        const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
-      application_storage_ptr_(
-          component_context.FindComponent<components::ApplicationStorageComponent>().GetStorage()),
-      user_storage_ptr_(
-          component_context.FindComponent<internview::components::UserStorageComponent>()
-              .GetStorage()) {
+      application_service_(config, component_context),
+      user_service_(config, component_context) {
 }
 
 Value HandlerUserGetById::HandleRequestJsonThrow(const HttpRequest& request,
@@ -24,10 +19,10 @@ Value HandlerUserGetById::HandleRequestJsonThrow(const HttpRequest& request,
     auto id = boost::uuids::uuid_from_string(request.GetPathArg("id"));
     if (auth_res.user_id == id || auth_res.role == "recruiter") {
         if (auth_res.user_id != id &&
-            !application_storage_ptr_->CheckInternApplied(id, auth_res.user_id)) {
+            !application_service_.CheckInternApplied(id, auth_res.user_id)) {
             throw ClientError(MakeObject("message", "You do not have roots to do this action"));
         }
-        auto res = user_storage_ptr_->GetUserById(id).ToResponseDTO();
+        auto res = user_service_.GetUserById(id).ToResponseDTO();
         return ValueBuilder(res).ExtractValue();
     } else {
         throw ClientError(MakeObject("message", "Invalid role or id for this action"));

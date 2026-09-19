@@ -1,9 +1,7 @@
 #pragma once
 
-#include <memory>
-
-#include "storages/interfaces/application_storage.hpp"
-#include "storages/interfaces/cv_storage.hpp"
+#include "services/application_service.hpp"
+#include "services/cv_service.hpp"
 #include "utils/common_handler.hpp"
 
 namespace internview::handlers {
@@ -18,8 +16,8 @@ public:
                                  RequestContext& context) const override;
 
 private:
-    std::shared_ptr<internview::storages::interfaces::IApplicationStorage> application_storage_;
-    std::shared_ptr<internview::storages::interfaces::ICvStorage> cv_storage_ptr_;
+    services::ApplicationService application_service_;
+    services::CvService cv_service_;
 };
 
 }  // namespace internview::handlers

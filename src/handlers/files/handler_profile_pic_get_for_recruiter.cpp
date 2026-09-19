@@ -1,7 +1,5 @@
 #include "handler_profile_pic_get_for_recruiter.hpp"
 
-#include "components/application_storage_component.hpp"
-#include "components/user_storage_component.hpp"
 #include "userver/server/handlers/http_handler_base.hpp"
 #include "utils/common_handler.hpp"
 
@@ -10,11 +8,8 @@ namespace internview::handlers {
 HandlerProfilePicGetForRecruiter::HandlerProfilePicGetForRecruiter(
     const ComponentConfig& config, const ComponentContext& component_context)
     : HttpHandlerBase(config, component_context),
-      user_storage_ptr_(
-          component_context.FindComponent<internview::components::UserStorageComponent>()
-              .GetStorage()),
-      application_storage_ptr_(
-          component_context.FindComponent<components::ApplicationStorageComponent>().GetStorage()) {
+      user_service_(config, component_context),
+      application_service_(config, component_context) {
 }
 
 std::string HandlerProfilePicGetForRecruiter::HandleRequestThrow(
@@ -25,8 +20,8 @@ std::string HandlerProfilePicGetForRecruiter::HandleRequestThrow(
         throw ClientError(MakeObject("message", "Invalid role for this action"));
     }
     auto id = boost::uuids::uuid_from_string(request.GetPathArg("id"));
-    if (application_storage_ptr_->CheckInternApplied(id, auth_res.user_id)) {
-        auto opt = user_storage_ptr_->GetProfilePic(id);
+    if (application_service_.CheckInternApplied(id, auth_res.user_id)) {
+        auto opt = user_service_.GetProfilePic(id);
         if (!opt) {
             return "";
         }

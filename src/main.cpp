@@ -11,14 +11,13 @@
 #include <userver/utils/daemon_run.hpp>
 
 #include "auth/auth_checker.hpp"
-#include "components/application_storage_component.hpp"
-#include "components/cv_storage_component.hpp"
-#include "components/img_storage_component.hpp"
-#include "components/internview_component.hpp"
-#include "components/pdf_storage_component.hpp"
-#include "components/refresh_token_storage_component.hpp"
-#include "components/user_storage_component.hpp"
-#include "components/vacancy_storage_component.hpp"
+#include "components/storages/application_storage_component.hpp"
+#include "components/storages/cv_storage_component.hpp"
+#include "components/storages/img_storage_component.hpp"
+#include "components/storages/pdf_storage_component.hpp"
+#include "components/storages/refresh_token_storage_component.hpp"
+#include "components/storages/user_storage_component.hpp"
+#include "components/storages/vacancy_storage_component.hpp"
 #include "handlers/application/handler_application_delete.hpp"
 #include "handlers/application/handler_application_post.hpp"
 #include "handlers/application/handler_application_update.hpp"
@@ -56,7 +55,7 @@
 
 // ?: Add pool for slave HOSTTYPE
 // TODO: test DI containers
-// TODO: make user storage interface better
+// TODO: user services, instead of storages
 
 int main(int argc, char* argv[]) {
     userver::server::handlers::auth::RegisterAuthCheckerFactory<
@@ -89,7 +88,7 @@ int main(int argc, char* argv[]) {
 
             .Append<internview::components::VacancyStorageComponent>("vacancy-storage-component")
 
-            .Append<internview::components::InternviewComponent>("internview-component")
+            .Append<internview::components::AuthServiceComponent>("auth-service-component")
 
             .Append<internview::handlers::status::HandlerStatusGet>()
 

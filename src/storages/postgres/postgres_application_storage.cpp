@@ -11,7 +11,8 @@ namespace internview::storages::postgres {
 PostgresApplicationStorage::PostgresApplicationStorage(
     [[maybe_unused]] const userver::components::ComponentConfig& config,
     const userver::components::ComponentContext& component_context)
-    : pg_cluster_(component_context.FindComponent<userver::components::Postgres>("postgres-db").GetCluster()) {
+    : pg_cluster_(component_context.FindComponent<userver::components::Postgres>("postgres-db")
+                      .GetCluster()) {
 }
 
 models::Application PostgresApplicationStorage::CreateApplication(

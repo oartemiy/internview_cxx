@@ -1,8 +1,5 @@
 #include "handler_user_delete.hpp"
 
-#include "components/cv_storage_component.hpp"
-#include "components/user_storage_component.hpp"
-#include "components/vacancy_storage_component.hpp"
 #include "dto/user_dto.hpp"
 #include "utils/common_handler.hpp"
 
@@ -11,13 +8,9 @@ namespace internview::handlers {
 HandlerUserDelete::HandlerUserDelete(const ComponentConfig& config,
                                      const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
-      user_storage_ptr_(
-          component_context.FindComponent<internview::components::UserStorageComponent>()
-              .GetStorage()),
-      cv_storage_ptr_(
-          component_context.FindComponent<components::CvStorageComponent>().GetStorage()),
-      vacancy_storage_ptr_(
-          component_context.FindComponent<components::VacancyStorageComponent>().GetStorage()) {
+      user_service_(config, component_context),
+      cv_service_(config, component_context),
+      vacancy_service_(config, component_context) {
 }
 
 Value HandlerUserDelete::HandleRequestJsonThrow([[maybe_unused]] const HttpRequest& request,
@@ -29,22 +22,21 @@ Value HandlerUserDelete::HandleRequestJsonThrow([[maybe_unused]] const HttpReque
     dto.id = user_id;
 
     if (auth_res.role == "intern") {
-        auto user_cvs = cv_storage_ptr_->GetUserCvs(user_id);
+        auto user_cvs = cv_service_.GetUserCvs(user_id);
         for (const auto& cv : user_cvs) {
-            cv_storage_ptr_->DeleteCv(cv.id, cv.user_id);
+            cv_service_.DeleteCv(cv.id, cv.user_id);
         }
         // NOTE: application deleting is automatic, check schema
     }
-
+    
     if (auth_res.role == "recruiter") {
-        auto user_vacancies = vacancy_storage_ptr_->GetRecruiterVacancies(user_id);
+        auto user_vacancies = vacancy_service_.GetRecruiterVacancies(user_id);
         for (const auto& vacancy : user_vacancies) {
-            vacancy_storage_ptr_->DeleteVacancy(vacancy.id, vacancy.recruiter_id);
+            vacancy_service_.DeleteVacancy(vacancy.id, vacancy.recruiter_id);
         }
     }
 
-    // LOG_INFO() << token;
-    user_storage_ptr_->DeleteUser(dto);
+    user_service_.DeleteUser(dto);
 
     return MakeObject("status", "success", "deleted user", dto.login);
 }

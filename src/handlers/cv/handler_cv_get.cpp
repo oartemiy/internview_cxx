@@ -1,14 +1,11 @@
 #include "handler_cv_get.hpp"
 
-#include "components/cv_storage_component.hpp"
 #include "utils/common_handler.hpp"
 
 namespace internview::handlers {
 
 HandlerCvGet::HandlerCvGet(const ComponentConfig& config, const ComponentContext& component_context)
-    : HttpHandlerJsonBase(config, component_context),
-      cv_storage_ptr_(
-          component_context.FindComponent<components::CvStorageComponent>().GetStorage()) {
+    : HttpHandlerJsonBase(config, component_context), cv_service_(config, component_context) {
 }
 
 Value HandlerCvGet::HandleRequestJsonThrow([[maybe_unused]] const HttpRequest& request,
@@ -20,7 +17,7 @@ Value HandlerCvGet::HandleRequestJsonThrow([[maybe_unused]] const HttpRequest& r
         throw ClientError(MakeObject("message", "Invalid role for this action"));
     }
 
-    auto resp_vec = cv_storage_ptr_->GetUserCvs(auth_res.user_id);
+    auto resp_vec = cv_service_.GetUserCvs(auth_res.user_id);
     return ValueBuilder(resp_vec).ExtractValue();
 }
 

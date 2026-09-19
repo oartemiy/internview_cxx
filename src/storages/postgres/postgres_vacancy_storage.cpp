@@ -15,7 +15,8 @@ PostgresVacancyStorage::PostgresVacancyStorage(
                       .GetCluster()) {
 }
 
-internview::models::Vacancy PostgresVacancyStorage::CreateVacancy(const dto::vacancy::CreateDTO& dto) {
+internview::models::Vacancy PostgresVacancyStorage::CreateVacancy(
+    const dto::vacancy::CreateDTO& dto) {
     auto id = userver::utils::generators::GenerateBoostUuidV7();
     try {
         auto pg_res =
@@ -73,7 +74,8 @@ std::vector<internview::models::Vacancy> PostgresVacancyStorage::GetRecruiterVac
     return vec;
 }
 
-internview::models::Vacancy PostgresVacancyStorage::UpdateVacancy(const dto::vacancy::UpdateDTO& dto) {
+internview::models::Vacancy PostgresVacancyStorage::UpdateVacancy(
+    const dto::vacancy::UpdateDTO& dto) {
     auto model = GetVacancyById(dto.id);
     if (!dto.has_description_in_request_json && !dto.has_experience_level_in_request_json &&
         !dto.has_location_in_request_json && !dto.has_requirements_in_request_json &&
@@ -133,7 +135,7 @@ internview::models::Vacancy PostgresVacancyStorage::UpdateVacancy(const dto::vac
 }
 
 void PostgresVacancyStorage::DeleteVacancy(const boost::uuids::uuid& id,
-                                   const boost::uuids::uuid& recruiter_id) {
+                                           const boost::uuids::uuid& recruiter_id) {
     auto pg_res =
         pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
                              vacancy_storage_queries::sql::kDeleteVacancy, id, recruiter_id);
@@ -143,8 +145,8 @@ void PostgresVacancyStorage::DeleteVacancy(const boost::uuids::uuid& id,
     }
 }
 
-internview::models::Vacancy PostgresVacancyStorage::ToggleVacancy(const boost::uuids::uuid& id,
-                                                          const boost::uuids::uuid& recruiter_id) {
+internview::models::Vacancy PostgresVacancyStorage::ToggleVacancy(
+    const boost::uuids::uuid& id, const boost::uuids::uuid& recruiter_id) {
     try {
         auto pg_res =
             pg_cluster_->Execute(userver::v3_1::storages::postgres::ClusterHostType::kMaster,
@@ -167,7 +169,5 @@ boost::uuids::uuid PostgresVacancyStorage::GetRecruiterIdByApplicationId(
                                        application_id);
     return pg_res.AsSingleRow<boost::uuids::uuid>();
 }
-
-
 
 }  // namespace internview::storages::postgres

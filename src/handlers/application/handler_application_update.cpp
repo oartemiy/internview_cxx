@@ -1,7 +1,5 @@
 #include "handler_application_update.hpp"
 
-#include "components/application_storage_component.hpp"
-#include "components/vacancy_storage_component.hpp"
 #include "dto/application_dto.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
 #include "utils/common_handler.hpp"
@@ -11,11 +9,9 @@ namespace internview::handlers {
 HandlerApplicationUpdate::HandlerApplicationUpdate(const ComponentConfig& config,
                                                    const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
-      application_storage_ptr_(
-          component_context.FindComponent<components::ApplicationStorageComponent>().GetStorage()),
+      application_service_(config, component_context),
 
-      vacancy_storage_ptr_(
-          component_context.FindComponent<components::VacancyStorageComponent>().GetStorage()) {
+      vacancy_service_(config, component_context) {
 }
 
 Value HandlerApplicationUpdate::HandleRequestJsonThrow(
@@ -28,19 +24,19 @@ Value HandlerApplicationUpdate::HandleRequestJsonThrow(
     if (auth_res.role == "intern") {
         if ((dto.has_cover_letter_in_request_json || dto.has_cv_id_in_request_json) &&
             !dto.has_status_in_request_json) {
-            auto res = application_storage_ptr_->UpdateApplication(dto);
+            auto res = application_service_.UpdateApplication(dto);
             return ValueBuilder(res).ExtractValue();
         } else {
             throw ClientError(MakeObject("message", "Invalid intern request_json"));
         }
     } else {
-        if (vacancy_storage_ptr_->GetRecruiterIdByApplicationId(id) != auth_res.user_id) {
+        if (vacancy_service_.GetRecruiterIdByApplicationId(id) != auth_res.user_id) {
             throw ClientError(
                 MakeObject("message", "This application does not belongs to your vacancy"));
         }
         if (dto.has_status_in_request_json &&
             (!dto.has_cover_letter_in_request_json && !dto.has_cv_id_in_request_json)) {
-            auto res = application_storage_ptr_->UpdateApplication(dto);
+            auto res = application_service_.UpdateApplication(dto);
             return ValueBuilder(res).ExtractValue();
         } else {
             throw ClientError(MakeObject("message", "Invalid recruiter request_json"));

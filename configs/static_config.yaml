@@ -73,7 +73,7 @@ components_manager:
             missing-ok: false
             environment-secrets-key: SECDIST_CONFIG
 
-        internview-component: {}
+        auth-service-component: {}
 
         img-storage:
             fs-task-processor: fs-task-processor

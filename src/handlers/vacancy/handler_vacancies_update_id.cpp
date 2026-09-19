@@ -1,6 +1,5 @@
 #include "handler_vacancies_update_id.hpp"
 
-#include "components/vacancy_storage_component.hpp"
 #include "dto/vacancy_dto.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
 #include "utils/common_handler.hpp"
@@ -9,9 +8,7 @@ namespace internview::handlers {
 
 HandlerVacancyUpdate::HandlerVacancyUpdate(const ComponentConfig& config,
                                            const ComponentContext& component_context)
-    : HttpHandlerJsonBase(config, component_context),
-      vacancy_storage_ptr_(
-          component_context.FindComponent<components::VacancyStorageComponent>().GetStorage()) {
+    : HttpHandlerJsonBase(config, component_context), vacancy_service_(config, component_context) {
 }
 
 Value HandlerVacancyUpdate::HandleRequestJsonThrow(const HttpRequest& request,
@@ -31,7 +28,7 @@ Value HandlerVacancyUpdate::HandleRequestJsonThrow(const HttpRequest& request,
     dto.id = id;
     dto.recruiter_id = auth_res.user_id;
 
-    auto updated_model = vacancy_storage_ptr_->UpdateVacancy(dto);
+    auto updated_model = vacancy_service_.UpdateVacancy(dto);
 
     return ValueBuilder(updated_model).ExtractValue();
 }

@@ -16,6 +16,4 @@ ApplicationStorageComponent::ApplicationStorageComponent(
               comfig, component_context)) {
 }
 
-
-
 }  // namespace internview::components

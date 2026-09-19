@@ -1,6 +1,6 @@
 #include "postgres_cv_storage.hpp"
 
-#include "components/pdf_storage_component.hpp"
+#include "components/storages/pdf_storage_component.hpp"
 #include "cv_storage_queries/sql_queries.hpp"
 #include "userver/server/handlers/exceptions.hpp"
 #include "userver/storages/postgres/cluster.hpp"

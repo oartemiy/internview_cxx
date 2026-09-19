@@ -1,7 +1,5 @@
 #include "handler_vacancy_applications_get.hpp"
 
-#include "components/application_storage_component.hpp"
-#include "components/vacancy_storage_component.hpp"
 #include "utils/common_handler.hpp"
 
 namespace internview::handlers {
@@ -9,10 +7,8 @@ namespace internview::handlers {
 HandlerVacancyApplicationsGet::HandlerVacancyApplicationsGet(
     const ComponentConfig& config, const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
-      vacancy_storage_ptr_(
-          component_context.FindComponent<components::VacancyStorageComponent>().GetStorage()),
-      application_storage_ptr_(
-          component_context.FindComponent<components::ApplicationStorageComponent>().GetStorage()) {
+      vacancy_service_(config, component_context),
+      application_service_(config, component_context) {
 }
 
 Value HandlerVacancyApplicationsGet::HandleRequestJsonThrow(
@@ -24,8 +20,8 @@ Value HandlerVacancyApplicationsGet::HandleRequestJsonThrow(
         throw ClientError(MakeObject("message", "Invalid role for this action"));
     }
     auto id = boost::uuids::uuid_from_string(request.GetPathArg("id"));
-    if (vacancy_storage_ptr_->GetVacancyById(id).recruiter_id == auth_res.user_id) {
-        auto vec = application_storage_ptr_->GetVacancyApplications(id);
+    if (vacancy_service_.GetVacancyById(id).recruiter_id == auth_res.user_id) {
+        auto vec = application_service_.GetVacancyApplications(id);
         return ValueBuilder(vec).ExtractValue();
     } else {
         throw ClientError(

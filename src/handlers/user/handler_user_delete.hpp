@@ -1,11 +1,10 @@
 #pragma once
 
-#include <memory>
 #include <string_view>
 
-#include "storages/interfaces/cv_storage.hpp"
-#include "storages/interfaces/user_storage.hpp"
-#include "storages/interfaces/vacancy_storage.hpp"
+#include "services/cv_service.hpp"
+#include "services/user_service.hpp"
+#include "services/vacancy_service.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
 #include "utils/common_handler.hpp"
 
@@ -21,9 +20,9 @@ public:
                                  RequestContext& context) const override;
 
 private:
-    std::shared_ptr<internview::storages::interfaces::IUserStorage> user_storage_ptr_;
-    std::shared_ptr<internview::storages::interfaces::ICvStorage> cv_storage_ptr_;
-    std::shared_ptr<internview::storages::interfaces::IVacancyStorage> vacancy_storage_ptr_;
+    services::UserService user_service_;
+    services::CvService cv_service_;
+    services::VacancyService vacancy_service_;
 };
 
 }  // namespace internview::handlers

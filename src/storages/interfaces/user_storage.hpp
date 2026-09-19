@@ -16,7 +16,8 @@ public:
 
     virtual internview::models::User GetUserByLogin(const std::string& login) = 0;
 
-    virtual void UpdatePasswordHash(const boost::uuids::uuid& id, const std::string& new_password_hash) = 0;
+    virtual void UpdatePasswordHash(const boost::uuids::uuid& id,
+                                    const std::string& new_password_hash) = 0;
 
     virtual dto::user::ResponseDTO UpdateUser(const dto::user::UpdateDTO& dto) = 0;
 

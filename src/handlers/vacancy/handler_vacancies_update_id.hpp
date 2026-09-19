@@ -1,8 +1,6 @@
 #pragma once
 
-#include <memory>
-
-#include "storages/interfaces/vacancy_storage.hpp"
+#include "services/vacancy_service.hpp"
 #include "utils/common_handler.hpp"
 
 namespace internview::handlers {
@@ -17,7 +15,7 @@ public:
                                  RequestContext& context) const override;
 
 private:
-    std::shared_ptr<internview::storages::interfaces::IVacancyStorage> vacancy_storage_ptr_;
+    services::VacancyService vacancy_service_;
 };
 
 }  // namespace internview::handlers

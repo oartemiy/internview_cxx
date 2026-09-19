@@ -1,6 +1,5 @@
 #include "handler_user_update.hpp"
 
-#include "components/user_storage_component.hpp"
 #include "dto/user_dto.hpp"
 #include "services/auth_service.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
@@ -10,10 +9,7 @@ namespace internview::handlers {
 
 HandlerUserUpdate::HandlerUserUpdate(const ComponentConfig& config,
                                      const ComponentContext& component_context)
-    : HttpHandlerJsonBase(config, component_context),
-      user_storage_ptr_(
-          component_context.FindComponent<internview::components::UserStorageComponent>()
-              .GetStorage()) {
+    : HttpHandlerJsonBase(config, component_context), user_service_(config, component_context) {
 }
 
 Value HandlerUserUpdate::HandleRequestJsonThrow([[maybe_unused]] const HttpRequest& request,
@@ -32,7 +28,7 @@ Value HandlerUserUpdate::HandleRequestJsonThrow([[maybe_unused]] const HttpReque
         throw userver::server::handlers::ClientError(
             MakeObject("message", "Login: me can not be taken"));
     }
-    auto res = user_storage_ptr_->UpdateUser(dto);
+    auto res = user_service_.UpdateUser(dto);
     return ValueBuilder(res).ExtractValue();
 }
 

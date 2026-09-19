@@ -102,14 +102,15 @@ add_library(
     src/services/auth_service.cpp
 
     # components
-    src/components/internview_component.cpp
-    src/components/pdf_storage_component.cpp
-    src/components/img_storage_component.cpp
-    src/components/user_storage_component.cpp
-    src/components/cv_storage_component.cpp
-    src/components/refresh_token_storage_component.cpp
-    src/components/application_storage_component.cpp
-    src/components/vacancy_storage_component.cpp
+    src/components/services/auth_service_component.cpp
+
+    src/components/storages/pdf_storage_component.cpp
+    src/components/storages/img_storage_component.cpp
+    src/components/storages/user_storage_component.cpp
+    src/components/storages/cv_storage_component.cpp
+    src/components/storages/refresh_token_storage_component.cpp
+    src/components/storages/application_storage_component.cpp
+    src/components/storages/vacancy_storage_component.cpp
 
     # storages
     src/storages/local/local_file_storage.cpp

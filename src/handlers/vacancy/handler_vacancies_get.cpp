@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <string>
 
-#include "components/vacancy_storage_component.hpp"
+#include "components/services/auth_service_component.hpp"
 #include "dto/vacancy_dto.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
 #include "utils/common_handler.hpp"
@@ -13,9 +13,9 @@ namespace internview::handlers {
 HandlerVacanciesGet::HandlerVacanciesGet(const ComponentConfig& config,
                                          const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
-      auth_service_ptr_(component_context.FindComponent<InternviewComponent>().GetAuthServicePtr()),
-      vacancy_storage_ptr_(
-          component_context.FindComponent<components::VacancyStorageComponent>().GetStorage()) {
+      auth_service_ptr_(
+          component_context.FindComponent<components::AuthServiceComponent>().GetService()),
+      vacancy_service_(config, component_context) {
 }
 
 Value HandlerVacanciesGet::HandleRequestJsonThrow(const HttpRequest& request,
@@ -32,7 +32,7 @@ Value HandlerVacanciesGet::HandleRequestJsonThrow(const HttpRequest& request,
     if (request.HasArg("query")) {
         dto.query = request.GetArg("query");
     }
-    auto res = vacancy_storage_ptr_->GetVacancies(dto);
+    auto res = vacancy_service_.GetVacancies(dto);
     return ValueBuilder(res).ExtractValue();
 }
 

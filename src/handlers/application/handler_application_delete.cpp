@@ -1,6 +1,5 @@
 #include "handler_application_delete.hpp"
 
-#include "components/application_storage_component.hpp"
 #include "utils/common_handler.hpp"
 
 namespace internview::handlers {
@@ -8,9 +7,7 @@ namespace internview::handlers {
 HandlerApplicationDelete::HandlerApplicationDelete(const ComponentConfig& config,
                                                    const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
-      application_storage_ptr_(
-          component_context.FindComponent<internview::components::ApplicationStorageComponent>()
-              .GetStorage()) {
+      application_service_(config, component_context) {
 }
 
 Value HandlerApplicationDelete::HandleRequestJsonThrow(
@@ -21,7 +18,7 @@ Value HandlerApplicationDelete::HandleRequestJsonThrow(
         throw ClientError(MakeObject("message", "Invalid role for this action"));
     }
     auto id = boost::uuids::uuid_from_string(request.GetPathArg("id"));
-    application_storage_ptr_->DeleteApplication(id, auth_res.user_id);
+    application_service_.DeleteApplication(id, auth_res.user_id);
     return MakeObject("status", "deleted", "deleted application", request.GetPathArg("id"));
 }
 

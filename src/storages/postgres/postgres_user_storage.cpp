@@ -8,7 +8,7 @@
 #include <string>
 #include <userver/server/handlers/exceptions.hpp>
 
-#include "components/img_storage_component.hpp"
+#include "components/storages/img_storage_component.hpp"
 #include "dto/user_dto.hpp"
 #include "models/user.hpp"
 #include "user_storage_queries/sql_queries.hpp"
@@ -82,7 +82,7 @@ internview::models::User PostgresUserStorage::GetUserByLogin(const std::string& 
 }
 
 void PostgresUserStorage::UpdatePasswordHash(const boost::uuids::uuid& id,
-                                                       const std::string& new_password_hash) {
+                                             const std::string& new_password_hash) {
     auto pg_res =
         pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
                              user_storage_queries::sql::kChangeUserPassword, id, new_password_hash);

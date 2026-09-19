@@ -10,6 +10,7 @@
 #include "storages/interfaces/refresh_token_storage.hpp"
 #include "storages/interfaces/user_storage.hpp"
 #include "userver/cache/expirable_lru_cache.hpp"
+#include "userver/components/component_config.hpp"
 #include "userver/components/component_context.hpp"
 
 namespace internview::services {
@@ -27,7 +28,8 @@ public:
         std::string refresh_token;
     };
 
-    AuthService(const userver::components::ComponentContext& component_context);
+    AuthService(const userver::components::ComponentConfig& config,
+                const userver::components::ComponentContext& component_context);
 
     /**
      * @brief Check authoriation

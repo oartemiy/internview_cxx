@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "components/internview_component.hpp"
+#include "components/services/auth_service_component.hpp"
 #include "services/auth_service.hpp"
 #include "userver/components/component_context.hpp"
 #include "userver/server/handlers/auth/auth_checker_base.hpp"
@@ -40,7 +40,7 @@ public:
     AuthCheckerBasePtr MakeAuthChecker(const HandlerAuthConfig& config) const override;
 
 private:
-    internview::components::InternviewComponent& internview_component_;
+    internview::components::AuthServiceComponent& auth_service_component_;
 };
 
 }  // namespace internview::auth

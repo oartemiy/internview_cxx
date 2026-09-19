@@ -1,6 +1,5 @@
 #include "handler_profile_pic_get.hpp"
 
-#include "components/user_storage_component.hpp"
 #include "userver/http/status_code.hpp"
 #include "userver/server/handlers/http_handler_base.hpp"
 #include "utils/common_handler.hpp"
@@ -9,10 +8,7 @@ namespace internview::handlers {
 
 HandlerProfilePicGet::HandlerProfilePicGet(const ComponentConfig& config,
                                            const ComponentContext& component_context)
-    : HttpHandlerBase(config, component_context),
-      user_storage_ptr_(
-          component_context.FindComponent<internview::components::UserStorageComponent>()
-              .GetStorage()) {
+    : HttpHandlerBase(config, component_context), user_service_(config, component_context) {
 }
 
 std::string HandlerProfilePicGet::HandleRequestThrow(
@@ -21,7 +17,7 @@ std::string HandlerProfilePicGet::HandleRequestThrow(
 
     auto user_id = auth_res.user_id;
 
-    auto opt = user_storage_ptr_->GetProfilePic(user_id);
+    auto opt = user_service_.GetProfilePic(user_id);
     if (!opt) {
         return "";
     }

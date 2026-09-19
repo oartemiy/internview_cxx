@@ -1,6 +1,5 @@
 #include "handler_vacancy_post.hpp"
 
-#include "components/vacancy_storage_component.hpp"
 #include "dto/vacancy_dto.hpp"
 #include "utils/common_handler.hpp"
 
@@ -8,9 +7,7 @@ namespace internview::handlers {
 
 HandlerVacancyPost::HandlerVacancyPost(const ComponentConfig& config,
                                        const ComponentContext& component_context)
-    : HttpHandlerJsonBase(config, component_context),
-      vacancy_storage_ptr_(
-          component_context.FindComponent<components::VacancyStorageComponent>().GetStorage()) {
+    : HttpHandlerJsonBase(config, component_context), vacancy_service_(config, component_context) {
 }
 
 Value HandlerVacancyPost::HandleRequestJsonThrow([[maybe_unused]] const HttpRequest& request,
@@ -23,7 +20,7 @@ Value HandlerVacancyPost::HandleRequestJsonThrow([[maybe_unused]] const HttpRequ
     auto dto = request_json.As<dto::vacancy::CreateDTO>();
     dto.recruiter_id = auth_res.user_id;
 
-    auto model = vacancy_storage_ptr_->CreateVacancy(dto);
+    auto model = vacancy_service_.CreateVacancy(dto);
 
     return ValueBuilder(model).ExtractValue();
 }
