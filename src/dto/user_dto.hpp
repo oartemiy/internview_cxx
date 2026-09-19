@@ -14,7 +14,7 @@
 
 namespace internview::dto::user {
 
-struct CreateDTO {
+struct RegisterDTO {
     std::string login;
     std::string password;
     std::string name;
@@ -24,8 +24,8 @@ struct CreateDTO {
 };
 
 inline auto Parse(const userver::formats::json::Value& json,
-                  userver::formats::parse::To<CreateDTO>) {
-    CreateDTO dto;
+                  userver::formats::parse::To<RegisterDTO>) {
+    RegisterDTO dto;
     dto.login = json["login"].As<std::string>();
     dto.password = json["password"].As<std::string>();
     dto.name = json["name"].As<std::string>();
@@ -34,6 +34,16 @@ inline auto Parse(const userver::formats::json::Value& json,
     dto.role = json["role"].As<std::string>();
     return dto;
 }
+
+struct CreateDTO {
+    boost::uuids::uuid id;
+    std::string login;
+    std::string password_hash;
+    std::string name;
+    std::string role;
+    std::optional<std::string> description;
+    std::optional<std::string> profile_pic;
+};
 
 struct UpdateDTO {
     // ! role can not be changed

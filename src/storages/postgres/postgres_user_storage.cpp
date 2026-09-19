@@ -35,6 +35,29 @@ PostgresUserStorage::PostgresUserStorage(
     }
 }
 
+internview::dto::user::ResponseDTO PostgresUserStorage::CreateUser(
+    const dto::user::CreateDTO& dto) {
+    try {
+        auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kMaster,
+                                           user_storage_queries::sql::kCreateUser, dto.id,
+                                           dto.login, dto.password_hash, dto.name, dto.role,
+                                           dto.description, dto.profile_pic);
+
+        return dto::user::ResponseDTO{dto.id,
+                                      dto.login,
+                                      dto.name,
+                                      dto.role,
+                                      dto.description,
+                                      dto.profile_pic,
+                                      pg_res[0][0].As<std::chrono::system_clock::time_point>(),
+                                      {},
+                                      {}};
+    } catch (userver::storages::postgres::UniqueViolation& e) {
+        throw userver::server::handlers::ConflictError(userver::formats::json::MakeObject(
+            "message", "Login: " + dto.login + " is taken. Try another one"));
+    }
+}
+
 models::User PostgresUserStorage::GetUserById(const boost::uuids::uuid& id) {
     auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
                                        user_storage_queries::sql::kGetUserById, id);
@@ -45,6 +68,28 @@ models::User PostgresUserStorage::GetUserById(const boost::uuids::uuid& id) {
     }
     auto user = pg_res.AsSingleRow<internview::models::User>(userver::storages::postgres::kRowTag);
     return user;
+}
+
+internview::models::User PostgresUserStorage::GetUserByLogin(const std::string& login) {
+    auto pg_res = pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
+                                       user_storage_queries::sql::kGetUserByLogin, login);
+    if (pg_res.IsEmpty()) {
+        throw userver::server::handlers::ResourceNotFound(
+            userver::formats::json::MakeObject("message", "User with id: " + login + " not found"));
+    }
+    auto user = pg_res.AsSingleRow<internview::models::User>(userver::storages::postgres::kRowTag);
+    return user;
+}
+
+void PostgresUserStorage::UpdatePasswordHash(const boost::uuids::uuid& id,
+                                                       const std::string& new_password_hash) {
+    auto pg_res =
+        pg_cluster_->Execute(userver::storages::postgres::ClusterHostType::kSlave,
+                             user_storage_queries::sql::kChangeUserPassword, id, new_password_hash);
+    if (pg_res.IsEmpty()) {
+        throw userver::server::handlers::ClientError(userver::formats::json::MakeObject(
+            "message", "User with id: " + boost::uuids::to_string(id) + " not found"));
+    }
 }
 
 dto::user::ResponseDTO PostgresUserStorage::UpdateUser(

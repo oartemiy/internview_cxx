@@ -17,7 +17,7 @@ HandlerAuthRegisterPost::HandlerAuthRegisterPost(const ComponentConfig& config,
 Value HandlerAuthRegisterPost::HandleRequestJsonThrow(
     [[maybe_unused]] const HttpRequest& request, const Value& request_json,
     [[maybe_unused]] RequestContext& context) const {
-    dto::user::CreateDTO dto = request_json.As<dto::user::CreateDTO>();
+    dto::user::RegisterDTO dto = request_json.As<dto::user::RegisterDTO>();
     if (dto.role != "intern" && dto.role != "recruiter") {
         throw userver::server::handlers::ClientError(
             MakeObject("message", "Available roles: intern, recruiter"));

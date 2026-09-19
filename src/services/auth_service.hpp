@@ -6,7 +6,6 @@
 #include <userver/formats/json/serialize.hpp>
 #include <userver/formats/json/value_builder.hpp>
 
-#include "models/user.hpp"
 #include "services/jwt_service.hpp"
 #include "storages/interfaces/refresh_token_storage.hpp"
 #include "storages/interfaces/user_storage.hpp"
@@ -110,7 +109,7 @@ public:
      * @throws userver::server::handlers::ConflictError
                std::runtime_error
      */
-    dto::user::ResponseDTO Register(const internview::dto::user::CreateDTO& dto);
+    dto::user::ResponseDTO Register(const internview::dto::user::RegisterDTO& dto);
 
 private:
     struct CacheAuthInfo {
@@ -120,13 +119,10 @@ private:
 
     internview::services::JwtService jwt_service_;
     std::shared_ptr<internview::storages::interfaces::IRefreshTokenStorage> refresh_token_storage_;
-
     std::shared_ptr<internview::storages::interfaces::IUserStorage> user_storage_;
-    userver::storages::postgres::ClusterPtr pg_cluster_;
+
     userver::cache::ExpirableLruCache<boost::uuids::uuid, CacheAuthInfo> cache_;
     userver::engine::TaskProcessor& crypto_tp_;
-
-    models::User GetUserById(const boost::uuids::uuid& id);
 };
 
 }  // namespace internview::services

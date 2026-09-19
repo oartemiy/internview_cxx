@@ -23,6 +23,16 @@ public:
     PostgresUserStorage& operator=(PostgresUserStorage&&) = delete;
 
     /**
+     * @brief Creates a User object
+     *
+     * @param dto
+     * @return dto::user::ResponseDTO
+     * @throws userver::server::handlers::ConflictError
+               std::runtime_error
+     */
+    internview::dto::user::ResponseDTO CreateUser(const dto::user::CreateDTO& dto) override;
+
+    /**
      * @brief Get the User By Id object
      *
      * @param id
@@ -30,6 +40,22 @@ public:
      * @throw userver::server::handlers::ResourceNotFound
      */
     internview::models::User GetUserById(const boost::uuids::uuid& id) override;
+
+    /**
+     * @brief Get the User object By login
+     * 
+     * @param login 
+     * @return internview::models::User 
+     */
+    internview::models::User GetUserByLogin(const std::string& login) override;
+
+    /**
+     * @brief Changes user password
+     * 
+     * @param dto 
+     * @return boost::uuids::uuid 
+     */
+    void UpdatePasswordHash(const boost::uuids::uuid& id, const std::string& new_password_hash) override;
 
     /**
      * @brief Update the User object

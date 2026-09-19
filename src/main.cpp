@@ -56,6 +56,7 @@
 
 // ?: Add pool for slave HOSTTYPE
 // TODO: test DI containers
+// TODO: make user storage interface better
 
 int main(int argc, char* argv[]) {
     userver::server::handlers::auth::RegisterAuthCheckerFactory<

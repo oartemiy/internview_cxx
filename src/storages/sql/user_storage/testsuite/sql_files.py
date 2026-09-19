@@ -18,8 +18,8 @@ def sql_files() -> set:
         # Generated from get_user_by_id.sql
         "get_user_by_id",
     
-        # Generated from login_user.sql
-        "login_user",
+        # Generated from get_user_by_login.sql
+        "get_user_by_login",
     
         # Generated from update_user.sql
         "update_user",
