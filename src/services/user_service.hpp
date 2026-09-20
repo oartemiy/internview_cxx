@@ -6,6 +6,7 @@
 #include "storages/interfaces/user_storage.hpp"
 #include "userver/components/component_config.hpp"
 #include "userver/components/component_context.hpp"
+#include "utils/file.hpp"
 
 namespace internview::services {
 
@@ -34,7 +35,7 @@ public:
     }
 
     void UploadProfilePic(const boost::uuids::uuid& id,
-                          const userver::server::http::FormDataArg& file_arg) const {
+                          const utils::File& file_arg) const {
         return user_storage_->UploadProfilePic(id, file_arg);
     }
 

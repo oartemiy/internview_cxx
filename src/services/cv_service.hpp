@@ -5,6 +5,8 @@
 #include "components/storages/cv_storage_component.hpp"
 #include "storages/interfaces/cv_storage.hpp"
 #include "userver/components/component_context.hpp"
+#include "utils/file.hpp"
+
 namespace internview::services {
 
 class CvService {
@@ -35,7 +37,7 @@ public:
     }
 
     void UploadCvPdf(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id,
-                     const userver::server::http::FormDataArg& file_arg) const {
+                     const utils::File& file_arg) const {
         return cv_storage_->UploadCvPdf(id, user_id, file_arg);
     }
 

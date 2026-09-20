@@ -6,6 +6,7 @@
 #include "userver/storages/postgres/cluster.hpp"
 #include "userver/storages/postgres/component.hpp"
 #include "userver/utils/boost_uuid7.hpp"
+#include "utils/file.hpp"
 
 namespace internview::storages::postgres {
 
@@ -131,7 +132,7 @@ void PostgresCvStorage::DeleteCv(const boost::uuids::uuid& id, const boost::uuid
 }
 
 void PostgresCvStorage::UploadCvPdf(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id,
-                                    const userver::server::http::FormDataArg& file_arg) {
+                                    const utils::File& file_arg) {
 
     auto cv_model = GetCvById(id, user_id);
 

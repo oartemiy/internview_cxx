@@ -1,7 +1,7 @@
 #pragma once
 
 #include "models/cv.hpp"
-#include "userver/server/http/form_data_arg.hpp"
+#include "utils/file.hpp"
 
 namespace internview::storages::interfaces {
 
@@ -21,7 +21,7 @@ public:
     virtual void DeleteCv(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id) = 0;
 
     virtual void UploadCvPdf(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id,
-                             const userver::server::http::FormDataArg& file_arg) = 0;
+                             const utils::File& file) = 0;
 
     virtual std::optional<std::pair<std::string, std::string>> GetCvPdf(
         const boost::uuids::uuid& id, const boost::uuids::uuid& user_id) = 0;

@@ -26,7 +26,7 @@ public:
      * @param contents
      * @throw std::runtime_error
      */
-    std::string Save(const File& file) override;
+    std::string Save(const utils::File& file) override;
 
     /**
      * @brief Read file from disk and returns it's bytes as std::string
@@ -54,7 +54,7 @@ public:
     void Delete(const std::string& key) override;
 
 private:
-    std::string GenerateFileKey(const File& file);
+    std::string GenerateFileKey(const utils::File& file);
 
     std::string FullPath(const std::string& key);
 

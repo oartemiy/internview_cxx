@@ -23,7 +23,7 @@ LocalFileStorage::LocalFileStorage(userver::engine::TaskProcessor& file_task_pro
     userver::fs::CreateDirectories(fs_tp_, base_dir_, boost::filesystem::perms::owner_all);
 }
 
-std::string LocalFileStorage::GenerateFileKey(const File& file) {
+std::string LocalFileStorage::GenerateFileKey(const utils::File& file) {
     auto ext = std::filesystem::path(file.filename).extension().string();
     std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
     if (ext.empty()) {
@@ -49,7 +49,7 @@ std::string LocalFileStorage::FullPath(const std::string& key) {
     return (std::filesystem::path(base_dir_) / key).string();
 }
 
-std::string LocalFileStorage::Save(const File& file) {
+std::string LocalFileStorage::Save(const utils::File& file) {
     auto file_key = GenerateFileKey(file);
     auto path = FullPath(file_key);
     LOG_INFO() << "New file:" << path;

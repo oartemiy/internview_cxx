@@ -5,6 +5,7 @@
 #include "userver/components/component_config.hpp"
 #include "userver/components/component_context.hpp"
 #include "userver/storages/postgres/postgres_fwd.hpp"
+#include "utils/file.hpp"
 
 namespace internview::storages::postgres {
 
@@ -73,7 +74,7 @@ public:
      * @throw userver::server::handlers::ClientError
      */
     void UploadCvPdf(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id,
-                     const userver::server::http::FormDataArg& file_arg) override;
+                     const utils::File& file) override;
 
     /**
      * @brief Get the Cv Pdf object

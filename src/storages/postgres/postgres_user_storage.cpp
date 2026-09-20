@@ -170,7 +170,7 @@ void PostgresUserStorage::DeleteUser(const internview::dto::user::DeleteDTO& dto
 }
 
 void PostgresUserStorage::UploadProfilePic(const boost::uuids::uuid& id,
-                                           const userver::server::http::FormDataArg& file_arg) {
+                                           const utils::File& file_arg) {
 
     auto user = GetUserById(id);
     if (user.profile_pic != std::nullopt) {

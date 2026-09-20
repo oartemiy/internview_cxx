@@ -2,7 +2,7 @@
 
 #include "dto/user_dto.hpp"
 #include "models/user.hpp"
-#include "userver/server/http/form_data_arg.hpp"
+#include "utils/file.hpp"
 
 namespace internview::storages::interfaces {
 
@@ -24,7 +24,7 @@ public:
     virtual void DeleteUser(const dto::user::DeleteDTO& dto) = 0;
 
     virtual void UploadProfilePic(const boost::uuids::uuid& id,
-                                  const userver::server::http::FormDataArg& file_arg) = 0;
+                                  const utils::File& file) = 0;
 
     virtual std::optional<std::pair<std::string, std::string>> GetProfilePic(
         const boost::uuids::uuid& id) = 0;
