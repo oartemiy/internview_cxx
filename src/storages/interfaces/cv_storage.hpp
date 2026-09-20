@@ -2,6 +2,7 @@
 
 #include "models/cv.hpp"
 #include "utils/file.hpp"
+#include "dto/cv_dto.hpp"
 
 namespace internview::storages::interfaces {
 

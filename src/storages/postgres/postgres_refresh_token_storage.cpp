@@ -79,7 +79,7 @@ PostgresRefreshTokenStorage::RefreshToken(const std::string& refresh_token) {
     auto token_hash = userver::crypto::hash::Sha256(refresh_token);
     auto token_opt = GetByTokenHash(token_hash);
     if (token_opt) {
-        auto model = *token_opt;
+        const auto& model = *token_opt;
         if (model.expires_at <= std::chrono::system_clock::now() || model.revoked) {
             throw userver::server::handlers::Unauthorized(userver::formats::json::MakeObject(
                 "message",

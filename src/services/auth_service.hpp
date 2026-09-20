@@ -18,6 +18,7 @@ namespace internview::services {
 class AuthService {
 public:
     struct AuthResult {
+        // TODO: remove access_token from AuthResult
         std::string access_token;
         boost::uuids::uuid user_id;
         std::string role;

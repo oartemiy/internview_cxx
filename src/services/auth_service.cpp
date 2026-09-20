@@ -56,7 +56,7 @@ AuthService::AuthResult AuthService::CheckAuthorization(const std::string& http_
         return {token, id, role};
     } else {
         if (auth_cache_info->password_version == version) {
-            return {token, id, role};
+            return {std::move(token), id, std::move(role)};
         } else {
             throw userver::server::handlers::Unauthorized(userver::formats::json::MakeObject(
                 "message", "User has changed password, this access token has expired"));
@@ -68,7 +68,7 @@ std::string AuthService::GenerateRefreshToken(const boost::uuids::uuid& user_id)
     auto token = userver::crypto::base64::Base64Encode(userver::crypto::GenerateRandomBlock(32));
     auto token_hash = userver::crypto::hash::Sha256(token);
 
-    refresh_token_storage_->Create(user_id, token_hash);
+    refresh_token_storage_->Create(user_id, std::move(token_hash));
 
     return token;
 }
@@ -81,7 +81,7 @@ AuthService::NewTokens AuthService::Refresh(const std::string& refresh_token) co
     auto new_refresh_token = refresh_token_storage_->RefreshToken(refresh_token);
     auto user = user_storage_->GetUserById(new_refresh_token.user_id);
 
-    return {new_refresh_token.token,
+    return {std::move(new_refresh_token.token),
             GenerateAccessToken(new_refresh_token.user_id, user.role, user.password_version)};
 }
 
@@ -106,14 +106,14 @@ internview::dto::user::ResponseDTO AuthService::Login(const internview::dto::use
     }
     auto access_token = GenerateAccessToken(user.id, user.role, user.password_version);
     auto refresh_token = GenerateRefreshToken(user.id);
-    auto resp_dto = dto::user::ResponseDTO{user.id,         user.login,       user.name,
-                                           user.role,       user.description, user.profile_pic,
-                                           user.created_at, access_token,     refresh_token};
+    auto resp_dto = dto::user::ResponseDTO{user.id,         std::move(user.login),       std::move(user.name),
+                                           std::move(user.role),       std::move(user.description), std::move(user.profile_pic),
+                                           user.created_at, std::move(access_token),     std::move(refresh_token)};
     return resp_dto;
 }
 
 void AuthService::ChangePassword(const dto::user::ChangePasswordDTO& dto) {
-    auto user = user_storage_->GetUserById(dto.id);
+    const auto user = user_storage_->GetUserById(dto.id);
 
     auto verify_res_fut = userver::engine::AsyncNoTracing(crypto_tp_, [&dto, &user] {
         return internview::utils::VerifyPassword(dto.old_password, user.password_hash);

@@ -18,8 +18,8 @@ Value HandlerUserGet::HandleRequestJsonThrow([[maybe_unused]] const HttpRequest&
     auto user_id = auth_res.user_id;
     auto user = user_service_.GetUserById(user_id);
     auto resp_dto =
-        dto::user::ResponseDTO(user.id, user.login, user.name, user.role, user.description,
-                               user.profile_pic, user.created_at, std::nullopt);
+        dto::user::ResponseDTO(user.id, std::move(user.login), std::move(user.name), std::move(user.role), std::move(user.description),
+                               std::move(user.profile_pic), user.created_at, std::nullopt);
     return ValueBuilder(resp_dto).ExtractValue();
 }
 

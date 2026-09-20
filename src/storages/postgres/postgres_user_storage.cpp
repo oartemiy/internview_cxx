@@ -135,8 +135,8 @@ dto::user::ResponseDTO PostgresUserStorage::UpdateUser(
             img_storage_->Delete(*old_profile_pic);
         }
         auto resp_dto =
-            dto::user::ResponseDTO{dto.id,           model.login,       model.name,
-                                   model.role,       model.description, model.profile_pic,
+            dto::user::ResponseDTO{dto.id,           std::move(model.login),       std::move(model.name),
+                                   std::move(model.role),       std::move(model.description), std::move(model.profile_pic),
                                    model.created_at, std::nullopt};
         return resp_dto;
     } catch (userver::storages::postgres::UniqueViolation& e) {
@@ -178,7 +178,7 @@ void PostgresUserStorage::UploadProfilePic(const boost::uuids::uuid& id,
     }
     auto key = img_storage_->Save(file_arg);
     auto update_dto =
-        dto::user::UpdateDTO{false, false, false, true, id, "", "", std::nullopt, key};
+        dto::user::UpdateDTO{false, false, false, true, id, "", "", std::nullopt, std::move(key)};
     auto res = UpdateUser(update_dto);
 }
 
@@ -187,7 +187,7 @@ std::optional<std::pair<std::string, std::string>> PostgresUserStorage::GetProfi
 
     auto user = GetUserById(id);
 
-    auto pic = user.profile_pic;
+    const auto& pic = user.profile_pic;
     if (!pic) {
         return std::nullopt;
     }

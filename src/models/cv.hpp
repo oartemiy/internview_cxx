@@ -4,7 +4,6 @@
 #include <chrono>
 #include <optional>
 
-#include "dto/cv_dto.hpp"
 #include "userver/formats/json/value_builder.hpp"
 #include "userver/formats/serialize/boost_uuid.hpp"
 #include "userver/formats/serialize/common_containers.hpp"
@@ -23,17 +22,17 @@ struct CV {
     std::chrono::system_clock::time_point created_at;
     std::chrono::system_clock::time_point updated_at;
 
-    internview::dto::cv::ResponseDTO ToResponseDTO() const {
-        dto::cv::ResponseDTO res;
-        res.id = id;
-        res.user_id = user_id;
-        res.title = title;
-        res.description = description;
-        res.cv_pdf = cv_pdf;
-        res.created_at = created_at;
-        res.updated_at = updated_at;
-        return res;
-    }
+    // internview::dto::cv::ResponseDTO ToResponseDTO() const {
+    //     dto::cv::ResponseDTO res;
+    //     res.id = id;
+    //     res.user_id = user_id;
+    //     res.title = title;
+    //     res.description = description;
+    //     res.cv_pdf = cv_pdf;
+    //     res.created_at = created_at;
+    //     res.updated_at = updated_at;
+    //     return res;
+    // }
 };
 
 inline auto Serialize(const CV& user,

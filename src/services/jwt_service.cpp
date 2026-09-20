@@ -54,7 +54,7 @@ JwtService::JWTParse JwtService::VerifyToken(const std::string& token) const {
     auto user_id = gen(user_id_str);
     int password_version = std::stoi(password_version_clain.as_string());
 
-    return {user_id, user_role_str, password_version};
+    return {user_id, std::move(user_role_str), password_version};
 }
 
 }  // namespace internview::services

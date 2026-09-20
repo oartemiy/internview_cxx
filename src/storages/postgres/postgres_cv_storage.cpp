@@ -132,16 +132,16 @@ void PostgresCvStorage::DeleteCv(const boost::uuids::uuid& id, const boost::uuid
 }
 
 void PostgresCvStorage::UploadCvPdf(const boost::uuids::uuid& id, const boost::uuids::uuid& user_id,
-                                    const utils::File& file_arg) {
+                                    const utils::File& file) {
 
     auto cv_model = GetCvById(id, user_id);
 
     if (cv_model.cv_pdf != std::nullopt) {
         pdf_storage_->Delete(*cv_model.cv_pdf);
     }
-    auto key = pdf_storage_->Save(file_arg);
+    auto key = pdf_storage_->Save(file);
 
-    UpdateCv({false, false, true, id, user_id, "", std::nullopt, key});
+    UpdateCv({false, false, true, id, user_id, "", std::nullopt, std::move(key)});
 }
 
 std::optional<std::pair<std::string, std::string>> PostgresCvStorage::GetCvPdf(
@@ -150,10 +150,10 @@ std::optional<std::pair<std::string, std::string>> PostgresCvStorage::GetCvPdf(
     if (!cv_model.cv_pdf) {
         return std::nullopt;
     }
-    auto pic = cv_model.cv_pdf;
+    const auto& pdf = cv_model.cv_pdf;
     try {
-        auto file = pdf_storage_->Load(*pic);
-        std::pair<std::string, std::string> res{*pic, file};
+        auto file = pdf_storage_->Load(*pdf);
+        std::pair<std::string, std::string> res{*pdf, std::move(file)};
         return res;
     } catch (std::runtime_error& e) {
         return std::nullopt;
