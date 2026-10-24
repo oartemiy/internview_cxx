@@ -1,8 +1,11 @@
 __pycache__
 build*/
+results/
+results-quick/
 compile_commands.json
 .cache/
 .ccache/
+.tools/
 .idea/
 .vscode/
 !.vscode/c_cpp_properties.json

@@ -3,6 +3,14 @@ project(internview CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
+option(INTERNVIEW_FTIME_TRACE "Emit Clang -ftime-trace profiles for build-time analysis" OFF)
+
+option(
+    USE_PCH
+    "Precompile common userver/protobuf headers (build-time experiment)"
+    OFF
+)
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(DownloadUserver)
 include(DownloadSodium)
@@ -192,6 +200,16 @@ target_link_libraries(
 # The Service
 add_executable(${PROJECT_NAME} src/main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_objs)
+
+if(INTERNVIEW_FTIME_TRACE)
+    target_compile_options(${PROJECT_NAME}_objs PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-ftime-trace>")
+    target_compile_options(${PROJECT_NAME} PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-ftime-trace>")
+endif()
+
+if(USE_PCH)
+    target_precompile_headers(${PROJECT_NAME}_objs PRIVATE src/pch_userver.hpp)
+    target_precompile_headers(${PROJECT_NAME} PRIVATE src/pch_userver.hpp)
+endif()
 
 # # Unit Tests
 # add_executable(${PROJECT_NAME}_unittest src/greeting_test.cpp)

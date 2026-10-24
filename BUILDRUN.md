@@ -30,6 +30,49 @@ can also be `debug-custom`, `release-custom`.
 * `make docker-clean-data` - stop docker containers
 
 
+## Build-time profiling (ClangBuildAnalyzer)
+
+The `scripts/` directory contains a reproducible build-time profiler. It builds
+the `internview` target from scratch with `-ftime-trace`, captures the trace with
+ClangBuildAnalyzer, and writes per-run and aggregated reports.
+
+Requirements: Clang with `-ftime-trace` support (Homebrew LLVM is recommended on
+macOS; Apple Clang may not support it), Ninja, CMake, and Python 3.
+
+```bash
+make cba             # download/build ClangBuildAnalyzer into .tools/
+make measure-quick   # 1 clean Release build, writes results-quick/
+make measure         # 5 clean Release builds, writes results/
+make results         # print results/baseline/comparison.md
+make results-quick   # print results-quick/baseline/comparison.md
+```
+
+The first `make cba` needs network access: it clones
+[ClangBuildAnalyzer](https://github.com/aras-p/ClangBuildAnalyzer) into
+`.tools/ClangBuildAnalyzer` and builds it locally. Nothing is installed
+system-wide. The build is done in `build-cba/`, so `build-debug/` is untouched.
+
+Useful environment variables:
+
+* `REPS` — number of clean builds (default 5);
+* `JOBS` — parallel build jobs (default 4);
+* `CMAKE_OPTS` — extra CMake arguments;
+* `CXX` / `CC` — force a specific compiler;
+* `CBA` — use an existing ClangBuildAnalyzer binary;
+* `CBA_SRC` — use another ClangBuildAnalyzer source checkout.
+
+Raw data and the report are written under `results/baseline/`:
+
+* `cba-report-N.txt` — full CBA report for run N;
+* `tu-times-N.csv` — per-TU frontend/backend times;
+* `phases-N.csv` — compile/link phases from `.ninja_log`;
+* `timing.txt` — wall-clock time for every run;
+* `comparison.md`, `summary.json` — aggregated medians and machine-readable data.
+
+`make measure-quick` writes the same layout under `results-quick/baseline/`, so
+it does not overwrite the canonical `results/`.
+
+
 ## License
 
 The original template is distributed under the [Apache-2.0 License](https://github.com/userver-framework/userver/blob/develop/LICENSE)

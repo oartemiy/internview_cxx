@@ -6,6 +6,8 @@ CMAKE_OPTS ?= -DUSERVER_PYTHON_PATH=/opt/homebrew/bin/python3.12  -DUSERVER_CHEC
 # If we're under TTY, pass "-it" to "docker run"
 DOCKER_ARGS = $(shell /bin/test -t 0 && /bin/echo -it || echo)
 PRESETS ?= debug release debug-custom release-custom
+REPS ?= 5
+JOBS ?= 4
 
 .PHONY: all
 all: test-debug test-release
@@ -61,6 +63,40 @@ install: install-release
 format:
 	find src -name '*pp' -type f | xargs $(CLANG_FORMAT) -i
 	find tests -name '*.py' -type f | xargs autopep8 -i
+
+# Build-time profiling with ClangBuildAnalyzer.
+.PHONY: help cba measure measure-quick results results-quick clean-results clean-quick
+help:
+	@printf '%s\n' \
+		'Build-time profiling:' \
+		'  make cba             download/build ClangBuildAnalyzer into .tools/' \
+		'  make measure-quick   1 clean Release build, results in results-quick/' \
+		'  make measure         5 clean Release builds, results in results/' \
+		'  make results         print results/baseline/comparison.md' \
+		'  make results-quick   print results-quick/baseline/comparison.md' \
+		'  make clean-results   remove results/' \
+		'  make clean-quick     remove results-quick/'
+
+cba:
+	@eval "$$(scripts/bootstrap_cba.sh)"; echo "ClangBuildAnalyzer: $$CBA"
+
+measure:
+	REPS=$(REPS) JOBS=$(JOBS) CMAKE_OPTS='$(CMAKE_OPTS)' scripts/run_all.sh
+
+measure-quick:
+	RESULTS_ROOT=results-quick REPS=1 JOBS=$(JOBS) CMAKE_OPTS='$(CMAKE_OPTS)' scripts/run_all.sh
+
+results:
+	@cat results/baseline/comparison.md
+
+results-quick:
+	@cat results-quick/baseline/comparison.md
+
+clean-results:
+	rm -rf results
+
+clean-quick:
+	rm -rf results-quick
 
 # Start targets makefile in docker wrapper.
 # The docker mounts the whole service's source directory,
