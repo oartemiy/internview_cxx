@@ -16,3 +16,4 @@ Makefile.local
 CMakeUserPresets.json
 configs/secure_data.json
 uploads/
+.tools/
