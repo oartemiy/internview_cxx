@@ -3,6 +3,7 @@
 #include "components/services/auth_service_component.hpp"
 #include "dto/user_dto.hpp"
 #include "userver/server/handlers/http_handler_json_base.hpp"
+#include "utils/common_handler.hpp"
 
 namespace internview::handlers {
 
@@ -16,7 +17,7 @@ HandlerAuthLoginPost::HandlerAuthLoginPost(const ComponentConfig& config,
 Value HandlerAuthLoginPost::HandleRequestJsonThrow([[maybe_unused]] const HttpRequest& request,
                                                    const Value& request_json,
                                                    [[maybe_unused]] RequestContext& context) const {
-    auto dto = request_json.As<dto::user::LoginDTO>();
+    auto dto = ParseJsonBody<dto::user::LoginDTO>(request_json);
     auto responce = auth_service_->Login(dto);
     return ValueBuilder(responce).ExtractValue();
 }

@@ -10,18 +10,20 @@ HandlerVacancyPost::HandlerVacancyPost(const ComponentConfig& config,
     : HttpHandlerJsonBase(config, component_context), vacancy_service_(config, component_context) {
 }
 
-Value HandlerVacancyPost::HandleRequestJsonThrow([[maybe_unused]] const HttpRequest& request,
+Value HandlerVacancyPost::HandleRequestJsonThrow(const HttpRequest& request,
                                                  const Value& request_json,
                                                  [[maybe_unused]] RequestContext& context) const {
     auto auth_res = context.GetUserData<AuthResult>();
-    if (auth_res.role != "recruiter") {
-        throw ClientError(MakeObject("message", "Invalid role for this action"));
-    }
-    auto dto = request_json.As<dto::vacancy::CreateDTO>();
+    RequireRole(auth_res, "recruiter");
+    auto dto = ParseJsonBody<dto::vacancy::CreateDTO>(request_json);
+    ValidateLength("title", dto.title, 1, 200);
+    ValidateEnum("work_mode", dto.work_mode, {"remote", "office", "hybrid"});
+    ValidateEnum("experience_level", dto.experience_level, {"junior", "middle", "senior"});
     dto.recruiter_id = auth_res.user_id;
 
     auto model = vacancy_service_.CreateVacancy(dto);
 
+    request.SetResponseStatus(HttpStatus::kCreated);
     return ValueBuilder(model).ExtractValue();
 }
 

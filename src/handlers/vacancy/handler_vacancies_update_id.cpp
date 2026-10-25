@@ -18,16 +18,21 @@ Value HandlerVacancyUpdate::HandleRequestJsonThrow(const HttpRequest& request,
         throw ClientError(MakeObject("message", "Empty json"));
     }
     auto auth_res = context.GetUserData<AuthResult>();
+    RequireRole(auth_res, "recruiter");
+    auto id = ParseUuidPathArg(request, "id");
 
-    auto id = boost::uuids::uuid_from_string(request.GetPathArg("id"));
-    if (auth_res.role != "recruiter") {
-        throw ClientError(MakeObject("message", "Invalid role for this action"));
+    auto dto = ParseJsonBody<dto::vacancy::UpdateDTO>(request_json);
+    if (dto.has_title_in_request_json) {
+        ValidateLength("title", dto.title, 1, 200);
     }
-
-    auto dto = request_json.As<dto::vacancy::UpdateDTO>();
+    ValidateEnum("work_mode", dto.work_mode, {"remote", "office", "hybrid"});
+    ValidateEnum("experience_level", dto.experience_level, {"junior", "middle", "senior"});
     dto.id = id;
     dto.recruiter_id = auth_res.user_id;
 
+    if (vacancy_service_.GetVacancyById(id).recruiter_id != auth_res.user_id) {
+        throw Forbidden(MakeObject("message", "This vacancy does not belongs to you"));
+    }
     auto updated_model = vacancy_service_.UpdateVacancy(dto);
 
     return ValueBuilder(updated_model).ExtractValue();

@@ -14,12 +14,14 @@ Value HandlerApplicationDelete::HandleRequestJsonThrow(
     const HttpRequest& request, [[maybe_unused]] const Value& request_json,
     [[maybe_unused]] RequestContext& context) const {
     auto auth_res = context.GetUserData<AuthResult>();
-    if (auth_res.role != "intern") {
-        throw ClientError(MakeObject("message", "Invalid role for this action"));
+    RequireRole(auth_res, "intern");
+    auto id = ParseUuidPathArg(request, "id");
+    if (application_service_.GetApplicationById(id).intern_id != auth_res.user_id) {
+        throw Forbidden(MakeObject("message", "This application does not belongs to you"));
     }
-    auto id = boost::uuids::uuid_from_string(request.GetPathArg("id"));
     application_service_.DeleteApplication(id, auth_res.user_id);
-    return MakeObject("status", "deleted", "deleted application", request.GetPathArg("id"));
+    request.SetResponseStatus(HttpStatus::kNoContent);
+    return {};
 }
 
 }  // namespace internview::handlers

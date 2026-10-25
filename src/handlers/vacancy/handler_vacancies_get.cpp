@@ -1,6 +1,7 @@
 #include "handler_vacancies_get.hpp"
 
 #include <cstddef>
+#include <limits>
 #include <string>
 
 #include "components/services/auth_service_component.hpp"
@@ -23,11 +24,11 @@ Value HandlerVacanciesGet::HandleRequestJsonThrow(const HttpRequest& request,
                                                   [[maybe_unused]] RequestContext& context) const {
     dto::vacancy::GetDTO dto;
 
-    if (request.HasArg("limit")) {
-        dto.limit = std::stoi(request.GetArg("limit"));
+    if (auto limit = ParseIntArg(request, "limit", 1, 100)) {
+        dto.limit = limit;
     }
-    if (request.HasArg("offset")) {
-        dto.offset = std::stoi(request.GetArg("offset"));
+    if (auto offset = ParseIntArg(request, "offset", 0, std::numeric_limits<int>::max())) {
+        dto.offset = offset;
     }
     if (request.HasArg("query")) {
         dto.query = request.GetArg("query");

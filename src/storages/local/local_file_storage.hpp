@@ -56,6 +56,9 @@ public:
 private:
     std::string GenerateFileKey(const utils::File& file);
 
+    /**
+     * @throw std::invalid_argument if key is not a plain file name
+     */
     std::string FullPath(const std::string& key);
 
     userver::engine::TaskProcessor& fs_tp_;

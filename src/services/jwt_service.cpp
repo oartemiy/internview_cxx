@@ -33,28 +33,29 @@ std::string JwtService::GenerateToken(const boost::uuids::uuid& user_id, const s
 }
 
 JwtService::JWTParse JwtService::VerifyToken(const std::string& token) const {
-    auto decoded = jwt::decode(token);
-    auto verifier =
-        jwt::verify().allow_algorithm(jwt::algorithm::hs256{secret_key_}).with_issuer("internview");
-
     try {
+        auto decoded = jwt::decode(token);
+        auto verifier = jwt::verify()
+                            .allow_algorithm(jwt::algorithm::hs256{secret_key_})
+                            .with_issuer("internview");
         verifier.verify(decoded);
+
+        auto user_id_claim = decoded.get_payload_claim("user_id");
+        auto user_role_claim = decoded.get_payload_claim("role");
+        auto password_version_clain = decoded.get_payload_claim("password_version");
+
+        std::string user_id_str = user_id_claim.as_string();
+        std::string user_role_str = user_role_claim.as_string();
+        boost::uuids::string_generator gen;
+        auto user_id = gen(user_id_str);
+        int password_version = std::stoi(password_version_clain.as_string());
+
+        return {user_id, std::move(user_role_str), password_version};
     } catch (std::exception& e) {
+        // malformed token, bad signature, expired token or missing/invalid claims
         throw userver::server::handlers::Unauthorized(userver::formats::json::MakeObject(
             "message", "Unauthorized: Invalid JWT token or expired token"));
     }
-
-    auto user_id_claim = decoded.get_payload_claim("user_id");
-    auto user_role_claim = decoded.get_payload_claim("role");
-    auto password_version_clain = decoded.get_payload_claim("password_version");
-
-    std::string user_id_str = user_id_claim.as_string();
-    std::string user_role_str = user_role_claim.as_string();
-    boost::uuids::string_generator gen;
-    auto user_id = gen(user_id_str);
-    int password_version = std::stoi(password_version_clain.as_string());
-
-    return {user_id, std::move(user_role_str), password_version};
 }
 
 }  // namespace internview::services

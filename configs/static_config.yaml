@@ -85,16 +85,16 @@ components_manager:
             base-dir: /Users/oartemiy/code/internview/uploads/pdf/
             supported-extensions: [".pdf"]
 
-        user-storage: {}
+        user-repository: {}
 
-        cv-storage: {}
+        cv-repository: {}
 
-        refresh-token-storage:
+        refresh-token-repository:
             token-lifetime-seconds: 1209600 # 14 days
 
-        application-storage-component: {}
+        application-repository: {}
 
-        vacancy-storage-component: {}
+        vacancy-repository: {}
 
         handler-status-get:
             path: /status

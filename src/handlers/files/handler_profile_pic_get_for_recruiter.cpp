@@ -15,27 +15,24 @@ HandlerProfilePicGetForRecruiter::HandlerProfilePicGetForRecruiter(
 std::string HandlerProfilePicGetForRecruiter::HandleRequestThrow(
     const HttpRequest& request, [[maybe_unused]] RequestContext& context) const {
     auto auth_res = context.GetUserData<AuthResult>();
+    RequireRole(auth_res, "recruiter");
 
-    if (auth_res.role != "recruiter") {
-        throw ClientError(MakeObject("message", "Invalid role for this action"));
+    auto id = ParseUuidPathArg(request, "id");
+    if (!application_service_.CheckInternApplied(id, auth_res.user_id)) {
+        throw Forbidden(MakeObject("message", "This user does not applied for your vacancies"));
     }
-    auto id = boost::uuids::uuid_from_string(request.GetPathArg("id"));
-    if (application_service_.CheckInternApplied(id, auth_res.user_id)) {
-        auto opt = user_service_.GetProfilePic(id);
-        if (!opt) {
-            return "";
-        }
-        const auto& [pic, file] = *opt;
-        if (pic.ends_with(".png")) {
-            request.GetHttpResponse().SetContentType("image/png");
-        } else if (pic.ends_with(".jpg") || pic.ends_with(".jpeg")) {
-            request.GetHttpResponse().SetContentType("image/jpeg");
-        }
-        request.SetResponseStatus(userver::http::OK);
-        return file;
-    } else {
-        throw ClientError(MakeObject("message", "This user does not applied for your vacancies"));
+    auto opt = user_service_.GetProfilePic(id);
+    if (!opt) {
+        throw ResourceNotFound(MakeObject("message", "Profile picture not found"));
     }
+    const auto& [pic, file] = *opt;
+    if (pic.ends_with(".png")) {
+        request.GetHttpResponse().SetContentType("image/png");
+    } else if (pic.ends_with(".jpg") || pic.ends_with(".jpeg")) {
+        request.GetHttpResponse().SetContentType("image/jpeg");
+    }
+    request.SetResponseStatus(userver::http::OK);
+    return file;
 }
 
 }  // namespace internview::handlers

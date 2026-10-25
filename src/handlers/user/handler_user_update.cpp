@@ -16,17 +16,26 @@ Value HandlerUserUpdate::HandleRequestJsonThrow([[maybe_unused]] const HttpReque
                                                 const Value& request_json,
                                                 [[maybe_unused]] RequestContext& context) const {
     if (request_json.IsEmpty()) {
-        throw userver::server::handlers::ClientError(
-            MakeObject("message", "Empty request data body. Nothing to update"));
+        throw ClientError(MakeObject("message", "Empty request data body. Nothing to update"));
     }
-    auto dto = request_json.As<internview::dto::user::UpdateDTO>();
+    auto dto = ParseJsonBody<internview::dto::user::UpdateDTO>(request_json);
     auto auth_res = context.GetUserData<AuthResult>();
 
     dto.id = auth_res.user_id;
 
-    if (dto.login == "me") {
-        throw userver::server::handlers::ClientError(
-            MakeObject("message", "Login: me can not be taken"));
+    if (dto.has_login_in_request) {
+        if (dto.login == "me") {
+            throw ClientError(MakeObject("message", "Login: me can not be taken"));
+        }
+        ValidateLength("login", dto.login, 3, 50);
+    }
+    if (dto.has_name_in_request) {
+        ValidateLength("name", dto.name, 1, 100);
+    }
+    // NOTE: profile_pic is a file storage key, it can only be removed here (set to null)
+    if (dto.has_profile_pic_in_request && dto.profile_pic) {
+        throw ClientError(MakeObject(
+            "message", "profile_pic can only be set to null, use POST /users/me/profile-pic"));
     }
     auto res = user_service_.UpdateUser(dto);
     return ValueBuilder(res).ExtractValue();

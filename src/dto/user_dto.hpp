@@ -30,7 +30,7 @@ inline auto Parse(const userver::formats::json::Value& json,
     dto.password = json["password"].As<std::string>();
     dto.name = json["name"].As<std::string>();
     dto.description = json["description"].As<std::optional<std::string>>(std::nullopt);
-    dto.profile_pic = json["profile_pic"].As<std::optional<std::string>>(std::nullopt);
+    // NOTE: profile_pic is a file storage key, it is set only via POST /users/me/profile-pic
     dto.role = json["role"].As<std::string>();
     return dto;
 }

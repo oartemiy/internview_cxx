@@ -17,19 +17,16 @@ HandlerAuthRegisterPost::HandlerAuthRegisterPost(const ComponentConfig& config,
 Value HandlerAuthRegisterPost::HandleRequestJsonThrow(
     [[maybe_unused]] const HttpRequest& request, const Value& request_json,
     [[maybe_unused]] RequestContext& context) const {
-    dto::user::RegisterDTO dto = request_json.As<dto::user::RegisterDTO>();
+    dto::user::RegisterDTO dto = ParseJsonBody<dto::user::RegisterDTO>(request_json);
     if (dto.role != "intern" && dto.role != "recruiter") {
-        throw userver::server::handlers::ClientError(
-            MakeObject("message", "Available roles: intern, recruiter"));
+        throw ClientError(MakeObject("message", "Available roles: intern, recruiter"));
     }
     if (dto.login == "me") {
-        throw userver::server::handlers::ClientError(
-            MakeObject("message", "Login: me can not be taken"));
+        throw ClientError(MakeObject("message", "Login: me can not be taken"));
     }
-    if (dto.password.length() <= 1) {
-        throw userver::server::handlers::ClientError(
-            MakeObject("message", "Password must be at least 2 chars"));
-    }
+    ValidateLength("login", dto.login, 3, 50);
+    ValidateLength("name", dto.name, 1, 100);
+    ValidateLength("password", dto.password, 6, 128);
     auto res = auth_service_->Register(dto);
     return ValueBuilder(res).ExtractValue();
 }

@@ -10,28 +10,35 @@ HandlerApplicationUpdate::HandlerApplicationUpdate(const ComponentConfig& config
                                                    const ComponentContext& component_context)
     : HttpHandlerJsonBase(config, component_context),
       application_service_(config, component_context),
-
-      vacancy_service_(config, component_context) {
+      vacancy_service_(config, component_context),
+      cv_service_(config, component_context) {
 }
 
 Value HandlerApplicationUpdate::HandleRequestJsonThrow(
     const HttpRequest& request, const Value& request_json,
     [[maybe_unused]] RequestContext& context) const {
     auto auth_res = context.GetUserData<AuthResult>();
-    auto dto = request_json.As<dto::application::UpdateDTO>();
-    auto id = boost::uuids::uuid_from_string(request.GetPathArg("id"));
+    auto id = ParseUuidPathArg(request, "id");
+    auto dto = ParseJsonBody<dto::application::UpdateDTO>(request_json);
     dto.id = id;
     if (auth_res.role == "intern") {
-        if ((dto.has_cover_letter_in_request_json || dto.has_cv_id_in_request_json) &&
-            !dto.has_status_in_request_json) {
-            auto res = application_service_.UpdateApplication(dto);
-            return ValueBuilder(res).ExtractValue();
-        } else {
+        if (application_service_.GetApplicationById(id).intern_id != auth_res.user_id) {
+            throw Forbidden(MakeObject("message", "This application does not belongs to you"));
+        }
+        if (!(dto.has_cover_letter_in_request_json || dto.has_cv_id_in_request_json) ||
+            dto.has_status_in_request_json) {
             throw ClientError(MakeObject("message", "Invalid intern request_json"));
         }
+        if (dto.has_cv_id_in_request_json) {
+            // throws ResourceNotFound if cv does not belong to the intern
+            cv_service_.GetCvById(dto.cv_id, auth_res.user_id);
+        }
+        auto res = application_service_.UpdateApplication(dto);
+        return ValueBuilder(res).ExtractValue();
     } else {
+        // throws ResourceNotFound for unknown application
         if (vacancy_service_.GetRecruiterIdByApplicationId(id) != auth_res.user_id) {
-            throw ClientError(
+            throw Forbidden(
                 MakeObject("message", "This application does not belongs to your vacancy"));
         }
         if (dto.has_status_in_request_json &&

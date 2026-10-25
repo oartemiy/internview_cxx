@@ -16,7 +16,7 @@ std::string HandlerProfilePicPost::HandleRequestThrow(
 
     auto user_id = auth_res.user_id;
     const auto& file_arg = request.GetFormDataArg("file");
-    if (file_arg.filename->empty()) {
+    if (!file_arg.filename || file_arg.filename->empty()) {
         request.SetResponseStatus(userver::server::http::HttpStatus::BadRequest);
         return "Empty file";
     }

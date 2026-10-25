@@ -2,6 +2,9 @@
 
 #include <string_view>
 
+#include <memory>
+
+#include "services/auth_service.hpp"
 #include "services/cv_service.hpp"
 #include "services/user_service.hpp"
 #include "services/vacancy_service.hpp"
@@ -23,6 +26,7 @@ private:
     services::UserService user_service_;
     services::CvService cv_service_;
     services::VacancyService vacancy_service_;
+    std::shared_ptr<services::AuthService> auth_service_;
 };
 
 }  // namespace internview::handlers

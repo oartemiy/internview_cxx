@@ -29,7 +29,7 @@ inline auto Parse(const userver::formats::json::Value& json,
     CreateDTO dto;
     dto.title = json["title"].As<std::string>();
     dto.description = json["description"].As<std::optional<std::string>>(std::nullopt);
-    dto.cv_pdf = json["cv_pdf"].As<std::optional<std::string>>(std::nullopt);
+    // NOTE: cv_pdf is a file storage key, it is set only via POST /cvs/{id}/pdf
     return dto;
 }
 

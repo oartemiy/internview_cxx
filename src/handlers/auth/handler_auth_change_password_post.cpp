@@ -13,17 +13,19 @@ HandlerAuthChangePasswordPost::HandlerAuthChangePasswordPost(
           component_context.FindComponent<components::AuthServiceComponent>().GetService()) {
 }
 
-Value HandlerAuthChangePasswordPost::HandleRequestJsonThrow(
-    [[maybe_unused]] const HttpRequest& request, const Value& request_json,
-    RequestContext& context) const {
-    auto dto = request_json.As<dto::user::ChangePasswordDTO>();
+Value HandlerAuthChangePasswordPost::HandleRequestJsonThrow(const HttpRequest& request,
+                                                            const Value& request_json,
+                                                            RequestContext& context) const {
+    auto dto = ParseJsonBody<dto::user::ChangePasswordDTO>(request_json);
+    ValidateLength("new_password", dto.new_password, 6, 128);
     auto auth_res = context.GetUserData<AuthResult>();
     auto user_id = auth_res.user_id;
     dto.id = user_id;
 
     auth_service_->ChangePassword(dto);
 
-    return MakeObject("status", "password changed");
+    request.SetResponseStatus(HttpStatus::kNoContent);
+    return {};
 }
 
 }  // namespace internview::handlers

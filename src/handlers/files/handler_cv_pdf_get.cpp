@@ -14,7 +14,7 @@ HandlerCvPdfGet::HandlerCvPdfGet(const ComponentConfig& config,
 
 std::string HandlerCvPdfGet::HandleRequestThrow(const HttpRequest& request,
                                                 [[maybe_unused]] RequestContext& context) const {
-    auto id = boost::uuids::uuid_from_string(request.GetPathArg("id"));
+    auto id = ParseUuidPathArg(request, "id");
     auto auth_res = context.GetUserData<AuthResult>();
     auto intern_id = auth_res.user_id;
 
@@ -24,7 +24,7 @@ std::string HandlerCvPdfGet::HandleRequestThrow(const HttpRequest& request,
     auto opt = cv_service_.GetCvPdf(id, intern_id);
 
     if (!opt) {
-        return "";
+        throw ResourceNotFound(MakeObject("message", "PDF not found"));
     }
 
     const auto& [pic, file] = *opt;

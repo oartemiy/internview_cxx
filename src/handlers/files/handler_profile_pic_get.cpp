@@ -19,7 +19,7 @@ std::string HandlerProfilePicGet::HandleRequestThrow(
 
     auto opt = user_service_.GetProfilePic(user_id);
     if (!opt) {
-        return "";
+        throw ResourceNotFound(MakeObject("message", "Profile picture not found"));
     }
     const auto& [pic, file] = *opt;
     if (pic.ends_with(".png")) {

@@ -4,8 +4,8 @@
 #include <string_view>
 #include <userver/storages/secdist/provider_component.hpp>
 
-#include "components/storages/refresh_token_storage_component.hpp"
-#include "components/storages/user_storage_component.hpp"
+#include "components/repositories/refresh_token_repository_component.hpp"
+#include "components/repositories/user_repository_component.hpp"
 #include "models/user.hpp"
 #include "userver/crypto/base64.hpp"
 #include "userver/crypto/hash.hpp"
@@ -13,25 +13,36 @@
 #include "userver/formats/json/value.hpp"
 #include "userver/server/handlers/exceptions.hpp"
 #include "userver/utils/boost_uuid7.hpp"
+#include "utils/exceptions.hpp"
 #include "utils/password.hpp"
 
 namespace internview::services {
 
 AuthService::AuthService([[maybe_unused]] const userver::components::ComponentConfig& config,
                          const userver::components::ComponentContext& component_context)
-    : jwt_service_(component_context
-                       .FindComponent<userver::components::DefaultSecdistProvider>(
-                           "default-secdist-provider")
-                       .Get()
-                       .As<userver::formats::json::Value>()["jwt_secret"]
-                       .As<std::string>()),
-      refresh_token_storage_(
-          component_context.FindComponent<internview::components::RefreshTokenStorage>()
-              .GetStorage()),
-      user_storage_(component_context.FindComponent<internview::components::UserStorageComponent>()
-                        .GetStorage()),
+    : AuthService(component_context
+                      .FindComponent<userver::components::DefaultSecdistProvider>(
+                          "default-secdist-provider")
+                      .Get()
+                      .As<userver::formats::json::Value>()["jwt_secret"]
+                      .As<std::string>(),
+                  component_context.FindComponent<internview::components::RefreshTokenRepositoryComponent>()
+                      .GetRepository(),
+                  component_context.FindComponent<internview::components::UserRepositoryComponent>()
+                      .GetRepository(),
+                  component_context.GetTaskProcessor("crypt-task-processor")) {
+}
+
+AuthService::AuthService(
+    const std::string& jwt_secret,
+    std::shared_ptr<repositories::interfaces::IRefreshTokenRepository> refresh_token_repository,
+    std::shared_ptr<repositories::interfaces::IUserRepository> user_repository,
+    userver::engine::TaskProcessor& crypto_tp)
+    : jwt_service_(jwt_secret),
+      refresh_token_repository_(std::move(refresh_token_repository)),
+      user_repository_(std::move(user_repository)),
       cache_(16, 256),
-      crypto_tp_(component_context.GetTaskProcessor("crypt-task-processor")) {
+      crypto_tp_(crypto_tp) {
     // !NOTE:
     cache_.SetMaxLifetime(std::chrono::minutes(30));  // = access_token_lifetime
 }
@@ -68,21 +79,24 @@ std::string AuthService::GenerateRefreshToken(const boost::uuids::uuid& user_id)
     auto token = userver::crypto::base64::Base64Encode(userver::crypto::GenerateRandomBlock(32));
     auto token_hash = userver::crypto::hash::Sha256(token);
 
-    refresh_token_storage_->Create(user_id, std::move(token_hash));
+    refresh_token_repository_->Create(user_id, std::move(token_hash));
 
     return token;
 }
 
 void AuthService::Revoke(const boost::uuids::uuid& user_id) const {
-    refresh_token_storage_->RevokeAllUserTokens(user_id);
+    refresh_token_repository_->RevokeAllUserTokens(user_id);
 }
 
 AuthService::NewTokens AuthService::Refresh(const std::string& refresh_token) const {
-    auto new_refresh_token = refresh_token_storage_->RefreshToken(refresh_token);
-    auto user = user_storage_->GetUserById(new_refresh_token.user_id);
+    auto new_refresh_token = refresh_token_repository_->RefreshToken(refresh_token);
+    auto user = user_repository_->GetUserById(new_refresh_token.user_id);
 
-    return {std::move(new_refresh_token.token),
-            GenerateAccessToken(new_refresh_token.user_id, user.role, user.password_version)};
+    return {
+        .access_token =
+            GenerateAccessToken(new_refresh_token.user_id, user.role, user.password_version),
+        .refresh_token = std::move(new_refresh_token.token),
+    };
 }
 
 void AuthService::MarkAsChanged(const boost::uuids::uuid& user_id, int password_version,
@@ -90,19 +104,39 @@ void AuthService::MarkAsChanged(const boost::uuids::uuid& user_id, int password_
     cache_.Put(user_id, {password_version, role});
 }
 
-internview::dto::user::ResponseDTO AuthService::Login(const internview::dto::user::LoginDTO& dto) {
+bool AuthService::VerifyPasswordAsync(const std::string& password,
+                                      const std::string& password_hash) const {
+    return userver::engine::AsyncNoTracing(crypto_tp_, [&password, &password_hash] {
+               return internview::utils::VerifyPassword(password, password_hash);
+           }).Get();
+}
 
-    auto user = user_storage_->GetUserByLogin(dto.login);
-
-    auto verify_res_fut = userver::engine::AsyncNoTracing(crypto_tp_, [&dto, &user] {
-        return internview::utils::VerifyPassword(dto.password, user.password_hash);
-    });
-
-    auto verify_res = verify_res_fut.Get();
-
-    if (!verify_res) {
-        throw userver::server::handlers::ClientError(
+void AuthService::CheckPassword(const boost::uuids::uuid& user_id,
+                                const std::string& password) const {
+    const auto user = user_repository_->GetUserById(user_id);
+    if (!VerifyPasswordAsync(password, user.password_hash)) {
+        throw internview::utils::Forbidden(
             userver::formats::json::MakeObject("message", "Password is incorrect"));
+    }
+}
+
+internview::dto::user::ResponseDTO AuthService::Login(const internview::dto::user::LoginDTO& dto) {
+    // NOTE: the same error for unknown login and wrong password, do not leak existing logins
+    const auto invalid_credentials = [] {
+        return userver::server::handlers::Unauthorized(
+            userver::formats::json::MakeObject("message", "Invalid login or password"));
+    };
+
+    std::optional<models::User> user_opt;
+    try {
+        user_opt = user_repository_->GetUserByLogin(dto.login);
+    } catch (const userver::server::handlers::ResourceNotFound&) {
+        throw invalid_credentials();
+    }
+    auto& user = *user_opt;
+
+    if (!VerifyPasswordAsync(dto.password, user.password_hash)) {
+        throw invalid_credentials();
     }
     auto access_token = GenerateAccessToken(user.id, user.role, user.password_version);
     auto refresh_token = GenerateRefreshToken(user.id);
@@ -113,16 +147,10 @@ internview::dto::user::ResponseDTO AuthService::Login(const internview::dto::use
 }
 
 void AuthService::ChangePassword(const dto::user::ChangePasswordDTO& dto) {
-    const auto user = user_storage_->GetUserById(dto.id);
+    const auto user = user_repository_->GetUserById(dto.id);
 
-    auto verify_res_fut = userver::engine::AsyncNoTracing(crypto_tp_, [&dto, &user] {
-        return internview::utils::VerifyPassword(dto.old_password, user.password_hash);
-    });
-
-    auto verify_res = verify_res_fut.Get();
-
-    if (!verify_res) {
-        throw userver::server::handlers::ClientError(
+    if (!VerifyPasswordAsync(dto.old_password, user.password_hash)) {
+        throw internview::utils::Forbidden(
             userver::formats::json::MakeObject("message", "Password is incorrect"));
     }
 
@@ -131,7 +159,7 @@ void AuthService::ChangePassword(const dto::user::ChangePasswordDTO& dto) {
 
     auto new_password_hash = new_password_hash_fut.Get();
 
-    user_storage_->UpdatePasswordHash(dto.id, new_password_hash);
+    user_repository_->UpdatePasswordHash(dto.id, new_password_hash);
 
     Revoke(dto.id);
     // Mark user as changed
@@ -147,7 +175,7 @@ dto::user::ResponseDTO AuthService::Register(const internview::dto::user::Regist
     if (password_hash.empty()) {
         throw std::runtime_error("Sodium error");
     }
-    auto resp_dto = user_storage_->CreateUser(
+    auto resp_dto = user_repository_->CreateUser(
         {id, dto.login, password_hash, dto.name, dto.role, dto.description, dto.profile_pic});
     resp_dto.access_token = GenerateAccessToken(id, dto.role, 0);
     resp_dto.refresh_token = GenerateRefreshToken(id);

@@ -9,19 +9,17 @@ HandlerCvPost::HandlerCvPost(const ComponentConfig& config,
     : HttpHandlerJsonBase(config, component_context), cv_service_(config, component_context) {
 }
 
-Value HandlerCvPost::HandleRequestJsonThrow([[maybe_unused]] const HttpRequest& request,
-                                            const Value& request_json,
+Value HandlerCvPost::HandleRequestJsonThrow(const HttpRequest& request, const Value& request_json,
                                             [[maybe_unused]] RequestContext& context) const {
-    auto dto = request_json.As<internview::dto::cv::CreateDTO>();
     auto auth_res = context.GetUserData<AuthResult>();
+    RequireRole(auth_res, "intern");
 
-    if (auth_res.role != "intern") {
-        throw ClientError(MakeObject("message", "Invalid role for this action"));
-    }
-
+    auto dto = ParseJsonBody<internview::dto::cv::CreateDTO>(request_json);
+    ValidateLength("title", dto.title, 1, 200);
     dto.user_id = auth_res.user_id;
     auto res = cv_service_.CreateCv(dto);
 
+    request.SetResponseStatus(HttpStatus::kCreated);
     return ValueBuilder(res).ExtractValue();
 }
 

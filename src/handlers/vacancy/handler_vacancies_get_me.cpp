@@ -14,9 +14,7 @@ Value HandlerVacanciesGetMe::HandleRequestJsonThrow(
     [[maybe_unused]] const HttpRequest& request, [[maybe_unused]] const Value& request_json,
     [[maybe_unused]] RequestContext& context) const {
     auto auth_res = context.GetUserData<AuthResult>();
-    if (auth_res.role != "recruiter") {
-        throw ClientError(MakeObject("message", "Invalid role for this action"));
-    }
+    RequireRole(auth_res, "recruiter");
     auto res = vacancy_service_.GetRecruiterVacancies(auth_res.user_id);
     return ValueBuilder(res).ExtractValue();
 }

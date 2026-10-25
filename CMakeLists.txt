@@ -28,11 +28,11 @@ include_directories(src)
 userver_add_sql_library(
     ${PROJECT_NAME}_user_storage_sql
     NAMESPACE
-    user_storage_queries
+    user_repository_queries
     SOURCE_DIR
-    src/storages/sql/user_storage
+    src/repositories/sql/user_repository
     OUTPUT_DIR
-    ${CMAKE_SOURCE_DIR}/src/storages/sql/user_storage
+    ${CMAKE_SOURCE_DIR}/src/repositories/sql/user_repository
     SQL_FILES
     *.sql
 )
@@ -40,11 +40,11 @@ userver_add_sql_library(
 userver_add_sql_library(
     ${PROJECT_NAME}_cv_storage_sql
     NAMESPACE
-    cv_storage_queries
+    cv_repository_queries
     SOURCE_DIR
-    src/storages/sql/cv_storage
+    src/repositories/sql/cv_repository
     OUTPUT_DIR
-    ${CMAKE_SOURCE_DIR}/src/storages/sql/cv_storage
+    ${CMAKE_SOURCE_DIR}/src/repositories/sql/cv_repository
     SQL_FILES
     *.sql
 )
@@ -52,11 +52,11 @@ userver_add_sql_library(
 userver_add_sql_library(
     ${PROJECT_NAME}_vacancy_storage_sql
     NAMESPACE
-    vacancy_storage_queries
+    vacancy_repository_queries
     SOURCE_DIR
-    src/storages/sql/vacancy_storage
+    src/repositories/sql/vacancy_repository
     OUTPUT_DIR
-    ${CMAKE_SOURCE_DIR}/src/storages/sql/vacancy_storage
+    ${CMAKE_SOURCE_DIR}/src/repositories/sql/vacancy_repository
     SQL_FILES
     *.sql
 )
@@ -64,11 +64,11 @@ userver_add_sql_library(
 userver_add_sql_library(
     ${PROJECT_NAME}_application_storage_sql
     NAMESPACE
-    application_storage_queries
+    application_repository_queries
     SOURCE_DIR
-    src/storages/sql/application_storage
+    src/repositories/sql/application_repository
     OUTPUT_DIR
-    ${CMAKE_SOURCE_DIR}/src/storages/sql/application_storage
+    ${CMAKE_SOURCE_DIR}/src/repositories/sql/application_repository
     SQL_FILES
     *.sql
 )
@@ -76,21 +76,21 @@ userver_add_sql_library(
 userver_add_sql_library(
     ${PROJECT_NAME}_refresh_token_storage_sql
     NAMESPACE
-    refresh_token_storage_queries
+    refresh_token_repository_queries
     SOURCE_DIR
-    src/storages/sql/refresh_token_storage
+    src/repositories/sql/refresh_token_repository
     OUTPUT_DIR
-    ${CMAKE_SOURCE_DIR}/src/storages/sql/refresh_token_storage
+    ${CMAKE_SOURCE_DIR}/src/repositories/sql/refresh_token_repository
     SQL_FILES
     *.sql
 )
 
 
-target_include_directories(${PROJECT_NAME}_user_storage_sql PUBLIC ${CMAKE_SOURCE_DIR}/src/storages/sql/user_storage/include)
-target_include_directories(${PROJECT_NAME}_cv_storage_sql PUBLIC ${CMAKE_SOURCE_DIR}/src/storages/sql/cv_storage/include)
-target_include_directories(${PROJECT_NAME}_vacancy_storage_sql PUBLIC ${CMAKE_SOURCE_DIR}/src/storages/sql/vacancy_storage/include)
-target_include_directories(${PROJECT_NAME}_application_storage_sql PUBLIC ${CMAKE_SOURCE_DIR}/src/storages/sql/application_storage/include)
-target_include_directories(${PROJECT_NAME}_refresh_token_storage_sql PUBLIC ${CMAKE_SOURCE_DIR}/src/storages/sql/refresh_token_storage/include)
+target_include_directories(${PROJECT_NAME}_user_storage_sql PUBLIC ${CMAKE_SOURCE_DIR}/src/repositories/sql/user_repository/include)
+target_include_directories(${PROJECT_NAME}_cv_storage_sql PUBLIC ${CMAKE_SOURCE_DIR}/src/repositories/sql/cv_repository/include)
+target_include_directories(${PROJECT_NAME}_vacancy_storage_sql PUBLIC ${CMAKE_SOURCE_DIR}/src/repositories/sql/vacancy_repository/include)
+target_include_directories(${PROJECT_NAME}_application_storage_sql PUBLIC ${CMAKE_SOURCE_DIR}/src/repositories/sql/application_repository/include)
+target_include_directories(${PROJECT_NAME}_refresh_token_storage_sql PUBLIC ${CMAKE_SOURCE_DIR}/src/repositories/sql/refresh_token_repository/include)
 
 add_library(
     ${PROJECT_NAME}_objs OBJECT
@@ -106,19 +106,19 @@ add_library(
 
     src/components/storages/pdf_storage_component.cpp
     src/components/storages/img_storage_component.cpp
-    src/components/storages/user_storage_component.cpp
-    src/components/storages/cv_storage_component.cpp
-    src/components/storages/refresh_token_storage_component.cpp
-    src/components/storages/application_storage_component.cpp
-    src/components/storages/vacancy_storage_component.cpp
+    src/components/repositories/user_repository_component.cpp
+    src/components/repositories/cv_repository_component.cpp
+    src/components/repositories/refresh_token_repository_component.cpp
+    src/components/repositories/application_repository_component.cpp
+    src/components/repositories/vacancy_repository_component.cpp
 
     # storages
     src/storages/local/local_file_storage.cpp
-    src/storages/postgres/postgres_user_storage.cpp
-    src/storages/postgres/postgres_cv_storage.cpp
-    src/storages/postgres/postgres_refresh_token_storage.cpp
-    src/storages/postgres/postgres_application_storage.cpp
-    src/storages/postgres/postgres_vacancy_storage.cpp
+    src/repositories/postgres/postgres_user_repository.cpp
+    src/repositories/postgres/postgres_cv_repository.cpp
+    src/repositories/postgres/postgres_refresh_token_repository.cpp
+    src/repositories/postgres/postgres_application_repository.cpp
+    src/repositories/postgres/postgres_vacancy_repository.cpp
 
     # auth middleware
     src/auth/auth_checker.cpp
@@ -193,10 +193,24 @@ target_link_libraries(
 add_executable(${PROJECT_NAME} src/main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_objs)
 
-# # Unit Tests
-# add_executable(${PROJECT_NAME}_unittest src/greeting_test.cpp)
-# target_link_libraries(${PROJECT_NAME}_unittest PRIVATE ${PROJECT_NAME}_objs userver::utest)
-# add_google_tests(${PROJECT_NAME}_unittest)
+# Unit Tests
+add_executable(
+    ${PROJECT_NAME}_unittest
+    src/unittests/auth_service_test.cpp
+    src/unittests/dto_test.cpp
+    src/unittests/jwt_service_test.cpp
+    src/unittests/local_file_storage_test.cpp
+    src/unittests/models_test.cpp
+    src/unittests/password_test.cpp
+)
+target_link_libraries(
+    ${PROJECT_NAME}_unittest
+    PRIVATE ${PROJECT_NAME}_objs
+    userver::utest
+    sodium
+    jwt-cpp::jwt-cpp
+)
+add_google_tests(${PROJECT_NAME}_unittest)
 
 # # Benchmarks
 # add_executable(${PROJECT_NAME}_benchmark src/greeting_benchmark.cpp)

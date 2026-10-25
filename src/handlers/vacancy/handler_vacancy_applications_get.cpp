@@ -16,15 +16,13 @@ Value HandlerVacancyApplicationsGet::HandleRequestJsonThrow(
     [[maybe_unused]] RequestContext& context) const {
 
     auto auth_res = context.GetUserData<AuthResult>();
-    if (auth_res.role != "recruiter") {
-        throw ClientError(MakeObject("message", "Invalid role for this action"));
-    }
-    auto id = boost::uuids::uuid_from_string(request.GetPathArg("id"));
+    RequireRole(auth_res, "recruiter");
+    auto id = ParseUuidPathArg(request, "id");
     if (vacancy_service_.GetVacancyById(id).recruiter_id == auth_res.user_id) {
         auto vec = application_service_.GetVacancyApplications(id);
         return ValueBuilder(vec).ExtractValue();
     } else {
-        throw ClientError(
+        throw Forbidden(
             MakeObject("message", "This vacancy does not belongs to you. Check vacancy id"));
     }
 }

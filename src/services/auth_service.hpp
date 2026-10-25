@@ -7,8 +7,8 @@
 #include <userver/formats/json/value_builder.hpp>
 
 #include "services/jwt_service.hpp"
-#include "storages/interfaces/refresh_token_storage.hpp"
-#include "storages/interfaces/user_storage.hpp"
+#include "repositories/interfaces/refresh_token_repository.hpp"
+#include "repositories/interfaces/user_repository.hpp"
 #include "userver/cache/expirable_lru_cache.hpp"
 #include "userver/components/component_config.hpp"
 #include "userver/components/component_context.hpp"
@@ -31,6 +31,12 @@ public:
 
     AuthService(const userver::components::ComponentConfig& config,
                 const userver::components::ComponentContext& component_context);
+
+    // Allows to inject repositories directly (used in unit tests with mocks)
+    AuthService(const std::string& jwt_secret,
+                std::shared_ptr<repositories::interfaces::IRefreshTokenRepository> refresh_token_repository,
+                std::shared_ptr<repositories::interfaces::IUserRepository> user_repository,
+                userver::engine::TaskProcessor& crypto_tp);
 
     /**
      * @brief Check authoriation
@@ -87,11 +93,21 @@ public:
                        const std::string& role);
 
     /**
+     * @brief Verifies password of existing user
+     *
+     * @param user_id
+     * @param password
+     * @throws userver::server::handlers::ResourceNotFound
+               internview::utils::Forbidden
+     */
+    void CheckPassword(const boost::uuids::uuid& user_id, const std::string& password) const;
+
+    /**
      * @brief Login User
      *
      * @param dto
      * @return dto::user::ResponseDTO
-     * @throws userver::server::handlers::ClientError
+     * @throws userver::server::handlers::Unauthorized
      */
     internview::dto::user::ResponseDTO Login(const internview::dto::user::LoginDTO& dto);
 
@@ -100,7 +116,7 @@ public:
      *
      * @param dto
      * @throws userver::server::handlers::ResourceNotFound
-               userver::server::handlers::ClientError
+               internview::utils::Forbidden
      */
     void ChangePassword(const dto::user::ChangePasswordDTO& dto);
 
@@ -115,14 +131,16 @@ public:
     dto::user::ResponseDTO Register(const internview::dto::user::RegisterDTO& dto);
 
 private:
+    bool VerifyPasswordAsync(const std::string& password, const std::string& password_hash) const;
+
     struct CacheAuthInfo {
         int password_version;
         std::string role;
     };
 
     internview::services::JwtService jwt_service_;
-    std::shared_ptr<internview::storages::interfaces::IRefreshTokenStorage> refresh_token_storage_;
-    std::shared_ptr<internview::storages::interfaces::IUserStorage> user_storage_;
+    std::shared_ptr<internview::repositories::interfaces::IRefreshTokenRepository> refresh_token_repository_;
+    std::shared_ptr<internview::repositories::interfaces::IUserRepository> user_repository_;
 
     userver::cache::ExpirableLruCache<boost::uuids::uuid, CacheAuthInfo> cache_;
     userver::engine::TaskProcessor& crypto_tp_;

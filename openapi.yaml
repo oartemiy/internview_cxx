@@ -2,7 +2,11 @@ openapi: 3.0.0
 info:
   title: InternView API
   version: 1.0.0
-  description: API for InternView platform – connecting interns and recruiters.
+  description: |
+    API for InternView platform – connecting interns and recruiters.
+
+    Errors of JSON endpoints are returned as `ErrorResponse`.
+    File endpoints (profile pictures and CV pdf) return errors with an empty body.
 servers:
   - url: http://localhost:8080
     description: Local development server
@@ -11,7 +15,7 @@ servers:
 
 tags:
   - name: auth
-    description: Authentication and user management
+    description: Authentication and sessions
   - name: users
     description: User profile operations
   - name: cvs
@@ -20,6 +24,8 @@ tags:
     description: Vacancy operations
   - name: applications
     description: Application (response) operations
+  - name: service
+    description: Service health
 
 components:
   securitySchemes:
@@ -27,25 +33,71 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: Access token from /auth/register, /auth/login or /auth/refresh. Lives 30 minutes.
+
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      description: Invalid uuid results in 400
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    BadRequest:
+      description: Invalid input (malformed uuid, missing fields, validation error)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Missing, malformed or expired access token
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: Wrong role or the resource belongs to somebody else
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Conflict:
+      description: Unique constraint violation
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
   schemas:
     ErrorResponse:
       type: object
       properties:
-        error:
+        code:
+          type: string
+          description: HTTP status code
+          example: "400"
+        message:
+          type: string
+          description: HTTP status text
+          example: Bad Request
+        details:
           type: object
           properties:
-            code:
-              type: string
-              description: Machine-readable error code
             message:
               type: string
               description: Human-readable error message
-            details:
-              type: object
-              additionalProperties: true
-              description: Additional structured information
       required:
-        - error
+        - code
+        - message
 
     User:
       type: object
@@ -55,8 +107,58 @@ components:
           format: uuid
         login:
           type: string
+        name:
+          type: string
+        role:
+          type: string
+          enum: [intern, recruiter]
+        description:
+          type: string
+          nullable: true
+        profile_pic:
+          type: string
+          nullable: true
+          description: Storage key of the picture, download it via /users/me/profile-pic
+        created_at:
+          type: string
+          format: date-time
+      required: [id, login, name, role, description, profile_pic, created_at]
+
+    AuthResponse:
+      allOf:
+        - $ref: "#/components/schemas/User"
+        - type: object
+          properties:
+            access_token:
+              type: string
+              description: JWT access token
+            refresh_token:
+              type: string
+              description: Opaque single-use refresh token (14 days)
+          required: [access_token, refresh_token]
+
+    TokenPair:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+      required: [access_token, refresh_token]
+
+    RegisterRequest:
+      type: object
+      properties:
+        login:
+          type: string
           minLength: 3
           maxLength: 50
+          description: '"me" is reserved'
+        password:
+          type: string
+          format: password
+          minLength: 6
+          maxLength: 128
         name:
           type: string
           minLength: 1
@@ -67,26 +169,47 @@ components:
         description:
           type: string
           nullable: true
-        profile_pic:
+      required: [login, password, name, role]
+
+    LoginRequest:
+      type: object
+      properties:
+        login:
           type: string
-          nullable: true
-        created_at:
+        password:
           type: string
-          format: date-time
-      required:
-        - id
-        - login
-        - name
-        - role
-        - created_at
+          format: password
+      required: [login, password]
+
+    RefreshRequest:
+      type: object
+      properties:
+        refresh_token:
+          type: string
+      required: [refresh_token]
+
+    ChangePasswordRequest:
+      type: object
+      properties:
+        old_password:
+          type: string
+          format: password
+        new_password:
+          type: string
+          format: password
+          minLength: 6
+          maxLength: 128
+      required: [old_password, new_password]
 
     UserUpdateRequest:
       type: object
+      description: Role can not be changed. At least one field must actually change.
       properties:
         login:
           type: string
           minLength: 3
           maxLength: 50
+          description: '"me" is reserved'
         name:
           type: string
           minLength: 1
@@ -97,13 +220,19 @@ components:
         profile_pic:
           type: string
           nullable: true
-        old_password:
-          type: string
-          description: Required if changing password
-        new_password:
-          type: string
-          description: Required if changing password
+          enum: [null]
+          description: Only null is accepted (removes the picture). Upload via POST /users/me/profile-pic
       minProperties: 1
+
+    UserDeleteRequest:
+      type: object
+      properties:
+        login:
+          type: string
+        password:
+          type: string
+          format: password
+      required: [login, password]
 
     CV:
       type: object
@@ -116,26 +245,20 @@ components:
           format: uuid
         title:
           type: string
-          minLength: 1
-          maxLength: 200
         description:
           type: string
           nullable: true
         cv_pdf:
           type: string
           nullable: true
+          description: Storage key of the pdf, download it via /cvs/{id}/pdf
         created_at:
           type: string
           format: date-time
         updated_at:
           type: string
           format: date-time
-      required:
-        - id
-        - user_id
-        - title
-        - created_at
-        - updated_at
+      required: [id, user_id, title, description, cv_pdf, created_at, updated_at]
 
     CVCreateRequest:
       type: object
@@ -144,14 +267,15 @@ components:
           type: string
           minLength: 1
           maxLength: 200
+          description: Unique among CVs of the user
         description:
           type: string
           nullable: true
-      required:
-        - title
+      required: [title]
 
     CVUpdateRequest:
       type: object
+      description: At least one field must actually change
       properties:
         title:
           type: string
@@ -160,6 +284,11 @@ components:
         description:
           type: string
           nullable: true
+        cv_pdf:
+          type: string
+          nullable: true
+          enum: [null]
+          description: Only null is accepted (removes the pdf). Upload via POST /cvs/{id}/pdf
       minProperties: 1
 
     Vacancy:
@@ -173,8 +302,6 @@ components:
           format: uuid
         title:
           type: string
-          minLength: 1
-          maxLength: 200
         description:
           type: string
           nullable: true
@@ -199,7 +326,6 @@ components:
           nullable: true
         is_active:
           type: boolean
-          default: true
         created_at:
           type: string
           format: date-time
@@ -207,12 +333,8 @@ components:
           type: string
           format: date-time
       required:
-        - id
-        - recruiter_id
-        - title
-        - is_active
-        - created_at
-        - updated_at
+        [id, recruiter_id, title, description, requirements, salary_range, location, work_mode,
+         experience_level, is_active, created_at, updated_at]
 
     VacancyCreateRequest:
       type: object
@@ -221,6 +343,7 @@ components:
           type: string
           minLength: 1
           maxLength: 200
+          description: Unique among vacancies of the recruiter
         description:
           type: string
           nullable: true
@@ -243,11 +366,13 @@ components:
           type: string
           enum: [junior, middle, senior]
           nullable: true
-      required:
-        - title
+      required: [title]
 
     VacancyUpdateRequest:
       type: object
+      description: |
+        At least one field must actually change.
+        Use PATCH /vacancies/{id}/toggle to change is_active.
       properties:
         title:
           type: string
@@ -275,8 +400,6 @@ components:
           type: string
           enum: [junior, middle, senior]
           nullable: true
-        is_active:
-          type: boolean
       minProperties: 1
 
     Application:
@@ -306,14 +429,7 @@ components:
         updated_at:
           type: string
           format: date-time
-      required:
-        - id
-        - vacancy_id
-        - intern_id
-        - cv_id
-        - status
-        - applied_at
-        - updated_at
+      required: [id, vacancy_id, intern_id, cv_id, status, cover_letter, applied_at, updated_at]
 
     ApplicationCreateRequest:
       type: object
@@ -324,111 +440,65 @@ components:
         cv_id:
           type: string
           format: uuid
+          description: Must be a CV of the current intern
         cover_letter:
           type: string
           nullable: true
-      required:
-        - vacancy_id
-        - cv_id
+      required: [vacancy_id, cv_id]
 
-    ApplicationUpdateStatusRequest:
+    ApplicationInternUpdateRequest:
       type: object
+      description: Intern (application owner) may change only cover_letter and/or cv_id
+      properties:
+        cv_id:
+          type: string
+          format: uuid
+          description: Must be a CV of the current intern
+        cover_letter:
+          type: string
+          nullable: true
+      minProperties: 1
+      additionalProperties: false
+
+    ApplicationRecruiterUpdateRequest:
+      type: object
+      description: Recruiter (vacancy owner) may change only status
       properties:
         status:
           type: string
           enum: [pending, reviewed, approved, rejected, cancelled]
-      required:
-        - status
+      required: [status]
+      additionalProperties: false
 
-    LoginRequest:
+    FileUpload:
       type: object
       properties:
-        login:
+        file:
           type: string
-        password:
-          type: string
-          format: password
-      required:
-        - login
-        - password
-
-    RegisterRequest:
-      type: object
-      properties:
-        login:
-          type: string
-          minLength: 3
-          maxLength: 50
-        password:
-          type: string
-          minLength: 6
-        name:
-          type: string
-          minLength: 1
-          maxLength: 100
-        role:
-          type: string
-          enum: [intern, recruiter]
-      required:
-        - login
-        - password
-        - name
-        - role
-
-    AuthResponse:
-      type: object
-      properties:
-        token:
-          type: string
-        user:
-          $ref: "#/components/schemas/User"
-      required:
-        - token
-        - user
-
-    ChangePasswordRequest:
-      type: object
-      properties:
-        old_password:
-          type: string
-          format: password
-        new_password:
-          type: string
-          format: password
-          minLength: 6
-      required:
-        - old_password
-        - new_password
-
-    PaginatedResponse:
-      type: object
-      properties:
-        items:
-          type: array
-        total:
-          type: integer
-        limit:
-          type: integer
-        offset:
-          type: integer
-      required:
-        - items
-        - total
-        - limit
-        - offset
+          format: binary
+      required: [file]
 
 security:
   - bearerAuth: []
 
 paths:
-  /status:
+  /ping:
     get:
-      summary: Health check
-      tags: [auth]
+      summary: Liveness probe
+      tags: [service]
       security: []
       responses:
         "200":
-          description: Service is running
+          description: Service is alive
+
+  /status:
+    get:
+      summary: Service status
+      tags: [service]
+      security: []
+      responses:
+        "200":
+          description: Service status
           content:
             application/json:
               schema:
@@ -437,6 +507,14 @@ paths:
                   status:
                     type: string
                     example: ok
+                  service:
+                    type: string
+                    example: InternView API
+                  version:
+                    type: string
+                    example: 0.0.1
+
+  # ------------------------------------------------------------------ auth
 
   /auth/register:
     post:
@@ -457,17 +535,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/AuthResponse"
         "400":
-          description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+          $ref: "#/components/responses/BadRequest"
         "409":
-          description: Login already exists
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+          $ref: "#/components/responses/Conflict"
 
   /auth/login:
     post:
@@ -487,19 +557,63 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
-          description: Invalid credentials
+          description: Invalid login or password (the same answer for both)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /auth/refresh:
+    post:
+      summary: Exchange a refresh token for a new token pair
+      description: Refresh tokens are single use, the old one is invalidated.
+      tags: [auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshRequest"
+      responses:
+        "200":
+          description: New tokens
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenPair"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Refresh token is unknown, expired, revoked or already used
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      summary: Revoke all refresh tokens of the current user
+      description: Access tokens stay valid until they expire.
+      tags: [auth]
+      responses:
+        "200":
+          description: All sessions are finished
+          content:
+            text/plain:
+              schema:
+                type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
   /auth/change-password:
     post:
-      summary: Change password (requires authentication)
+      summary: Change password
+      description: Revokes all refresh tokens and invalidates all issued access tokens.
       tags: [auth]
-      security:
-        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -510,18 +624,24 @@ paths:
         "204":
           description: Password changed successfully
         "400":
-          description: Invalid request
+          $ref: "#/components/responses/BadRequest"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
         "403":
           description: Invalid old password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ------------------------------------------------------------------ users
 
   /users/me:
     get:
       summary: Get current user profile
       tags: [users]
-      security:
-        - bearerAuth: []
       responses:
         "200":
           description: User profile
@@ -530,15 +650,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/User"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
         "404":
-          description: User not found
+          $ref: "#/components/responses/NotFound"
 
     patch:
       summary: Update current user profile (partial)
       tags: [users]
-      security:
-        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -553,40 +671,51 @@ paths:
               schema:
                 $ref: "#/components/schemas/User"
         "400":
-          description: Invalid input
+          $ref: "#/components/responses/BadRequest"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
         "404":
-          description: User not found
+          $ref: "#/components/responses/NotFound"
         "409":
           description: Login already taken
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
     delete:
       summary: Delete current user account
+      description: Deletes CVs, vacancies and applications of the user as well.
       tags: [users]
-      security:
-        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserDeleteRequest"
       responses:
         "204":
           description: Account deleted successfully
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Invalid password, nothing is deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: User not found
+          $ref: "#/components/responses/NotFound"
 
   /users/{id}:
     get:
-      summary: Get user by ID (public)
+      summary: Get user by ID
+      description: Available for the user itself and for recruiters the user applied to.
       tags: [users]
-      security:
-        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/Id"
       responses:
         "200":
           description: User data
@@ -594,47 +723,41 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "404":
-          description: User not found
+          $ref: "#/components/responses/NotFound"
 
   /users/me/profile-pic:
     post:
-      summary: Upload profile picture
+      summary: Upload profile picture (.jpg, .jpeg, .png, up to 5 MiB)
       tags: [users]
-      security:
-        - bearerAuth: []
       requestBody:
         required: true
         content:
           multipart/form-data:
             schema:
-              type: object
-              properties:
-                file:
-                  type: string
-                  format: binary
+              $ref: "#/components/schemas/FileUpload"
       responses:
         "200":
           description: Profile picture uploaded successfully
           content:
-            application/json:
+            text/plain:
               schema:
-                type: object
-                properties:
-                  profile_pic:
-                    type: string
+                type: string
+                example: Uploaded
         "400":
-          description: Invalid file or missing file
+          description: Missing file, empty file name or unsupported extension
         "401":
           description: Unauthorized
 
     get:
       summary: Get current user's profile picture
       tags: [users]
-      security:
-        - bearerAuth: []
       responses:
         "200":
           description: Profile picture file
@@ -646,12 +769,33 @@ paths:
         "404":
           description: Profile picture not found
 
+  /users/{id}/profile-pic:
+    get:
+      summary: Get profile picture of an applicant (recruiter only)
+      tags: [users]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Profile picture file
+          content:
+            image/jpeg: {}
+            image/png: {}
+        "400":
+          description: Invalid uuid
+        "401":
+          description: Unauthorized
+        "403":
+          description: Not a recruiter or the user did not apply to your vacancies
+        "404":
+          description: Profile picture not found
+
+  # ------------------------------------------------------------------ cvs
+
   /cvs:
     post:
       summary: Create a new CV (intern only)
       tags: [cvs]
-      security:
-        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -666,57 +810,22 @@ paths:
               schema:
                 $ref: "#/components/schemas/CV"
         "400":
-          description: Invalid input
+          $ref: "#/components/responses/BadRequest"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
         "403":
-          description: Forbidden (not intern)
-
-    get:
-      summary: List all CVs (with optional filters)
-      tags: [cvs]
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: user_id
-          in: query
-          schema:
-            type: string
-            format: uuid
-          description: Filter by owner
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 10
-        - name: offset
-          in: query
-          schema:
-            type: integer
-            default: 0
-      responses:
-        "200":
-          description: List of CVs
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: Title already taken by another CV of the user
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/PaginatedResponse"
-                  - type: object
-                    properties:
-                      items:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/CV"
-        "401":
-          description: Unauthorized
+                $ref: "#/components/schemas/ErrorResponse"
 
   /cvs/me:
     get:
-      summary: Get all CVs of the current user
+      summary: Get all CVs of the current user (intern only)
       tags: [cvs]
-      security:
-        - bearerAuth: []
       responses:
         "200":
           description: List of user's CVs
@@ -727,21 +836,17 @@ paths:
                 items:
                   $ref: "#/components/schemas/CV"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
 
   /cvs/{id}:
     get:
       summary: Get a specific CV
+      description: Available for the owner and for recruiters whose vacancy the CV was sent to.
       tags: [cvs]
-      security:
-        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/Id"
       responses:
         "200":
           description: CV details
@@ -749,23 +854,28 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CV"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Recruiter and the CV was not sent to your vacancies
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: CV not found
+          description: CV not found or belongs to another intern
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
     patch:
       summary: Update a CV (owner only)
       tags: [cvs]
-      security:
-        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/Id"
       requestBody:
         required: true
         content:
@@ -780,108 +890,101 @@ paths:
               schema:
                 $ref: "#/components/schemas/CV"
         "400":
-          description: Invalid input
+          $ref: "#/components/responses/BadRequest"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
         "403":
-          description: Forbidden (not owner)
+          $ref: "#/components/responses/Forbidden"
         "404":
-          description: CV not found
+          description: CV not found or belongs to another intern
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Title already taken by another CV of the user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
     delete:
       summary: Delete a CV (owner only)
+      description: Deletes the pdf and all applications made with this CV.
       tags: [cvs]
-      security:
-        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/Id"
       responses:
         "204":
           description: CV deleted
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
         "403":
-          description: Forbidden (not owner)
+          $ref: "#/components/responses/Forbidden"
         "404":
-          description: CV not found
+          description: CV not found or belongs to another intern
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /cvs/{id}/pdf:
     post:
-      summary: Upload PDF for a CV (owner only)
+      summary: Upload PDF for a CV (owner only, .pdf)
       tags: [cvs]
-      security:
-        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/Id"
       requestBody:
         required: true
         content:
           multipart/form-data:
             schema:
-              type: object
-              properties:
-                file:
-                  type: string
-                  format: binary
+              $ref: "#/components/schemas/FileUpload"
       responses:
         "200":
           description: PDF uploaded successfully
           content:
-            application/json:
+            text/plain:
               schema:
-                type: object
-                properties:
-                  cv_pdf:
-                    type: string
+                type: string
+                example: Uploaded
         "400":
-          description: Invalid file
+          description: Invalid uuid, missing file or unsupported extension
         "401":
           description: Unauthorized
         "403":
-          description: Forbidden (not owner)
+          description: Not an intern
         "404":
-          description: CV not found
+          description: CV not found or belongs to another intern
 
     get:
-      summary: Download PDF of a CV (authorized users)
+      summary: Download PDF of a CV
+      description: Available for the owner and for recruiters whose vacancy the CV was sent to.
       tags: [cvs]
-      security:
-        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/Id"
       responses:
         "200":
           description: PDF file
           content:
             application/pdf: {}
+        "400":
+          description: Invalid uuid
         "401":
           description: Unauthorized
         "403":
-          description: Forbidden
+          description: Recruiter and the CV was not sent to your vacancies
         "404":
-          description: PDF not found
+          description: CV or its pdf not found
+
+  # ------------------------------------------------------------------ vacancies
 
   /vacancies:
     post:
       summary: Create a new vacancy (recruiter only)
       tags: [vacancies]
-      security:
-        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -896,63 +999,40 @@ paths:
               schema:
                 $ref: "#/components/schemas/Vacancy"
         "400":
-          description: Invalid input
+          $ref: "#/components/responses/BadRequest"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
         "403":
-          description: Forbidden (not recruiter)
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: Title already taken by another vacancy of the recruiter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
     get:
-      summary: List vacancies with search and filters
+      summary: List active vacancies, newest first
       tags: [vacancies]
-      security:
-        - bearerAuth: []
+      security: []
       parameters:
         - name: query
           in: query
           schema:
             type: string
-          description: Full-text search (title, description)
-        - name: location
-          in: query
-          schema:
-            type: string
-        - name: work_mode
-          in: query
-          schema:
-            type: string
-            enum: [remote, office, hybrid]
-        - name: experience_level
-          in: query
-          schema:
-            type: string
-            enum: [junior, middle, senior]
-        - name: is_active
-          in: query
-          schema:
-            type: boolean
-            default: true
-        - name: sort_by
-          in: query
-          schema:
-            type: string
-            enum: [created_at, title]
-            default: created_at
-        - name: order
-          in: query
-          schema:
-            type: string
-            enum: [asc, desc]
-            default: desc
+          description: Full-text search by title and description (russian and english)
         - name: limit
           in: query
           schema:
             type: integer
-            default: 10
+            minimum: 1
+            maximum: 100
+            default: 15
         - name: offset
           in: query
           schema:
             type: integer
+            minimum: 0
             default: 0
       responses:
         "200":
@@ -960,23 +1040,16 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/PaginatedResponse"
-                  - type: object
-                    properties:
-                      items:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/Vacancy"
-        "401":
-          description: Unauthorized
+                type: array
+                items:
+                  $ref: "#/components/schemas/Vacancy"
+        "400":
+          $ref: "#/components/responses/BadRequest"
 
   /vacancies/me:
     get:
-      summary: Get vacancies created by current recruiter
+      summary: Get all vacancies of the current recruiter (including inactive)
       tags: [vacancies]
-      security:
-        - bearerAuth: []
       responses:
         "200":
           description: List of recruiter's vacancies
@@ -987,23 +1060,17 @@ paths:
                 items:
                   $ref: "#/components/schemas/Vacancy"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
         "403":
-          description: Forbidden (not recruiter)
+          $ref: "#/components/responses/Forbidden"
 
   /vacancies/{id}:
     get:
-      summary: Get a specific vacancy
+      summary: Get a vacancy by ID
       tags: [vacancies]
-      security:
-        - bearerAuth: []
+      security: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/Id"
       responses:
         "200":
           description: Vacancy details
@@ -1011,23 +1078,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Vacancy"
-        "401":
-          description: Unauthorized
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "404":
-          description: Vacancy not found
+          $ref: "#/components/responses/NotFound"
 
     patch:
-      summary: Update a vacancy (owner only)
+      summary: Update a vacancy (recruiter owner only)
       tags: [vacancies]
-      security:
-        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/Id"
       requestBody:
         required: true
         content:
@@ -1042,71 +1102,90 @@ paths:
               schema:
                 $ref: "#/components/schemas/Vacancy"
         "400":
-          description: Invalid input
+          $ref: "#/components/responses/BadRequest"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
         "403":
-          description: Forbidden (not owner)
+          $ref: "#/components/responses/Forbidden"
         "404":
-          description: Vacancy not found
+          $ref: "#/components/responses/NotFound"
         "409":
-          description: Duplicate title for this recruiter
+          description: Title already taken by another vacancy of the recruiter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
     delete:
-      summary: Delete a vacancy (owner only)
+      summary: Delete a vacancy (recruiter owner only)
+      description: Deletes all applications to the vacancy as well.
       tags: [vacancies]
-      security:
-        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/Id"
       responses:
         "204":
           description: Vacancy deleted
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
         "403":
-          description: Forbidden (not owner)
+          $ref: "#/components/responses/Forbidden"
         "404":
-          description: Vacancy not found
+          $ref: "#/components/responses/NotFound"
 
   /vacancies/{id}/toggle:
     patch:
-      summary: Toggle vacancy active status (owner only)
+      summary: Toggle vacancy is_active (recruiter owner only)
       tags: [vacancies]
-      security:
-        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/Id"
       responses:
         "200":
-          description: Toggled vacancy
+          description: Updated vacancy
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Vacancy"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
         "403":
-          description: Forbidden (not owner)
+          $ref: "#/components/responses/Forbidden"
         "404":
-          description: Vacancy not found
+          $ref: "#/components/responses/NotFound"
+
+  /vacancies/{id}/applications:
+    get:
+      summary: Get all applications for a vacancy (recruiter owner only)
+      tags: [applications]
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: List of applications for the vacancy
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Application"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ------------------------------------------------------------------ applications
 
   /applications:
     post:
-      summary: Create an application for a vacancy (intern only)
+      summary: Apply to a vacancy (intern only)
       tags: [applications]
-      security:
-        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -1121,22 +1200,29 @@ paths:
               schema:
                 $ref: "#/components/schemas/Application"
         "400":
-          description: Invalid input
+          $ref: "#/components/responses/BadRequest"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
         "403":
-          description: Forbidden (not intern)
+          $ref: "#/components/responses/Forbidden"
         "404":
-          description: Vacancy or CV not found
+          description: Vacancy not found, or CV not found / belongs to another intern
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "409":
-          description: Already applied
+          description: Already applied to this vacancy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /applications/me:
     get:
-      summary: Get applications of current user
+      summary: Applications of the current user
+      description: For interns - own applications, for recruiters - applications to own vacancies.
       tags: [applications]
-      security:
-        - bearerAuth: []
       responses:
         "200":
           description: List of applications
@@ -1147,27 +1233,25 @@ paths:
                 items:
                   $ref: "#/components/schemas/Application"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
 
   /applications/{id}:
     patch:
-      summary: Update application status (recruiter owner only)
+      summary: Update an application
+      description: |
+        Intern (application owner) may change cover_letter and/or cv_id.
+        Recruiter (vacancy owner) may change status only.
       tags: [applications]
-      security:
-        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/Id"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ApplicationUpdateStatusRequest"
+              oneOf:
+                - $ref: "#/components/schemas/ApplicationInternUpdateRequest"
+                - $ref: "#/components/schemas/ApplicationRecruiterUpdateRequest"
       responses:
         "200":
           description: Updated application
@@ -1176,82 +1260,39 @@ paths:
               schema:
                 $ref: "#/components/schemas/Application"
         "400":
-          description: Invalid status
+          description: Invalid uuid, unsupported status or fields not allowed for your role
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
         "403":
-          description: Forbidden (not recruiter owner)
+          description: Not the application owner (intern) or not the vacancy owner (recruiter)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: Application not found
+          description: Application not found, or new CV not found / belongs to another intern
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
     delete:
       summary: Withdraw an application (intern owner only)
       tags: [applications]
-      security:
-        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/Id"
       responses:
         "204":
           description: Application withdrawn
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
-          description: Unauthorized
+          $ref: "#/components/responses/Unauthorized"
         "403":
-          description: Forbidden (not owner)
+          $ref: "#/components/responses/Forbidden"
         "404":
-          description: Application not found
-
-  /vacancies/{vacancy_id}/applications:
-    get:
-      summary: Get all applications for a vacancy (recruiter owner only)
-      tags: [applications]
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: vacancy_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: status
-          in: query
-          schema:
-            type: string
-            enum: [pending, reviewed, approved, rejected, cancelled]
-          description: Filter by status
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 10
-        - name: offset
-          in: query
-          schema:
-            type: integer
-            default: 0
-      responses:
-        "200":
-          description: List of applications for the vacancy
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/PaginatedResponse"
-                  - type: object
-                    properties:
-                      items:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/Application"
-        "401":
-          description: Unauthorized
-        "403":
-          description: Forbidden (not owner)
-        "404":
-          description: Vacancy not found
+          $ref: "#/components/responses/NotFound"

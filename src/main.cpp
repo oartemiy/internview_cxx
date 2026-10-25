@@ -11,13 +11,13 @@
 #include <userver/utils/daemon_run.hpp>
 
 #include "auth/auth_checker.hpp"
-#include "components/storages/application_storage_component.hpp"
-#include "components/storages/cv_storage_component.hpp"
+#include "components/repositories/application_repository_component.hpp"
+#include "components/repositories/cv_repository_component.hpp"
 #include "components/storages/img_storage_component.hpp"
 #include "components/storages/pdf_storage_component.hpp"
-#include "components/storages/refresh_token_storage_component.hpp"
-#include "components/storages/user_storage_component.hpp"
-#include "components/storages/vacancy_storage_component.hpp"
+#include "components/repositories/refresh_token_repository_component.hpp"
+#include "components/repositories/user_repository_component.hpp"
+#include "components/repositories/vacancy_repository_component.hpp"
 #include "handlers/application/handler_application_delete.hpp"
 #include "handlers/application/handler_application_post.hpp"
 #include "handlers/application/handler_application_update.hpp"
@@ -76,16 +76,16 @@ int main(int argc, char* argv[]) {
 
             .Append<internview::components::PdfStorageComponent>("pdf-storage")
 
-            .Append<internview::components::UserStorageComponent>("user-storage")
+            .Append<internview::components::UserRepositoryComponent>("user-repository")
 
-            .Append<internview::components::CvStorageComponent>("cv-storage")
+            .Append<internview::components::CvRepositoryComponent>("cv-repository")
 
-            .Append<internview::components::RefreshTokenStorage>("refresh-token-storage")
+            .Append<internview::components::RefreshTokenRepositoryComponent>("refresh-token-repository")
 
-            .Append<internview::components::ApplicationStorageComponent>(
-                "application-storage-component")
+            .Append<internview::components::ApplicationRepositoryComponent>(
+                "application-repository")
 
-            .Append<internview::components::VacancyStorageComponent>("vacancy-storage-component")
+            .Append<internview::components::VacancyRepositoryComponent>("vacancy-repository")
 
             .Append<internview::components::AuthServiceComponent>("auth-service-component")
 

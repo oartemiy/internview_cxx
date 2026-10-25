@@ -15,19 +15,22 @@ HandlerCvUpdate::HandlerCvUpdate(const ComponentConfig& config,
 Value HandlerCvUpdate::HandleRequestJsonThrow(const HttpRequest& request, const Value& request_json,
                                               [[maybe_unused]] RequestContext& context) const {
     if (request_json.IsEmpty()) {
-        throw userver::server::handlers::ClientError(
-            MakeObject("message", "Empty request data body. Nothing to update"));
+        throw ClientError(MakeObject("message", "Empty request data body. Nothing to update"));
     }
     auto auth_res = context.GetUserData<AuthResult>();
+    RequireRole(auth_res, "intern");
 
-    if (auth_res.role != "intern") {
-        throw ClientError(MakeObject("message", "Invalid role for this action"));
+    auto dto = ParseJsonBody<dto::cv::UpdateDTO>(request_json);
+    if (dto.has_title_in_request) {
+        ValidateLength("title", dto.title, 1, 200);
     }
-
-    auto dto = request_json.As<dto::cv::UpdateDTO>();
-    auto id = request.GetPathArg("id");
+    // NOTE: cv_pdf is a file storage key, it can only be removed here (set to null)
+    if (dto.has_cv_pdf_in_request && dto.cv_pdf) {
+        throw ClientError(
+            MakeObject("message", "cv_pdf can only be set to null, use POST /cvs/{id}/pdf"));
+    }
     dto.user_id = auth_res.user_id;
-    dto.id = boost::uuids::uuid_from_string(id);
+    dto.id = ParseUuidPathArg(request, "id");
 
     auto resp_dto = cv_service_.UpdateCv(dto);
     return ValueBuilder(resp_dto).ExtractValue();

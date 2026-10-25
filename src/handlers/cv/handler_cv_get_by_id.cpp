@@ -14,7 +14,7 @@ HandlerCvGetById::HandlerCvGetById(const ComponentConfig& config,
 Value HandlerCvGetById::HandleRequestJsonThrow(const HttpRequest& request,
                                                [[maybe_unused]] const Value& request_json,
                                                [[maybe_unused]] RequestContext& context) const {
-    auto id = boost::uuids::uuid_from_string(request.GetPathArg("id"));
+    auto id = ParseUuidPathArg(request, "id");
     auto auth_res = context.GetUserData<AuthResult>();
     auto intern_id = auth_res.user_id;
 

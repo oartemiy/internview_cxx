@@ -18,7 +18,7 @@ HandlerAuthRefreshPost::HandlerAuthRefreshPost(const ComponentConfig& config,
 Value HandlerAuthRefreshPost::HandleRequestJsonThrow(
     [[maybe_unused]] const HttpRequest& request, const Value& request_json,
     [[maybe_unused]] RequestContext& context) const {
-    auto refresh_token = request_json["refresh_token"].As<std::string>();
+    auto refresh_token = ParseJsonBody<std::string>(request_json["refresh_token"]);
     auto new_tokens = auth_service_->Refresh(refresh_token);
     return MakeObject("refresh_token", new_tokens.refresh_token, "access_token",
                       new_tokens.access_token);
